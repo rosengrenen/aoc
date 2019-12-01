@@ -24,3 +24,6 @@ function calculateFuelCostComplete(weight) {
 const partTwo = weights
   .map(weight => calculateFuelCostComplete(weight))
   .reduce((previous, current) => previous + current, 0);
+
+console.log('Part one:', partOne);
+console.log("Part two:", partTwo);
