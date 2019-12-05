@@ -22,3 +22,23 @@ fn calculate_fuel_cost(weight: i32, part_two: bool) -> i32 {
     cost
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn part_one_test_cases() {
+    assert_eq!(calculate_fuel_cost(12, false), 2);
+    assert_eq!(calculate_fuel_cost(14, false), 2);
+    assert_eq!(calculate_fuel_cost(1969, false), 654);
+    assert_eq!(calculate_fuel_cost(100756, false), 33583);
+  }
+
+  #[test]
+  fn part_two_test_cases() {
+    assert_eq!(calculate_fuel_cost(14, true), 2);
+    assert_eq!(calculate_fuel_cost(1969, true), 966);
+    assert_eq!(calculate_fuel_cost(100756, true), 50346);
+  }
+}

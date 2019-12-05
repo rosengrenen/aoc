@@ -13,7 +13,7 @@ impl Solver for Day2Solver {
       for noun in 0..=99 {
         for verb in 0..=99 {
           let mut program = program_orig.clone();
-          if run_program(&mut program, noun, verb) == 19690720 {
+          if run_program(&mut program, noun, verb) == 19_690_720 {
             return (100 * noun + verb).to_string();
           }
         }
