@@ -11,6 +11,7 @@ mod day04;
 use day04::Day4Solver;
 mod day05;
 use day05::Day5Solver;
+
 mod lib;
 use lib::{read_lines, Solver};
 
