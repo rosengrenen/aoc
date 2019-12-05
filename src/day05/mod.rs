@@ -10,12 +10,12 @@ impl Solver for Day5Solver {
       .map(|s| s.parse::<i32>().unwrap())
       .collect();
     let mut program = program_orig.clone();
-    let output = if part_two {
+    if part_two {
       run_program(&mut program, 5)
     } else {
       run_program(&mut program, 1)
-    };
-    output.to_string()
+    }
+    .to_string()
   }
 }
 
