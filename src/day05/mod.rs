@@ -62,7 +62,7 @@ fn run_program(program: &mut Vec<i32>, input: i32) -> i32 {
         instruction_pointer += 2;
       }
       4 => {
-        output = program[a_value as usize];
+        output = get_value(program, a_value, a_mode);
         instruction_pointer += 2;
       }
       5 => {
@@ -99,4 +99,93 @@ fn run_program(program: &mut Vec<i32>, input: i32) -> i32 {
     };
   }
   return output;
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn part_two_test_cases() {
+    // Position mode
+    assert_eq!(
+      run_program(
+        &mut vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
+        0
+      ),
+      0
+    );
+    assert_eq!(
+      run_program(
+        &mut vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
+        1
+      ),
+      1
+    );
+    assert_eq!(
+      run_program(
+        &mut vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
+        17
+      ),
+      1
+    );
+
+    // Immediate mode
+    assert_eq!(
+      run_program(
+        &mut vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1],
+        0
+      ),
+      0
+    );
+    assert_eq!(
+      run_program(
+        &mut vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1],
+        1
+      ),
+      1
+    );
+    assert_eq!(
+      run_program(
+        &mut vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1],
+        17
+      ),
+      1
+    );
+
+    // Larger sample
+    assert_eq!(
+      run_program(
+        &mut vec![
+          3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0,
+          0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4,
+          20, 1105, 1, 46, 98, 99
+        ],
+        6
+      ),
+      999
+    );
+    assert_eq!(
+      run_program(
+        &mut vec![
+          3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0,
+          0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4,
+          20, 1105, 1, 46, 98, 99
+        ],
+        8
+      ),
+      1000
+    );
+    assert_eq!(
+      run_program(
+        &mut vec![
+          3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0,
+          0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4,
+          20, 1105, 1, 46, 98, 99
+        ],
+        13
+      ),
+      1001
+    );
+  }
 }
