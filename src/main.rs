@@ -1,4 +1,7 @@
 use std::env;
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
 use std::time::Instant;
 
 mod day01;
@@ -15,7 +18,18 @@ mod day06;
 use day06::Day6Solver;
 
 mod lib;
-use lib::{read_lines, Solver};
+use lib::Solver;
+
+fn read_lines<P>(filename: P) -> Vec<String>
+where
+    P: AsRef<Path>,
+{
+    let file = File::open(filename).expect("Failed to open file");
+    io::BufReader::new(file)
+        .lines()
+        .filter_map(io::Result::ok)
+        .collect()
+}
 
 fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
     let file = format!("src/day{:02}/input.txt", day);
