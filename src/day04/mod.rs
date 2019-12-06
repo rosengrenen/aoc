@@ -55,3 +55,22 @@ fn is_valid_code(mut code: u32, part_two: bool) -> bool {
 
   false
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn part_one_test_cases() {
+    assert_eq!(is_valid_code(111111, false), true);
+    assert_eq!(is_valid_code(223450, false), false);
+    assert_eq!(is_valid_code(123789, false), false);
+  }
+
+  #[test]
+  fn part_two_test_cases() {
+    assert_eq!(is_valid_code(112233, true), true);
+    assert_eq!(is_valid_code(123444, true), false);
+    assert_eq!(is_valid_code(111122, true), true);
+  }
+}
