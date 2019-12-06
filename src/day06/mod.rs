@@ -1,5 +1,6 @@
 use crate::lib::Solver;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 
 pub struct Day6Solver;
 
@@ -21,34 +22,42 @@ struct OrbitNode {
   name: String,
 }
 
-fn build_orbit_tree(orbits: &Vec<String>) -> OrbitNode {
+fn build_orbit_tree(lines: &Vec<String>) -> OrbitNode {
+  let mut parent_to_children: HashMap<&str, Vec<&str>> = HashMap::new();
+  for s in lines.iter() {
+    let planets: Vec<&str> = s.split(')').collect();
+    match parent_to_children.get_mut(planets[0]) {
+      Some(n) => n.push(planets[1]),
+      None => {
+        parent_to_children.insert(planets[0], vec![planets[1]]);
+      }
+    }
+  }
   let mut node = OrbitNode {
     children: Vec::new(),
     depth: 1,
     name: String::from("COM"),
   };
-  build_orbit_subtree(orbits, &mut node);
+  build_orbit_subtree(&parent_to_children, &mut node);
   node
 }
 
-fn build_orbit_subtree(orbits: &Vec<String>, node: &mut OrbitNode) {
-  for orbit in orbits.iter() {
-    let planets: Vec<&str> = orbit.split(')').collect();
-    let parent = planets[0];
-    let child = planets[1];
-
-    if parent == node.name {
-      node.children.push(OrbitNode {
-        children: Vec::new(),
-        depth: node.depth + 1,
-        name: child.to_string(),
-      });
+fn build_orbit_subtree(parent_to_children: &HashMap<&str, Vec<&str>>, node: &mut OrbitNode) {
+  match parent_to_children.get(&node.name[..]) {
+    Some(children) => {
+      for child in children.iter() {
+        node.children.push(OrbitNode {
+          children: Vec::new(),
+          depth: node.depth + 1,
+          name: child.to_string(),
+        })
+      }
+      for child in node.children.iter_mut() {
+        build_orbit_subtree(parent_to_children, child);
+      }
     }
-  }
-
-  for mut child in node.children.iter_mut() {
-    build_orbit_subtree(&orbits, &mut child);
-  }
+    None => (),
+  };
 }
 
 fn calculate_orbit_counts(node: &OrbitNode) -> i32 {
