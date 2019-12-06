@@ -5,7 +5,6 @@ pub struct Day6Solver;
 
 impl Solver for Day6Solver {
   fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
-    // println!("{:?}", lines);
     let tree = build_orbit_tree(&lines);
     if part_two {
       calculate_orbital_transfers(&tree, String::from("YOU"), String::from("SAN")).to_string()
