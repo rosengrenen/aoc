@@ -54,3 +54,29 @@ fn run_program(program: &mut Vec<i32>, noun: i32, verb: i32) -> i32 {
     };
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn test_program(mut input: &mut Vec<i32>, expected_answer: &Vec<i32>) {
+    let noun = input[1];
+    let verb = input[2];
+    run_program(&mut input, noun, verb);
+    assert_eq!(input, expected_answer);
+  }
+
+  #[test]
+  fn part_one_test_cases() {
+    test_program(&mut vec![1, 0, 0, 0, 99], &mut vec![2, 0, 0, 0, 99]);
+    test_program(&mut vec![2, 3, 0, 3, 99], &mut vec![2, 3, 0, 6, 99]);
+    test_program(
+      &mut vec![2, 4, 4, 5, 99, 0],
+      &mut vec![2, 4, 4, 5, 99, 9801],
+    );
+    test_program(
+      &mut vec![1, 1, 1, 4, 99, 5, 6, 0, 99],
+      &mut vec![30, 1, 1, 4, 2, 5, 6, 0, 99],
+    );
+  }
+}
