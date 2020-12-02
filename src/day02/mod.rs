@@ -20,6 +20,10 @@ impl Solver for Day2Solver {
           if c == character {
             occurences += 1;
           }
+
+          if occurences > max_occurences {
+            break;
+          }
         }
 
         if occurences >= min_occurences && occurences <= max_occurences {
