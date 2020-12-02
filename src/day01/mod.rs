@@ -4,7 +4,7 @@ pub struct Day1Solver;
 
 impl Solver for Day1Solver {
   fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
-    let mut numbers: Vec<i32> = lines.iter().map(|line| line.parse().unwrap()).collect();
+    let numbers: Vec<i32> = lines.iter().map(|line| line.parse().unwrap()).collect();
 
     let mut max = 0;
     if !part_two {
