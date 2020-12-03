@@ -6,15 +6,11 @@ impl Solver for Day1Solver {
   fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
     let numbers: Vec<i32> = lines.iter().map(|line| line.parse().unwrap()).collect();
 
-    let mut max = 0;
     if !part_two {
       for first_number in numbers.iter() {
         for second_number in numbers.iter() {
           if first_number + second_number == 2020 {
-            let product = first_number * second_number;
-            if product > max {
-              max = product;
-            }
+            return (first_number * second_number).to_string();
           }
         }
       }
@@ -23,17 +19,13 @@ impl Solver for Day1Solver {
         for second_number in numbers.iter() {
           for third_number in numbers.iter() {
             if first_number + second_number + third_number == 2020 {
-              let product = first_number * second_number * third_number;
-              if product > max {
-                max = product;
-              }
+              return (first_number * second_number * third_number).to_string();
             }
           }
         }
       }
     }
-
-    max.to_string()
+    panic!("")
   }
 }
 
