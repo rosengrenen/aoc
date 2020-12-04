@@ -19,7 +19,7 @@ impl Solver for Day3Solver {
 	}
 }
 
-fn create_map(lines: &Vec<String>) -> Vec<Vec<bool>> {
+fn create_map(lines: &[String]) -> Vec<Vec<bool>> {
 	lines
 		.iter()
 		.map(|line| {
@@ -31,7 +31,7 @@ fn create_map(lines: &Vec<String>) -> Vec<Vec<bool>> {
 		.collect()
 }
 
-fn traverse_map(map: &Vec<Vec<bool>>, x_step: usize, y_step: usize) -> i64 {
+fn traverse_map(map: &[Vec<bool>], x_step: usize, y_step: usize) -> i64 {
 	map.iter().enumerate().fold(0, |hits, (mut index, row)| {
 		if index % y_step != 0 {
 			return hits;

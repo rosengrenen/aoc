@@ -6,9 +6,9 @@ impl Solver for Day2Solver {
 	fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
 		let mut count = 0;
 		for line in lines.iter() {
-			let first_split: Vec<&str> = line.split(":").collect();
-			let second_split: Vec<&str> = first_split[0].split(" ").collect();
-			let third_split: Vec<&str> = second_split[0].split("-").collect();
+			let first_split: Vec<&str> = line.split(':').collect();
+			let second_split: Vec<&str> = first_split[0].split(' ').collect();
+			let third_split: Vec<&str> = second_split[0].split('-').collect();
 			let min_occurences: i64 = third_split[0].parse().unwrap();
 			let max_occurences: i64 = third_split[1].parse().unwrap();
 			let character: u8 = second_split[1].as_bytes()[0];

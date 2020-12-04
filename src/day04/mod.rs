@@ -33,7 +33,7 @@ impl Solver for Day4Solver {
 	}
 }
 
-fn parse_passports(lines: &Vec<String>) -> Vec<HashMap<&str, &str>> {
+fn parse_passports(lines: &[String]) -> Vec<HashMap<&str, &str>> {
 	let mut passports: Vec<HashMap<&str, &str>> = Vec::new();
 	let mut current_passport = HashMap::new();
 	for line in lines.iter() {
@@ -43,9 +43,9 @@ fn parse_passports(lines: &Vec<String>) -> Vec<HashMap<&str, &str>> {
 			continue;
 		}
 
-		let key_value_pairs: Vec<&str> = line.split(" ").collect();
+		let key_value_pairs: Vec<&str> = line.split(' ').collect();
 		for &pair in key_value_pairs.iter() {
-			let split: Vec<&str> = pair.split(":").collect();
+			let split: Vec<&str> = pair.split(':').collect();
 			current_passport.insert(split[0], split[1]);
 		}
 	}
@@ -72,7 +72,7 @@ fn is_valid_passport(passport: &HashMap<&str, &str>, validate_fields: bool) -> b
 const REQUIRED_FIELDS: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
 fn has_required_fields(passport: &HashMap<&str, &str>) -> bool {
 	for required_field in REQUIRED_FIELDS.iter() {
-		if let None = passport.get(required_field) {
+		if passport.get(required_field).is_none() {
 			return false;
 		}
 	}
@@ -84,39 +84,33 @@ fn is_valid_field(key: &str, value: &str) -> bool {
 	match key {
 		"byr" => {
 			let birth_year: i64 = value.parse().unwrap();
-			return 1920 <= birth_year && birth_year <= 2002;
+			1920 <= birth_year && birth_year <= 2002
 		}
 		"iyr" => {
 			let issuance_year: i64 = value.parse().unwrap();
-			return 2010 <= issuance_year && issuance_year <= 2020;
+			2010 <= issuance_year && issuance_year <= 2020
 		}
 		"eyr" => {
 			let expiration_year: i64 = value.parse().unwrap();
-			return 2020 <= expiration_year && expiration_year <= 2030;
+			2020 <= expiration_year && expiration_year <= 2030
 		}
 		"hgt" => {
 			if value.ends_with("cm") {
-				let height: i64 = value[..value.len() - 2].parse().unwrap();
+				let height: i64 = value.strip_suffix("cm").unwrap().parse().unwrap();
 				return 150 <= height && height <= 193;
 			}
 
 			if value.ends_with("in") {
-				let height: i64 = value[..value.len() - 2].parse().unwrap();
+				let height: i64 = value.strip_suffix("in").unwrap().parse().unwrap();
 				return 59 <= height && height <= 76;
 			}
 
-			return false;
+			false
 		}
-		"hcl" => {
-			return Regex::new("^#[0-9a-f]{6}$").unwrap().is_match(value);
-		}
-		"ecl" => {
-			return ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None;
-		}
-		"pid" => {
-			return Regex::new("^[0-9]{9}$").unwrap().is_match(value);
-		}
-		_ => return true,
+		"hcl" => Regex::new("^#[0-9a-f]{6}$").unwrap().is_match(value),
+		"ecl" => ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None,
+		"pid" => Regex::new("^[0-9]{9}$").unwrap().is_match(value),
+		_ => true,
 	}
 }
 
