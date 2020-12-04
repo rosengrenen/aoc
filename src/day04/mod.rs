@@ -84,25 +84,25 @@ fn is_valid_field(key: &str, value: &str) -> bool {
   match key {
     "byr" => {
       let birth_year: i64 = value.parse().unwrap();
-      return birth_year >= 1920 && birth_year <= 2002;
+      return 1920 <= birth_year && birth_year <= 2002;
     }
     "iyr" => {
       let issuance_year: i64 = value.parse().unwrap();
-      return issuance_year >= 2010 && issuance_year <= 2020;
+      return 2010 <= issuance_year && issuance_year <= 2020;
     }
     "eyr" => {
       let expiration_year: i64 = value.parse().unwrap();
-      return expiration_year >= 2020 && expiration_year <= 2030;
+      return 2020 <= expiration_year && expiration_year <= 2030;
     }
     "hgt" => {
       if value.ends_with("cm") {
         let height: i64 = value[..value.len() - 2].parse().unwrap();
-        return height >= 150 && height <= 193;
+        return 150 <= height && height <= 193;
       }
 
       if value.ends_with("in") {
         let height: i64 = value[..value.len() - 2].parse().unwrap();
-        return height >= 59 && height <= 76;
+        return 59 <= height && height <= 76;
       }
 
       return false;
