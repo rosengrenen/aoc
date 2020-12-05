@@ -1,5 +1,4 @@
 use crate::lib::Solver;
-use num::Integer;
 use std::cmp;
 
 pub struct Day5Solver;
