@@ -34,7 +34,7 @@ fn get_seat_id(partition_data: &str) -> i64 {
 	for &c in partition_data.as_bytes() {
 		seat_id <<= 1;
 		if c == b'B' || c == b'R' {
-			seat_id += 1;
+			seat_id |= 1;
 		}
 	}
 	seat_id
