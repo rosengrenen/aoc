@@ -30,15 +30,14 @@ impl Solver for Day5Solver {
 }
 
 fn get_seat_id(partition_data: &str) -> i64 {
-	i64::from_str_radix(
-		&partition_data
-			.replace("F", "0")
-			.replace("B", "1")
-			.replace("L", "0")
-			.replace("R", "1"),
-		2,
-	)
-	.unwrap()
+	let mut seat_id = 0;
+	for &c in partition_data.as_bytes() {
+		seat_id <<= 1;
+		if c == b'B' || c == b'R' {
+			seat_id += 1;
+		}
+	}
+	seat_id
 }
 
 #[cfg(test)]
