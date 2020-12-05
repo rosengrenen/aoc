@@ -31,35 +31,15 @@ impl Solver for Day5Solver {
 }
 
 fn get_seat_id(partition_data: &str) -> i64 {
-	let row_partition_data = &partition_data[0..7];
-	let column_partition_data = &partition_data[7..10];
-
-	let mut row_min = 0;
-	let mut row_max = 127;
-	for &c in row_partition_data.as_bytes().iter() {
-		if c == b'F' {
-			row_max -= (row_max - row_min).div_ceil(&2);
-		} else {
-			row_min += (row_max - row_min).div_ceil(&2);
-		}
-	}
-	if row_min != row_max {
-		panic!("Row could not be found");
-	}
-
-	let mut column_min = 0;
-	let mut column_max = 7;
-	for &c in column_partition_data.as_bytes().iter() {
-		if c == b'L' {
-			column_max -= (column_max - column_min).div_ceil(&2);
-		} else {
-			column_min += (column_max - column_min).div_ceil(&2);
-		}
-	}
-	if column_min != column_max {
-		panic!("Column could not be found");
-	}
-	8 * row_min + column_min
+	i64::from_str_radix(
+		&partition_data
+			.replace("F", "0")
+			.replace("B", "1")
+			.replace("L", "0")
+			.replace("R", "1"),
+		2,
+	)
+	.unwrap()
 }
 
 #[cfg(test)]
