@@ -3,7 +3,7 @@ use crate::lib::Solver;
 pub struct Day2Solver;
 
 impl Solver for Day2Solver {
-	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &[String], part_two: bool) -> String {
 		let mut count = 0;
 		for line in lines.iter() {
 			let mut first_split = line.split(':');

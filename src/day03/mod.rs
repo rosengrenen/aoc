@@ -3,7 +3,7 @@ use crate::lib::Solver;
 pub struct Day3Solver;
 
 impl Solver for Day3Solver {
-	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &[String], part_two: bool) -> String {
 		if !part_two {
 			traverse_map(lines, 3, 1).to_string()
 		} else {

@@ -3,10 +3,10 @@ use crate::lib::Solver;
 pub struct Day1Solver;
 
 impl Solver for Day1Solver {
-	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &[String], part_two: bool) -> String {
 		let mut numbers = parse_numbers(lines);
 
-		numbers.sort();
+		numbers.sort_unstable();
 		if !part_two {
 			for first_number in numbers.iter() {
 				for second_number in numbers.iter() {

@@ -3,7 +3,7 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 pub trait Solver {
-	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String;
+	fn solve(&self, lines: &[String], part_two: bool) -> String;
 }
 
 pub fn read_lines<P>(filename: P) -> Vec<String>

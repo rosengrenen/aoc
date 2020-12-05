@@ -3,7 +3,7 @@ use crate::lib::Solver;
 pub struct Day5Solver;
 
 impl Solver for Day5Solver {
-	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &[String], part_two: bool) -> String {
 		if !part_two {
 			lines
 				.iter()

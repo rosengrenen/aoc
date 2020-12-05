@@ -4,7 +4,7 @@ use regex::Regex;
 pub struct Day4Solver;
 
 impl Solver for Day4Solver {
-	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &[String], part_two: bool) -> String {
 		let passports = parse_passports(&lines);
 		if !part_two {
 			passports
@@ -36,7 +36,7 @@ fn parse_passports(lines: &[String]) -> Vec<Vec<(&str, &str)>> {
 	let mut passports = Vec::new();
 	let mut current_passport = Vec::new();
 	for line in lines.iter() {
-		if line == "" {
+		if line.is_empty() {
 			passports.push(current_passport);
 			current_passport = Vec::new();
 			continue;
@@ -52,7 +52,7 @@ fn parse_passports(lines: &[String]) -> Vec<Vec<(&str, &str)>> {
 	passports
 }
 
-fn is_valid_passport(passport: &Vec<(&str, &str)>, validate_fields: bool) -> bool {
+fn is_valid_passport(passport: &[(&str, &str)], validate_fields: bool) -> bool {
 	if !has_required_fields(passport) {
 		return false;
 	}
@@ -69,7 +69,7 @@ fn is_valid_passport(passport: &Vec<(&str, &str)>, validate_fields: bool) -> boo
 }
 
 const REQUIRED_FIELDS: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-fn has_required_fields(passport: &Vec<(&str, &str)>) -> bool {
+fn has_required_fields(passport: &[(&str, &str)]) -> bool {
 	for required_field in REQUIRED_FIELDS.iter() {
 		if passport
 			.iter()
@@ -91,34 +91,25 @@ fn is_valid_field(key: &str, value: &str) -> bool {
 		static ref PERSONAL_ID_REGEX: Regex = Regex::new("^[0-9]{9}$").unwrap();
 	}
 	match key {
-		"byr" => {
-			let birth_year: i64 = value.parse().unwrap();
-			1920 <= birth_year && birth_year <= 2002
-		}
-		"iyr" => {
-			let issuance_year: i64 = value.parse().unwrap();
-			2010 <= issuance_year && issuance_year <= 2020
-		}
-		"eyr" => {
-			let expiration_year: i64 = value.parse().unwrap();
-			2020 <= expiration_year && expiration_year <= 2030
-		}
+		"byr" => (1920..=2002).contains(&value.parse::<i64>().unwrap()),
+		"iyr" => (2010..=2020).contains(&value.parse::<i64>().unwrap()),
+		"eyr" => (2020..=2030).contains(&value.parse::<i64>().unwrap()),
+		"hcl" => HAIR_COLOR_REGEX.is_match(value),
+		"ecl" => ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None,
+		"pid" => PERSONAL_ID_REGEX.is_match(value),
 		"hgt" => {
 			if value.ends_with("cm") {
 				let height: i64 = value.strip_suffix("cm").unwrap().parse().unwrap();
-				return 150 <= height && height <= 193;
+				return (150..=193).contains(&height);
 			}
 
 			if value.ends_with("in") {
 				let height: i64 = value.strip_suffix("in").unwrap().parse().unwrap();
-				return 59 <= height && height <= 76;
+				return (59..=76).contains(&height);
 			}
 
 			false
 		}
-		"hcl" => HAIR_COLOR_REGEX.is_match(value),
-		"ecl" => ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None,
-		"pid" => PERSONAL_ID_REGEX.is_match(value),
 		_ => true,
 	}
 }
