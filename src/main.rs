@@ -1,7 +1,11 @@
+#![feature(test)]
+
+extern crate test;
+
+#[macro_use]
+extern crate lazy_static;
+
 use std::env;
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
 use std::time::Instant;
 
 mod day01;
@@ -16,18 +20,7 @@ mod day05;
 use day05::Day5Solver;
 
 mod lib;
-use lib::Solver;
-
-fn read_lines<P>(filename: P) -> Vec<String>
-where
-	P: AsRef<Path>,
-{
-	let file = File::open(filename).expect("Failed to open file");
-	io::BufReader::new(file)
-		.lines()
-		.filter_map(io::Result::ok)
-		.collect()
-}
+use lib::{read_lines, Solver};
 
 fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
 	let file = format!("src/day{:02}/input.txt", day);
@@ -50,12 +43,12 @@ fn main() {
 	let day: u32 = args[1].parse().expect("Not a number");
 	let (solver, file) = get_solver(day);
 	let part1_now = Instant::now();
-	let part1_answer = solver.solve(read_lines(&file), false);
+	let part1_answer = solver.solve(&read_lines(&file), false);
 	let part1_time = part1_now.elapsed().as_secs_f32();
 	println!("Day {} (part 1) answer: {}", day, part1_answer);
 	println!("Day {} (part 1) time: {}", day, part1_time);
 	let part2_now = Instant::now();
-	let part2_answer = solver.solve(read_lines(&file), true);
+	let part2_answer = solver.solve(&read_lines(&file), true);
 	let part2_time = part2_now.elapsed().as_secs_f32();
 	println!("Day {} (part 2) answer: {}", day, part2_answer);
 	println!("Day {} (part 2) time: {}", day, part2_time);

@@ -3,9 +3,10 @@ use crate::lib::Solver;
 pub struct Day1Solver;
 
 impl Solver for Day1Solver {
-	fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
-		let numbers: Vec<i32> = lines.iter().map(|line| line.parse().unwrap()).collect();
+	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
+		let mut numbers = parse_numbers(lines);
 
+		numbers.sort();
 		if !part_two {
 			for first_number in numbers.iter() {
 				for second_number in numbers.iter() {
@@ -15,9 +16,15 @@ impl Solver for Day1Solver {
 				}
 			}
 		} else {
-			for first_number in numbers.iter() {
-				for second_number in numbers.iter() {
-					for third_number in numbers.iter() {
+			for &first_number in numbers.iter() {
+				if first_number > 2020 {
+					continue;
+				}
+				for &second_number in numbers.iter() {
+					if first_number + second_number > 2020 {
+						continue;
+					}
+					for &third_number in numbers.iter() {
 						if first_number + second_number + third_number == 2020 {
 							return (first_number * second_number * third_number).to_string();
 						}
@@ -29,9 +36,18 @@ impl Solver for Day1Solver {
 	}
 }
 
+fn parse_numbers(lines: &[String]) -> Vec<i64> {
+	lines
+		.iter()
+		.map(|line| line.parse::<i64>().unwrap())
+		.collect()
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::read_lines;
+	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
@@ -44,7 +60,7 @@ mod tests {
 			"1456".to_string(),
 		];
 		let solver: Day1Solver = Day1Solver {};
-		assert_eq!(solver.solve(input, false), "514579");
+		assert_eq!(solver.solve(&input, false), "514579");
 	}
 
 	#[test]
@@ -58,6 +74,26 @@ mod tests {
 			"1456".to_string(),
 		];
 		let solver: Day1Solver = Day1Solver {};
-		assert_eq!(solver.solve(input, true), "241861950");
+		assert_eq!(solver.solve(&input, true), "241861950");
+	}
+
+	#[bench]
+	fn bench_parse_numbers(bencher: &mut Bencher) {
+		let input = read_lines("src/day01/input.txt");
+		bencher.iter(|| parse_numbers(&input));
+	}
+
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = read_lines("src/day01/input.txt");
+		let solver = Day1Solver {};
+		bencher.iter(|| solver.solve(&input, false));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = read_lines("src/day01/input.txt");
+		let solver = Day1Solver {};
+		bencher.iter(|| solver.solve(&input, true));
 	}
 }

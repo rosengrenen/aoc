@@ -3,16 +3,16 @@ use crate::lib::Solver;
 pub struct Day2Solver;
 
 impl Solver for Day2Solver {
-	fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
 		let mut count = 0;
 		for line in lines.iter() {
-			let first_split: Vec<&str> = line.split(':').collect();
-			let second_split: Vec<&str> = first_split[0].split(' ').collect();
-			let third_split: Vec<&str> = second_split[0].split('-').collect();
-			let min_occurences: i64 = third_split[0].parse().unwrap();
-			let max_occurences: i64 = third_split[1].parse().unwrap();
-			let character: u8 = second_split[1].as_bytes()[0];
-			let password: &str = first_split[1].trim();
+			let mut first_split = line.split(':');
+			let mut second_split = first_split.next().unwrap().split(' ');
+			let mut third_split = second_split.next().unwrap().split('-');
+			let min_occurences: i64 = third_split.next().unwrap().parse().unwrap();
+			let max_occurences: i64 = third_split.next().unwrap().parse().unwrap();
+			let character: u8 = second_split.next().unwrap().as_bytes()[0];
+			let password: &str = first_split.next().unwrap().trim();
 
 			if !part_two {
 				let mut occurences = 0;
@@ -49,6 +49,8 @@ impl Solver for Day2Solver {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::read_lines;
+	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
@@ -59,7 +61,7 @@ mod tests {
 		];
 
 		let solver: Day2Solver = Day2Solver {};
-		assert_eq!(solver.solve(input, false), "2");
+		assert_eq!(solver.solve(&input, false), "2");
 	}
 
 	#[test]
@@ -71,6 +73,20 @@ mod tests {
 		];
 
 		let solver: Day2Solver = Day2Solver {};
-		assert_eq!(solver.solve(input, true), "1");
+		assert_eq!(solver.solve(&input, true), "1");
+	}
+
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = read_lines("src/day02/input.txt");
+		let solver = Day2Solver {};
+		bencher.iter(|| solver.solve(&input, false));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = read_lines("src/day02/input.txt");
+		let solver = Day2Solver {};
+		bencher.iter(|| solver.solve(&input, true));
 	}
 }

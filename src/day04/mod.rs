@@ -1,11 +1,10 @@
 use crate::lib::Solver;
 use regex::Regex;
-use std::collections::HashMap;
 
 pub struct Day4Solver;
 
 impl Solver for Day4Solver {
-	fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
 		let passports = parse_passports(&lines);
 		if !part_two {
 			passports
@@ -33,27 +32,27 @@ impl Solver for Day4Solver {
 	}
 }
 
-fn parse_passports(lines: &[String]) -> Vec<HashMap<&str, &str>> {
-	let mut passports: Vec<HashMap<&str, &str>> = Vec::new();
-	let mut current_passport = HashMap::new();
+fn parse_passports(lines: &[String]) -> Vec<Vec<(&str, &str)>> {
+	let mut passports = Vec::new();
+	let mut current_passport = Vec::new();
 	for line in lines.iter() {
 		if line == "" {
 			passports.push(current_passport);
-			current_passport = HashMap::new();
+			current_passport = Vec::new();
 			continue;
 		}
 
 		let key_value_pairs: Vec<&str> = line.split(' ').collect();
 		for &pair in key_value_pairs.iter() {
-			let split: Vec<&str> = pair.split(':').collect();
-			current_passport.insert(split[0], split[1]);
+			let mut split = pair.split(':');
+			current_passport.push((split.next().unwrap(), split.next().unwrap()));
 		}
 	}
 	passports.push(current_passport);
 	passports
 }
 
-fn is_valid_passport(passport: &HashMap<&str, &str>, validate_fields: bool) -> bool {
+fn is_valid_passport(passport: &Vec<(&str, &str)>, validate_fields: bool) -> bool {
 	if !has_required_fields(passport) {
 		return false;
 	}
@@ -70,9 +69,13 @@ fn is_valid_passport(passport: &HashMap<&str, &str>, validate_fields: bool) -> b
 }
 
 const REQUIRED_FIELDS: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-fn has_required_fields(passport: &HashMap<&str, &str>) -> bool {
+fn has_required_fields(passport: &Vec<(&str, &str)>) -> bool {
 	for required_field in REQUIRED_FIELDS.iter() {
-		if passport.get(required_field).is_none() {
+		if passport
+			.iter()
+			.find(|(key, _)| key == required_field)
+			.is_none()
+		{
 			return false;
 		}
 	}
@@ -81,6 +84,12 @@ fn has_required_fields(passport: &HashMap<&str, &str>) -> bool {
 
 const ALLOWED_EYE_COLORS: [&str; 7] = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
 fn is_valid_field(key: &str, value: &str) -> bool {
+	lazy_static! {
+		static ref HAIR_COLOR_REGEX: Regex = Regex::new("^#[0-9a-f]{6}$").unwrap();
+	}
+	lazy_static! {
+		static ref PERSONAL_ID_REGEX: Regex = Regex::new("^[0-9]{9}$").unwrap();
+	}
 	match key {
 		"byr" => {
 			let birth_year: i64 = value.parse().unwrap();
@@ -107,9 +116,9 @@ fn is_valid_field(key: &str, value: &str) -> bool {
 
 			false
 		}
-		"hcl" => Regex::new("^#[0-9a-f]{6}$").unwrap().is_match(value),
+		"hcl" => HAIR_COLOR_REGEX.is_match(value),
 		"ecl" => ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None,
-		"pid" => Regex::new("^[0-9]{9}$").unwrap().is_match(value),
+		"pid" => PERSONAL_ID_REGEX.is_match(value),
 		_ => true,
 	}
 }
@@ -117,6 +126,8 @@ fn is_valid_field(key: &str, value: &str) -> bool {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::read_lines;
+	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
@@ -137,7 +148,7 @@ mod tests {
 		];
 
 		let solver = Day4Solver {};
-		assert_eq!(solver.solve(input, false), "2");
+		assert_eq!(solver.solve(&input, false), "2");
 	}
 
 	#[test]
@@ -195,7 +206,49 @@ mod tests {
 		];
 
 		let solver = Day4Solver {};
-		assert_eq!(solver.solve(invalid_passports_input, true), "0");
-		assert_eq!(solver.solve(valid_passports_input, true), "4");
+		assert_eq!(solver.solve(&invalid_passports_input, true), "0");
+		assert_eq!(solver.solve(&valid_passports_input, true), "4");
+	}
+
+	#[bench]
+	fn bench_parse_passports(bencher: &mut Bencher) {
+		let input = read_lines("src/day04/input.txt");
+		bencher.iter(|| parse_passports(&input));
+	}
+
+	#[bench]
+	fn bench_is_valid_passport(bencher: &mut Bencher) {
+		let input = read_lines("src/day04/input.txt");
+		let passports = parse_passports(&input);
+		bencher.iter(|| {
+			for passport in passports.iter() {
+				is_valid_passport(&passport, false);
+			}
+		});
+	}
+
+	#[bench]
+	fn bench_is_valid_passport_validate_fields(bencher: &mut Bencher) {
+		let input = read_lines("src/day04/input.txt");
+		let passports = parse_passports(&input);
+		bencher.iter(|| {
+			for passport in passports.iter() {
+				is_valid_passport(&passport, true);
+			}
+		});
+	}
+
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = read_lines("src/day04/input.txt");
+		let solver = Day4Solver {};
+		bencher.iter(|| solver.solve(&input, false));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = read_lines("src/day04/input.txt");
+		let solver = Day4Solver {};
+		bencher.iter(|| solver.solve(&input, true));
 	}
 }

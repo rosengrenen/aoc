@@ -1,16 +1,15 @@
 use crate::lib::Solver;
-use std::cmp;
 
 pub struct Day5Solver;
 
 impl Solver for Day5Solver {
-	fn solve(&self, lines: Vec<String>, part_two: bool) -> String {
+	fn solve(&self, lines: &Vec<String>, part_two: bool) -> String {
 		if !part_two {
 			lines
 				.iter()
-				.fold(0, |highest_seat_id, line| {
-					cmp::max(highest_seat_id, get_seat_id(line))
-				})
+				.map(|line| get_seat_id(line))
+				.max()
+				.unwrap()
 				.to_string()
 		} else {
 			let mut seat_ids: Vec<i64> = lines.iter().map(|line| get_seat_id(line)).collect();
@@ -43,6 +42,8 @@ fn get_seat_id(partition_data: &str) -> i64 {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::read_lines;
+	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
@@ -50,5 +51,19 @@ mod tests {
 		assert_eq!(get_seat_id("BFFFBBFRRR"), 567);
 		assert_eq!(get_seat_id("FFFBBBFRRR"), 119);
 		assert_eq!(get_seat_id("BBFFBBFRLL"), 820);
+	}
+
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = read_lines("src/day05/input.txt");
+		let solver = Day5Solver {};
+		bencher.iter(|| solver.solve(&input, false));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = read_lines("src/day05/input.txt");
+		let solver = Day5Solver {};
+		bencher.iter(|| solver.solve(&input, true));
 	}
 }
