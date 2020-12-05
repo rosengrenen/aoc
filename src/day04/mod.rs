@@ -98,14 +98,12 @@ fn is_valid_field(key: &str, value: &str) -> bool {
 		"ecl" => ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None,
 		"pid" => PERSONAL_ID_REGEX.is_match(value),
 		"hgt" => {
-			if value.ends_with("cm") {
-				let height: i64 = value.strip_suffix("cm").unwrap().parse().unwrap();
-				return (150..=193).contains(&height);
+			if let Some(cm) = value.strip_suffix("cm") {
+				return (150..=193).contains(&cm.parse().unwrap());
 			}
 
-			if value.ends_with("in") {
-				let height: i64 = value.strip_suffix("in").unwrap().parse().unwrap();
-				return (59..=76).contains(&height);
+			if let Some(inches) = value.strip_suffix("in") {
+				return (59..=76).contains(&inches.parse().unwrap());
 			}
 
 			false
