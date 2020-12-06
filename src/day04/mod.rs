@@ -42,8 +42,7 @@ fn parse_passports(lines: &[String]) -> Vec<Vec<(&str, &str)>> {
 			continue;
 		}
 
-		let key_value_pairs: Vec<&str> = line.split(' ').collect();
-		for &pair in key_value_pairs.iter() {
+		for pair in line.split_whitespace() {
 			let mut split = pair.split(':');
 			current_passport.push((split.next().unwrap(), split.next().unwrap()));
 		}
