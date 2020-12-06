@@ -11,6 +11,7 @@ impl Solver for Day6Solver {
 				if line.is_empty() {
 					questions_answered += current_group_answers.len();
 					current_group_answers.clear();
+					continue;
 				}
 				for c in line.as_bytes().iter() {
 					if current_group_answers.iter().all(|&c1| c1 != c) {
