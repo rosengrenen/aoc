@@ -6,20 +6,18 @@ impl Solver for Day6Solver {
 	fn solve(&self, input: &str, part_two: bool) -> i64 {
 		if !part_two {
 			let mut questions_answered: i64 = 0;
-			// "bitset" that represents if an answer was used, first bit represents 'a', the second 'b', ...
-			let mut answers: i64 = 0;
-			for line in input.lines() {
-				if line.is_empty() {
-					questions_answered += answers.count_ones() as i64;
-					answers = 0;
-					continue;
-				}
-				// Join current person answers with the rest
-				for c in line.as_bytes().iter() {
+			for batch in input.split("\n\n") {
+				// "bitset" that represents if an answer was used, first bit represents 'a', the second 'b', ...
+				let mut answers: i64 = 0;
+				// Join all answers to get set union
+				for c in batch.as_bytes().iter() {
+					if *c == b'\n' {
+						continue;
+					}
 					answers |= 1 << (c - b'a');
 				}
+				questions_answered += answers.count_ones() as i64;
 			}
-			questions_answered += answers.count_ones() as i64;
 			questions_answered
 		} else {
 			let mut questions_answered: i64 = 0;
