@@ -1,68 +1,109 @@
 use crate::lib::Solver;
-use regex::Regex;
 use std::collections::{HashMap, HashSet};
 
 pub struct Day7Solver;
 
 impl Solver for Day7Solver {
 	fn solve(&self, input: &str, part_two: bool) -> i64 {
-		let outer_regex: Regex = Regex::new("^(.*?) bags").unwrap();
-		let inner_regex: Regex = Regex::new("(\\d+) (.*?) bags?").unwrap();
 		if !part_two {
 			// Bag -> List of bags that contain Bag
-			let mut bag_map = HashMap::new();
-			for line in input.lines() {
-				let bag_color = &outer_regex.captures(line).unwrap()[1];
-				for inner_captures in inner_regex.captures_iter(line) {
-					let container_bag_color = inner_captures[2].to_owned();
-					let entry = bag_map.entry(container_bag_color).or_insert_with(Vec::new);
-					entry.push(bag_color.to_owned());
-				}
-			}
-			let mut set = HashSet::new();
-			find_bags_that_contains_bag(&bag_map, "shiny gold", &mut set);
+			let child_to_parents_map = create_child_to_parents_map(input);
+			let set = find_bags_that_contains_bag(&child_to_parents_map, "shiny gold");
 			set.len() as i64
 		} else {
 			// Bag -> List of bags in Bag
-			let mut bag_map = HashMap::new();
-			for line in input.lines() {
-				let bag_color = outer_regex.captures(line).unwrap()[1].to_owned();
-				let bags_in_bag: Vec<_> = inner_regex
-					.captures_iter(line)
-					.map(|inner_captures| {
-						let container_bag_count: i64 = inner_captures[1].parse().unwrap();
-						let container_bag_color = inner_captures[2].to_owned();
-						(container_bag_count, container_bag_color)
-					})
-					.collect();
-				bag_map.insert(bag_color, bags_in_bag);
-			}
-			count_bags_in_bag(&bag_map, "shiny gold")
+			let parent_to_children_map = create_parent_to_children_map(input);
+			count_bags_in_bag(&parent_to_children_map, "shiny gold")
 		}
 	}
 }
 
-fn find_bags_that_contains_bag(
-	bags_map: &HashMap<String, Vec<String>>,
+fn create_child_to_parents_map(input: &str) -> HashMap<String, Vec<&str>> {
+	let mut child_to_parents_map = HashMap::new();
+	for line in input.lines() {
+		let (parent_color, children_raw) = line.split_once(" bags contain ").unwrap();
+		// No children
+		if children_raw.as_bytes()[0] == b'n' {
+			continue;
+		}
+
+		for child_raw in children_raw.split(',') {
+			let child_parts_raw_iter = child_raw.trim().split_whitespace();
+			let mut child_name_parts_iter = child_parts_raw_iter.skip(1).take(2);
+			let child_color = child_name_parts_iter.next().unwrap().to_owned()
+				+ " " + child_name_parts_iter.next().unwrap();
+
+			let entry = child_to_parents_map
+				.entry(child_color)
+				.or_insert_with(Vec::new);
+			entry.push(parent_color);
+		}
+	}
+	child_to_parents_map
+}
+
+fn create_parent_to_children_map(input: &str) -> HashMap<&str, Vec<(i64, String)>> {
+	let mut parent_to_children_map = HashMap::new();
+	for line in input.lines() {
+		let (parent, children_raw) = line.split_once(" bags contain ").unwrap();
+		// No children
+		if children_raw.as_bytes()[0] == b'n' {
+			continue;
+		}
+
+		let children: Vec<(i64, String)> = children_raw
+			.split(',')
+			.map(|child_raw| {
+				let mut child_parts_raw_iter = child_raw.trim().split_whitespace();
+				let child_count: i64 = child_parts_raw_iter.next().unwrap().parse().unwrap();
+				let child_color = child_parts_raw_iter.next().unwrap().to_owned()
+					+ " " + child_parts_raw_iter.next().unwrap();
+
+				(child_count, child_color)
+			})
+			.collect();
+		parent_to_children_map.insert(parent, children);
+	}
+	parent_to_children_map
+}
+
+fn find_bags_that_contains_bag<'a>(
+	child_to_parents_map: &HashMap<String, Vec<&'a str>>,
 	bag: &str,
-	result_acc: &mut HashSet<String>,
+) -> HashSet<&'a str> {
+	let mut result_acc = HashSet::new();
+	find_bags_that_contains_bag_recursive(child_to_parents_map, bag, &mut result_acc);
+	result_acc
+}
+
+fn find_bags_that_contains_bag_recursive<'a>(
+	child_to_parents_map: &HashMap<String, Vec<&'a str>>,
+	bag: &str,
+	result_acc: &mut HashSet<&'a str>,
 ) {
-	if let Some(bags_that_contain_bag) = bags_map.get(bag) {
+	if let Some(bags_that_contain_bag) = child_to_parents_map.get(bag) {
 		for bag_that_contains_bag in bags_that_contain_bag.iter() {
-			result_acc.insert(bag_that_contains_bag.clone());
-			find_bags_that_contains_bag(bags_map, bag_that_contains_bag, result_acc)
+			result_acc.insert(bag_that_contains_bag);
+			find_bags_that_contains_bag_recursive(
+				child_to_parents_map,
+				bag_that_contains_bag,
+				result_acc,
+			)
 		}
 	}
 }
 
-fn count_bags_in_bag(bags_map: &HashMap<String, Vec<(i64, String)>>, bag: &str) -> i64 {
-	let bags_in_bag = bags_map.get(bag).unwrap();
-	bags_in_bag
-		.iter()
-		.map(|(child_bag_count, child_bag_color)| {
-			child_bag_count * (1 + count_bags_in_bag(bags_map, child_bag_color))
-		})
-		.sum()
+fn count_bags_in_bag(parent_to_children_map: &HashMap<&str, Vec<(i64, String)>>, bag: &str) -> i64 {
+	if let Some(bags_in_bag) = parent_to_children_map.get(bag) {
+		bags_in_bag
+			.iter()
+			.map(|(child_count, child_color)| {
+				child_count * (1 + count_bags_in_bag(parent_to_children_map, child_color))
+			})
+			.sum()
+	} else {
+		0
+	}
 }
 
 #[cfg(test)]
@@ -84,6 +125,18 @@ mod tests {
 		let solver = Day7Solver {};
 		assert_eq!(solver.solve(&input, true), 32);
 		assert_eq!(solver.solve(&input2, true), 126);
+	}
+
+	#[bench]
+	fn bench_create_child_to_parents_map(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		bencher.iter(|| create_child_to_parents_map(&input));
+	}
+
+	#[bench]
+	fn bench_create_parent_to_children_map(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		bencher.iter(|| create_parent_to_children_map(&input));
 	}
 
 	#[bench]
