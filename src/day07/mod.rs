@@ -1,80 +1,70 @@
 use crate::lib::Solver;
+use regex::Regex;
 use std::collections::{HashMap, HashSet};
 
 pub struct Day7Solver;
 
 impl Solver for Day7Solver {
 	fn solve(&self, lines: &[String], part_two: bool) -> String {
+		lazy_static! {
+			static ref OUTER_REGEX: Regex = Regex::new("^(.*?) bags").unwrap();
+			static ref INNER_REGEX: Regex = Regex::new("(\\d+) (.*?) bags?").unwrap();
+		}
 		if !part_two {
-			let mut bag_map: HashMap<String, Vec<String>> = HashMap::new();
+			// Bag -> List of bags that contain Bag
+			let mut bag_map = HashMap::new();
 			for line in lines.iter() {
-				let split: Vec<&str> = line.split(&"bags contain").collect();
-				let bag = split[0].trim();
-				let contains: Vec<String> = split[1]
-					.trim()
-					.split(",")
-					.filter(|child_pag| !child_pag.contains("no other bags"))
-					.map(|child_bag| {
-						let mut split = child_bag.trim().split_whitespace();
-						split.next().unwrap();
-						split.next().unwrap().to_owned() + " " + split.next().unwrap()
-					})
-					.collect();
-				for c in contains.iter() {
-					let e = bag_map.entry(c.clone()).or_insert(Vec::new());
-					e.push(bag.to_string());
+				let bag_color = &OUTER_REGEX.captures(line).unwrap()[1];
+				for inner_captures in INNER_REGEX.captures_iter(line) {
+					let container_bag_color = inner_captures[2].to_owned();
+					let entry = bag_map.entry(container_bag_color).or_insert(Vec::new());
+					entry.push(bag_color.to_owned());
 				}
 			}
 			let mut set = HashSet::new();
-			find_recursive(&bag_map, "shiny gold", &mut set);
+			find_bags_that_contains_bag(&bag_map, "shiny gold", &mut set);
 			set.len().to_string()
 		} else {
-			let mut bag_map: HashMap<String, Vec<(i64, String)>> = HashMap::new();
+			// Bag -> List of bags in Bag
+			let mut bag_map = HashMap::new();
 			for line in lines.iter() {
-				let split: Vec<&str> = line.split(&"bags contain").collect();
-				let bag = split[0].trim();
-				let contains: Vec<(i64, String)> = split[1]
-					.trim()
-					.split(",")
-					.filter(|child_pag| !child_pag.contains("no other bags"))
-					.map(|child_bag| {
-						let mut split = child_bag.trim().split_whitespace();
-						(
-							split.next().unwrap().parse().unwrap(),
-							split.next().unwrap().to_owned() + " " + split.next().unwrap(),
-						)
+				let bag_color = OUTER_REGEX.captures(line).unwrap()[1].to_owned();
+				let bags_in_bag: Vec<_> = INNER_REGEX
+					.captures_iter(line)
+					.map(|inner_captures| {
+						let container_bag_count: i64 = inner_captures[1].parse().unwrap();
+						let container_bag_color = inner_captures[2].to_owned();
+						(container_bag_count, container_bag_color)
 					})
 					.collect();
-				bag_map.insert(bag.to_owned(), contains);
+				bag_map.insert(bag_color, bags_in_bag);
 			}
-			(count_recursive(&bag_map, "shiny gold") - 1).to_string()
+			count_bags_in_bag(&bag_map, "shiny gold").to_string()
 		}
 	}
 }
 
-fn find_recursive(bags: &HashMap<String, Vec<String>>, bag: &str, found: &mut HashSet<String>) {
-	if let Some(bs) = bags.get(bag) {
-		for b in bs.iter() {
-			found.insert(b.clone());
-			find_recursive(bags, b, found)
+fn find_bags_that_contains_bag(
+	bags_map: &HashMap<String, Vec<String>>,
+	bag: &str,
+	result_acc: &mut HashSet<String>,
+) {
+	if let Some(bags_that_contain_bag) = bags_map.get(bag) {
+		for bag_that_contains_bag in bags_that_contain_bag.iter() {
+			result_acc.insert(bag_that_contains_bag.clone());
+			find_bags_that_contains_bag(bags_map, bag_that_contains_bag, result_acc)
 		}
 	}
 }
 
-fn count_recursive(bags: &HashMap<String, Vec<(i64, String)>>, bag: &str) -> i64 {
-	if let Some(bs) = bags.get(bag) {
-		if bs.is_empty() {
-			return 1;
-		}
-
-		let mut sum = 1;
-		for (c, b) in bs.iter() {
-			sum += c * count_recursive(bags, b);
-		}
-
-		return sum;
-	}
-	panic!("duh")
+fn count_bags_in_bag(bags_map: &HashMap<String, Vec<(i64, String)>>, bag: &str) -> i64 {
+	let bags_in_bag = bags_map.get(bag).unwrap();
+	bags_in_bag
+		.iter()
+		.map(|(child_bag_count, child_bag_color)| {
+			child_bag_count * (1 + count_bags_in_bag(bags_map, child_bag_color))
+		})
+		.sum()
 }
 
 #[cfg(test)]
