@@ -20,6 +20,8 @@ mod day05;
 use day05::Day5Solver;
 mod day06;
 use day06::Day6Solver;
+mod day07;
+use day07::Day7Solver;
 
 mod lib;
 use lib::{read_lines, Solver};
@@ -33,6 +35,7 @@ fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
 		4 => Box::new(Day4Solver {}),
 		5 => Box::new(Day5Solver {}),
 		6 => Box::new(Day6Solver {}),
+		7 => Box::new(Day7Solver {}),
 		n => panic!("The solver for day {} has not been implemented", n),
 	};
 	(solver, file)
@@ -53,9 +56,15 @@ fn main() {
 	};
 	let (solver, file) = get_solver(day);
 	let mut total_time = 0.0;
+
+	let read_input_now = Instant::now();
+	let input = read_lines(&file);
+	let read_input_time = read_input_now.elapsed().as_secs_f32();
+	println!("Day {} read input time: {}", day, read_input_time);
+
 	if part.is_none() || part.unwrap() == 1 {
 		let part1_now = Instant::now();
-		let part1_answer = solver.solve(&read_lines(&file), false);
+		let part1_answer = solver.solve(&input, false);
 		let part1_time = part1_now.elapsed().as_secs_f32();
 		println!("Day {} (part 1) answer: {}", day, part1_answer);
 		println!("Day {} (part 1) time: {}", day, part1_time);
@@ -64,7 +73,7 @@ fn main() {
 
 	if part.is_none() || part.unwrap() == 2 {
 		let part2_now = Instant::now();
-		let part2_answer = solver.solve(&read_lines(&file), true);
+		let part2_answer = solver.solve(&input, true);
 		let part2_time = part2_now.elapsed().as_secs_f32();
 		println!("Day {} (part 2) answer: {}", day, part2_answer);
 		println!("Day {} (part 2) time: {}", day, part2_time);
@@ -72,6 +81,11 @@ fn main() {
 	}
 
 	if part.is_none() {
-		println!("Day {} total time: {}", day, total_time);
+		println!(
+			"Day {} total time: {}/{}",
+			day,
+			total_time,
+			total_time + read_input_time
+		);
 	}
 }
