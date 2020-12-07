@@ -3,9 +3,9 @@ use crate::lib::Solver;
 pub struct Day2Solver;
 
 impl Solver for Day2Solver {
-	fn solve(&self, lines: &[String], part_two: bool) -> String {
+	fn solve(&self, input: &str, part_two: bool) -> i64 {
 		let mut count = 0;
-		for line in lines.iter() {
+		for line in input.lines() {
 			let mut first_split = line.split(':');
 			let mut second_split = first_split.next().unwrap().split(' ');
 			let mut third_split = second_split.next().unwrap().split('-');
@@ -42,51 +42,42 @@ impl Solver for Day2Solver {
 				}
 			}
 		}
-		count.to_string()
+		count
 	}
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::lib::read_lines;
 	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
-		let input: Vec<String> = vec![
-			"1-3 a: abcde".to_string(),
-			"1-3 b: cdefg".to_string(),
-			"2-9 c: ccccccccc".to_string(),
-		];
+		let input = include_str!("input.test1.txt");
 
 		let solver: Day2Solver = Day2Solver {};
-		assert_eq!(solver.solve(&input, false), "2");
+		assert_eq!(solver.solve(input, false), 2);
 	}
 
 	#[test]
 	fn part_two_test_cases() {
-		let input: Vec<String> = vec![
-			"1-3 a: abcde".to_string(),
-			"1-3 b: cdefg".to_string(),
-			"2-9 c: ccccccccc".to_string(),
-		];
+		let input = include_str!("input.test1.txt");
 
 		let solver: Day2Solver = Day2Solver {};
-		assert_eq!(solver.solve(&input, true), "1");
+		assert_eq!(solver.solve(input, true), 1);
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = read_lines("src/day02/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day2Solver {};
-		bencher.iter(|| solver.solve(&input, false));
+		bencher.iter(|| solver.solve(input, false));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = read_lines("src/day02/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day2Solver {};
-		bencher.iter(|| solver.solve(&input, true));
+		bencher.iter(|| solver.solve(input, true));
 	}
 }

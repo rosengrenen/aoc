@@ -3,13 +3,13 @@ use crate::lib::Solver;
 pub struct Day6Solver;
 
 impl Solver for Day6Solver {
-	fn solve(&self, lines: &[String], part_two: bool) -> String {
+	fn solve(&self, input: &str, part_two: bool) -> i64 {
 		if !part_two {
-			let mut questions_answered = 0;
+			let mut questions_answered: i64 = 0;
 			let mut current_group_answers = Vec::new();
-			for line in lines.iter() {
+			for line in input.lines() {
 				if line.is_empty() {
-					questions_answered += current_group_answers.len();
+					questions_answered += current_group_answers.len() as i64;
 					current_group_answers.clear();
 					continue;
 				}
@@ -19,16 +19,16 @@ impl Solver for Day6Solver {
 					}
 				}
 			}
-			questions_answered += current_group_answers.len();
-			questions_answered.to_string()
+			questions_answered += current_group_answers.len() as i64;
+			questions_answered
 		} else {
-			let mut questions_answered = 0;
+			let mut questions_answered: i64 = 0;
 			let mut current_group_answers = Vec::new();
 			let mut first = true;
-			for line in lines.iter() {
+			for line in input.lines() {
 				if line.is_empty() {
 					first = true;
-					questions_answered += current_group_answers.len();
+					questions_answered += current_group_answers.len() as i64;
 					current_group_answers.clear();
 					continue;
 				}
@@ -44,8 +44,8 @@ impl Solver for Day6Solver {
 						.collect();
 				}
 			}
-			questions_answered += current_group_answers.len();
-			questions_answered.to_string()
+			questions_answered += current_group_answers.len() as i64;
+			questions_answered
 		}
 	}
 }
@@ -53,67 +53,32 @@ impl Solver for Day6Solver {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::lib::read_lines;
 	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
-		let input: Vec<String> = vec![
-			"abc".to_string(),
-			"".to_string(),
-			"a".to_string(),
-			"b".to_string(),
-			"c".to_string(),
-			"".to_string(),
-			"ab".to_string(),
-			"ac".to_string(),
-			"".to_string(),
-			"a".to_string(),
-			"a".to_string(),
-			"a".to_string(),
-			"a".to_string(),
-			"".to_string(),
-			"b".to_string(),
-		];
-
+		let input = include_str!("input.test1.txt");
 		let solver = Day6Solver {};
-		assert_eq!(solver.solve(&input, false), "11");
+		assert_eq!(solver.solve(&input, false), 11);
 	}
 
 	#[test]
 	fn part_two_test_cases() {
-		let input: Vec<String> = vec![
-			"abc".to_string(),
-			"".to_string(),
-			"a".to_string(),
-			"b".to_string(),
-			"c".to_string(),
-			"".to_string(),
-			"ab".to_string(),
-			"ac".to_string(),
-			"".to_string(),
-			"a".to_string(),
-			"a".to_string(),
-			"a".to_string(),
-			"a".to_string(),
-			"".to_string(),
-			"b".to_string(),
-		];
-
+		let input = include_str!("input.test1.txt");
 		let solver = Day6Solver {};
-		assert_eq!(solver.solve(&input, true), "6");
+		assert_eq!(solver.solve(&input, true), 6);
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = read_lines("src/day06/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day6Solver {};
 		bencher.iter(|| solver.solve(&input, false));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = read_lines("src/day06/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day6Solver {};
 		bencher.iter(|| solver.solve(&input, true));
 	}

@@ -5,13 +5,13 @@ use std::collections::{HashMap, HashSet};
 pub struct Day7Solver;
 
 impl Solver for Day7Solver {
-	fn solve(&self, lines: &[String], part_two: bool) -> String {
+	fn solve(&self, input: &str, part_two: bool) -> i64 {
 		let outer_regex: Regex = Regex::new("^(.*?) bags").unwrap();
 		let inner_regex: Regex = Regex::new("(\\d+) (.*?) bags?").unwrap();
 		if !part_two {
 			// Bag -> List of bags that contain Bag
 			let mut bag_map = HashMap::new();
-			for line in lines.iter() {
+			for line in input.lines() {
 				let bag_color = &outer_regex.captures(line).unwrap()[1];
 				for inner_captures in inner_regex.captures_iter(line) {
 					let container_bag_color = inner_captures[2].to_owned();
@@ -21,11 +21,11 @@ impl Solver for Day7Solver {
 			}
 			let mut set = HashSet::new();
 			find_bags_that_contains_bag(&bag_map, "shiny gold", &mut set);
-			set.len().to_string()
+			set.len() as i64
 		} else {
 			// Bag -> List of bags in Bag
 			let mut bag_map = HashMap::new();
-			for line in lines.iter() {
+			for line in input.lines() {
 				let bag_color = outer_regex.captures(line).unwrap()[1].to_owned();
 				let bags_in_bag: Vec<_> = inner_regex
 					.captures_iter(line)
@@ -37,7 +37,7 @@ impl Solver for Day7Solver {
 					.collect();
 				bag_map.insert(bag_color, bags_in_bag);
 			}
-			count_bags_in_bag(&bag_map, "shiny gold").to_string()
+			count_bags_in_bag(&bag_map, "shiny gold")
 		}
 	}
 }
@@ -68,66 +68,34 @@ fn count_bags_in_bag(bags_map: &HashMap<String, Vec<(i64, String)>>, bag: &str) 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::lib::read_lines;
 	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
-		let input: Vec<String> = vec![
-			"light red bags contain 1 bright white bag, 2 muted yellow bags.".to_string(),
-			"dark orange bags contain 3 bright white bags, 4 muted yellow bags.".to_string(),
-			"bright white bags contain 1 shiny gold bag.".to_string(),
-			"muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.".to_string(),
-			"shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.".to_string(),
-			"dark olive bags contain 3 faded blue bags, 4 dotted black bags.".to_string(),
-			"vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.".to_string(),
-			"faded blue bags contain no other bags.".to_string(),
-			"dotted black bags contain no other bags.".to_string(),
-		];
-
+		let input = include_str!("input.test1.txt");
 		let solver = Day7Solver {};
-		assert_eq!(solver.solve(&input, false), "4");
+		assert_eq!(solver.solve(&input, false), 4);
 	}
 
 	#[test]
 	fn part_two_test_cases() {
-		let input: Vec<String> = vec![
-			"light red bags contain 1 bright white bag, 2 muted yellow bags.".to_string(),
-			"dark orange bags contain 3 bright white bags, 4 muted yellow bags.".to_string(),
-			"bright white bags contain 1 shiny gold bag.".to_string(),
-			"muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.".to_string(),
-			"shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.".to_string(),
-			"dark olive bags contain 3 faded blue bags, 4 dotted black bags.".to_string(),
-			"vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.".to_string(),
-			"faded blue bags contain no other bags.".to_string(),
-			"dotted black bags contain no other bags.".to_string(),
-		];
-
-		let input2: Vec<String> = vec![
-			"shiny gold bags contain 2 dark red bags.".to_string(),
-			"dark red bags contain 2 dark orange bags.".to_string(),
-			"dark orange bags contain 2 dark yellow bags.".to_string(),
-			"dark yellow bags contain 2 dark green bags.".to_string(),
-			"dark green bags contain 2 dark blue bags.".to_string(),
-			"dark blue bags contain 2 dark violet bags.".to_string(),
-			"dark violet bags contain no other bags.".to_string(),
-		];
-
+		let input = include_str!("input.test1.txt");
+		let input2 = include_str!("input.test2.txt");
 		let solver = Day7Solver {};
-		assert_eq!(solver.solve(&input, true), "32");
-		assert_eq!(solver.solve(&input2, true), "126");
+		assert_eq!(solver.solve(&input, true), 32);
+		assert_eq!(solver.solve(&input2, true), 126);
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = read_lines("src/day07/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day7Solver {};
 		bencher.iter(|| solver.solve(&input, false));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = read_lines("src/day07/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day7Solver {};
 		bencher.iter(|| solver.solve(&input, true));
 	}

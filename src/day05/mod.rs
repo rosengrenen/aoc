@@ -3,16 +3,11 @@ use crate::lib::Solver;
 pub struct Day5Solver;
 
 impl Solver for Day5Solver {
-	fn solve(&self, lines: &[String], part_two: bool) -> String {
+	fn solve(&self, input: &str, part_two: bool) -> i64 {
 		if !part_two {
-			lines
-				.iter()
-				.map(|line| get_seat_id(line))
-				.max()
-				.unwrap()
-				.to_string()
+			input.lines().map(|line| get_seat_id(line)).max().unwrap()
 		} else {
-			let mut seat_ids: Vec<i64> = lines.iter().map(|line| get_seat_id(line)).collect();
+			let mut seat_ids: Vec<i64> = input.lines().map(|line| get_seat_id(line)).collect();
 			seat_ids.sort_unstable();
 			let mut prev_id = -999;
 			for &current_id in seat_ids.iter() {
@@ -23,7 +18,7 @@ impl Solver for Day5Solver {
 				prev_id = current_id;
 			}
 
-			(prev_id + 1).to_string()
+			prev_id + 1
 		}
 	}
 }
@@ -42,7 +37,6 @@ fn get_seat_id(partition_data: &str) -> i64 {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::lib::read_lines;
 	use test::Bencher;
 
 	#[test]
@@ -55,14 +49,14 @@ mod tests {
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = read_lines("src/day05/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day5Solver {};
 		bencher.iter(|| solver.solve(&input, false));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = read_lines("src/day05/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day5Solver {};
 		bencher.iter(|| solver.solve(&input, true));
 	}

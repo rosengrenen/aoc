@@ -1,241 +1,164 @@
 use crate::lib::Solver;
-use regex::Regex;
 
 pub struct Day4Solver;
 
 impl Solver for Day4Solver {
-	fn solve(&self, lines: &[String], part_two: bool) -> String {
-		let passports = parse_passports(&lines);
+	fn solve(&self, input: &str, part_two: bool) -> i64 {
+		let parsed_passports_iter = parse_passports(input);
 		if !part_two {
-			passports
-				.iter()
-				.fold(0, |valid_passports, passport| {
-					if is_valid_passport(passport, false) {
-						valid_passports + 1
-					} else {
-						valid_passports
-					}
-				})
-				.to_string()
+			filter_required_fields(parsed_passports_iter).count() as i64
 		} else {
-			passports
-				.iter()
-				.fold(0, |valid_passports, passport| {
-					if is_valid_passport(passport, true) {
-						valid_passports + 1
-					} else {
-						valid_passports
-					}
-				})
-				.to_string()
+			filter_valid_fields(filter_required_fields(parsed_passports_iter)).count() as i64
 		}
 	}
 }
 
-fn parse_passports(lines: &[String]) -> Vec<Vec<(&str, &str)>> {
-	let mut passports = Vec::new();
-	let mut current_passport = Vec::new();
-	for line in lines.iter() {
-		if line.is_empty() {
-			passports.push(current_passport);
-			current_passport = Vec::new();
-			continue;
+#[derive(Default)]
+struct Passport<'a> {
+	byr: Option<&'a str>,
+	iyr: Option<&'a str>,
+	eyr: Option<&'a str>,
+	hgt: Option<&'a str>,
+	hcl: Option<&'a str>,
+	ecl: Option<&'a str>,
+	pid: Option<&'a str>,
+	cid: Option<&'a str>,
+}
+
+fn parse_passports(lines: &str) -> impl Iterator<Item = Passport> {
+	lines.split("\n\n").map(|passport_data| {
+		let mut passport = Passport::default();
+		for pair in passport_data.split_whitespace() {
+			let (key, value) = pair.split_once(':').unwrap();
+			match key {
+				"byr" => passport.byr = Some(value),
+				"iyr" => passport.iyr = Some(value),
+				"eyr" => passport.eyr = Some(value),
+				"hgt" => passport.hgt = Some(value),
+				"hcl" => passport.hcl = Some(value),
+				"ecl" => passport.ecl = Some(value),
+				"pid" => passport.pid = Some(value),
+				"cid" => passport.cid = Some(value),
+				_ => (),
+			}
 		}
 
-		for pair in line.split_whitespace() {
-			let mut split = pair.split(':');
-			current_passport.push((split.next().unwrap(), split.next().unwrap()));
-		}
-	}
-	passports.push(current_passport);
+		passport
+	})
+}
+
+fn filter_required_fields<'a, I>(passports: I) -> impl Iterator<Item = Passport<'a>>
+where
+	I: Iterator<Item = Passport<'a>>,
+{
 	passports
+		.filter(|Passport { byr, .. }| byr.is_some())
+		.filter(|Passport { iyr, .. }| iyr.is_some())
+		.filter(|Passport { eyr, .. }| eyr.is_some())
+		.filter(|Passport { hgt, .. }| hgt.is_some())
+		.filter(|Passport { hcl, .. }| hcl.is_some())
+		.filter(|Passport { ecl, .. }| ecl.is_some())
+		.filter(|Passport { pid, .. }| pid.is_some())
 }
 
-fn is_valid_passport(passport: &[(&str, &str)], validate_fields: bool) -> bool {
-	if !has_required_fields(passport) {
-		return false;
-	}
-
-	if validate_fields {
-		for (key, value) in passport.iter() {
-			if !is_valid_field(key, value) {
-				return false;
+fn filter_valid_fields<'a, I>(passports: I) -> impl Iterator<Item = Passport<'a>>
+where
+	I: Iterator<Item = Passport<'a>>,
+{
+	passports
+		.filter(|Passport { byr, .. }| {
+			if let Some(byr) = byr {
+				(1920..=2002).contains(&byr.parse::<i64>().unwrap())
+			} else {
+				false
 			}
-		}
-	}
-
-	true
-}
-
-const REQUIRED_FIELDS: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-fn has_required_fields(passport: &[(&str, &str)]) -> bool {
-	for required_field in REQUIRED_FIELDS.iter() {
-		if passport
-			.iter()
-			.find(|(key, _)| key == required_field)
-			.is_none()
-		{
-			return false;
-		}
-	}
-	true
-}
-
-const ALLOWED_EYE_COLORS: [&str; 7] = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
-fn is_valid_field(key: &str, value: &str) -> bool {
-	lazy_static! {
-		static ref HAIR_COLOR_REGEX: Regex = Regex::new("^#[0-9a-f]{6}$").unwrap();
-	}
-	lazy_static! {
-		static ref PERSONAL_ID_REGEX: Regex = Regex::new("^[0-9]{9}$").unwrap();
-	}
-	match key {
-		"byr" => (1920..=2002).contains(&value.parse::<i64>().unwrap()),
-		"iyr" => (2010..=2020).contains(&value.parse::<i64>().unwrap()),
-		"eyr" => (2020..=2030).contains(&value.parse::<i64>().unwrap()),
-		"hcl" => HAIR_COLOR_REGEX.is_match(value),
-		"ecl" => ALLOWED_EYE_COLORS.iter().find(|&&color| color == value) != None,
-		"pid" => PERSONAL_ID_REGEX.is_match(value),
-		"hgt" => {
-			if let Some(cm) = value.strip_suffix("cm") {
-				return (150..=193).contains(&cm.parse().unwrap());
+		})
+		.filter(|Passport { iyr, .. }| {
+			if let Some(iyr) = iyr {
+				(2010..=2020).contains(&iyr.parse::<i64>().unwrap())
+			} else {
+				false
 			}
-
-			if let Some(inches) = value.strip_suffix("in") {
-				return (59..=76).contains(&inches.parse().unwrap());
+		})
+		.filter(|Passport { eyr, .. }| {
+			if let Some(eyr) = eyr {
+				(2020..=2030).contains(&eyr.parse::<i64>().unwrap())
+			} else {
+				false
 			}
-
-			false
-		}
-		_ => true,
-	}
+		})
+		.filter(|Passport { hgt, .. }| {
+			if let Some(hgt) = hgt {
+				if let Some(cm) = hgt.strip_suffix("cm") {
+					return (150..=193).contains(&cm.parse().unwrap());
+				} else if let Some(inches) = hgt.strip_suffix("in") {
+					return (59..=76).contains(&inches.parse().unwrap());
+				} else {
+					false
+				}
+			} else {
+				false
+			}
+		})
+		.filter(|Passport { hcl, .. }| {
+			if let Some(hcl) = hcl {
+				if let Some(hcl_digits) = hcl.strip_prefix('#') {
+					hcl_digits.len() == 6
+						&& hcl_digits.as_bytes().iter().all(|c| c.is_ascii_hexdigit())
+				} else {
+					false
+				}
+			} else {
+				false
+			}
+		})
+		.filter(|Passport { ecl, .. }| {
+			if let Some(ecl) = ecl {
+				["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(ecl)
+			} else {
+				false
+			}
+		})
+		.filter(|Passport { pid, .. }| {
+			if let Some(pid) = pid {
+				pid.len() == 9 && pid.as_bytes().iter().all(|c| c.is_ascii_digit())
+			} else {
+				false
+			}
+		})
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::lib::read_lines;
 	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
-		let input: Vec<String> = vec![
-			"ecl:gry pid:860033327 eyr:2020 hcl:#fffffd".to_string(),
-			"byr:1937 iyr:2017 cid:147 hgt:183cm".to_string(),
-			"".to_string(),
-			"iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884".to_string(),
-			"hcl:#cfa07d byr:1929".to_string(),
-			"".to_string(),
-			"hcl:#ae17e1 iyr:2013".to_string(),
-			"eyr:2024".to_string(),
-			"ecl:brn pid:760753108 byr:1931".to_string(),
-			"hgt:179cm".to_string(),
-			"".to_string(),
-			"hcl:#cfa07d eyr:2025 pid:166559648".to_string(),
-			"iyr:2011 ecl:brn hgt:59in".to_string(),
-		];
-
+		let input = include_str!("input.test1.txt");
 		let solver = Day4Solver {};
-		assert_eq!(solver.solve(&input, false), "2");
-	}
-
-	#[test]
-	fn is_valid_field_test_cases() {
-		assert_eq!(is_valid_field("byr", "2002"), true);
-		assert_eq!(is_valid_field("byr", "2003"), false);
-
-		assert_eq!(is_valid_field("hgt", "60in"), true);
-		assert_eq!(is_valid_field("hgt", "190cm"), true);
-		assert_eq!(is_valid_field("hgt", "190in"), false);
-		assert_eq!(is_valid_field("hgt", "190"), false);
-
-		assert_eq!(is_valid_field("hcl", "#123abc"), true);
-		assert_eq!(is_valid_field("hcl", "#123abz"), false);
-		assert_eq!(is_valid_field("hcl", "123abc"), false);
-
-		assert_eq!(is_valid_field("ecl", "brn"), true);
-		assert_eq!(is_valid_field("ecl", "wat"), false);
-
-		assert_eq!(is_valid_field("pid", "000000001"), true);
-		assert_eq!(is_valid_field("pid", "0123456789"), false);
+		assert_eq!(solver.solve(&input, false), 2);
 	}
 
 	#[test]
 	fn part_two_test_cases() {
-		let invalid_passports_input: Vec<String> = vec![
-			"eyr:1972 cid:100".to_string(),
-			"hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926".to_string(),
-			"".to_string(),
-			"iyr:2019".to_string(),
-			"hcl:#602927 eyr:1967 hgt:170cm".to_string(),
-			"ecl:grn pid:012533040 byr:1946".to_string(),
-			"".to_string(),
-			"hcl:dab227 iyr:2012".to_string(),
-			"ecl:brn hgt:182cm pid:021572410 eyr:2020 byr:1992 cid:277".to_string(),
-			"".to_string(),
-			"hgt:59cm ecl:zzz".to_string(),
-			"eyr:2038 hcl:74454a iyr:2023".to_string(),
-			"pid:3556412378 byr:2007".to_string(),
-		];
-
-		let valid_passports_input: Vec<String> = vec![
-			"pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980".to_string(),
-			"hcl:#623a2f".to_string(),
-			"".to_string(),
-			"eyr:2029 ecl:blu cid:129 byr:1989".to_string(),
-			"iyr:2014 pid:896056539 hcl:#a97842 hgt:165cm".to_string(),
-			"".to_string(),
-			"hcl:#888785".to_string(),
-			"hgt:164cm byr:2001 iyr:2015 cid:88".to_string(),
-			"pid:545766238 ecl:hzl".to_string(),
-			"eyr:2022".to_string(),
-			"".to_string(),
-			"iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719".to_string(),
-		];
-
+		let invalid_passports_input = include_str!("input.test2.txt");
+		let valid_passports_input = include_str!("input.test3.txt");
 		let solver = Day4Solver {};
-		assert_eq!(solver.solve(&invalid_passports_input, true), "0");
-		assert_eq!(solver.solve(&valid_passports_input, true), "4");
-	}
-
-	#[bench]
-	fn bench_parse_passports(bencher: &mut Bencher) {
-		let input = read_lines("src/day04/input.txt");
-		bencher.iter(|| parse_passports(&input));
-	}
-
-	#[bench]
-	fn bench_is_valid_passport(bencher: &mut Bencher) {
-		let input = read_lines("src/day04/input.txt");
-		let passports = parse_passports(&input);
-		bencher.iter(|| {
-			for passport in passports.iter() {
-				is_valid_passport(&passport, false);
-			}
-		});
-	}
-
-	#[bench]
-	fn bench_is_valid_passport_validate_fields(bencher: &mut Bencher) {
-		let input = read_lines("src/day04/input.txt");
-		let passports = parse_passports(&input);
-		bencher.iter(|| {
-			for passport in passports.iter() {
-				is_valid_passport(&passport, true);
-			}
-		});
+		assert_eq!(solver.solve(&invalid_passports_input, true), 0);
+		assert_eq!(solver.solve(&valid_passports_input, true), 4);
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = read_lines("src/day04/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day4Solver {};
 		bencher.iter(|| solver.solve(&input, false));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = read_lines("src/day04/input.txt");
+		let input = include_str!("input.txt");
 		let solver = Day4Solver {};
 		bencher.iter(|| solver.solve(&input, true));
 	}

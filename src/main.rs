@@ -1,11 +1,10 @@
+#![feature(str_split_once)]
 #![feature(test)]
 
 extern crate test;
 
-#[macro_use]
-extern crate lazy_static;
-
 use std::env;
+use std::fs::read_to_string;
 use std::time::Instant;
 
 mod day01;
@@ -24,7 +23,11 @@ mod day07;
 use day07::Day7Solver;
 
 mod lib;
-use lib::{read_lines, Solver};
+use lib::Solver;
+
+pub fn read_file(filename: &str) -> String {
+	read_to_string(filename).unwrap()
+}
 
 fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
 	let file = format!("src/day{:02}/input.txt", day);
@@ -56,7 +59,7 @@ fn main() {
 	let mut total_time = 0.0;
 
 	let read_input_now = Instant::now();
-	let input = read_lines(&file);
+	let input = read_file(&file);
 	let read_input_time = read_input_now.elapsed().as_secs_f32();
 	println!("Day {} read input time: {}", day, read_input_time);
 
