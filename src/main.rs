@@ -48,9 +48,7 @@ fn main() {
 	}
 	let day: u32 = args[1].parse().expect("Not a number");
 	let part = if args.len() >= 3 {
-		args[2]
-			.parse::<i64>()
-			.map_or_else(|_| None, |part| Some(part))
+		args[2].parse::<i64>().map_or_else(|_| None, Some)
 	} else {
 		None
 	};

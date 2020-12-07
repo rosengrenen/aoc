@@ -15,7 +15,7 @@ impl Solver for Day7Solver {
 				let bag_color = &outer_regex.captures(line).unwrap()[1];
 				for inner_captures in inner_regex.captures_iter(line) {
 					let container_bag_color = inner_captures[2].to_owned();
-					let entry = bag_map.entry(container_bag_color).or_insert(Vec::new());
+					let entry = bag_map.entry(container_bag_color).or_insert_with(Vec::new);
 					entry.push(bag_color.to_owned());
 				}
 			}
