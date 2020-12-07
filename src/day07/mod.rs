@@ -6,16 +6,14 @@ pub struct Day7Solver;
 
 impl Solver for Day7Solver {
 	fn solve(&self, lines: &[String], part_two: bool) -> String {
-		lazy_static! {
-			static ref OUTER_REGEX: Regex = Regex::new("^(.*?) bags").unwrap();
-			static ref INNER_REGEX: Regex = Regex::new("(\\d+) (.*?) bags?").unwrap();
-		}
+		let outer_regex: Regex = Regex::new("^(.*?) bags").unwrap();
+		let inner_regex: Regex = Regex::new("(\\d+) (.*?) bags?").unwrap();
 		if !part_two {
 			// Bag -> List of bags that contain Bag
 			let mut bag_map = HashMap::new();
 			for line in lines.iter() {
-				let bag_color = &OUTER_REGEX.captures(line).unwrap()[1];
-				for inner_captures in INNER_REGEX.captures_iter(line) {
+				let bag_color = &outer_regex.captures(line).unwrap()[1];
+				for inner_captures in inner_regex.captures_iter(line) {
 					let container_bag_color = inner_captures[2].to_owned();
 					let entry = bag_map.entry(container_bag_color).or_insert(Vec::new());
 					entry.push(bag_color.to_owned());
@@ -28,8 +26,8 @@ impl Solver for Day7Solver {
 			// Bag -> List of bags in Bag
 			let mut bag_map = HashMap::new();
 			for line in lines.iter() {
-				let bag_color = OUTER_REGEX.captures(line).unwrap()[1].to_owned();
-				let bags_in_bag: Vec<_> = INNER_REGEX
+				let bag_color = outer_regex.captures(line).unwrap()[1].to_owned();
+				let bags_in_bag: Vec<_> = inner_regex
 					.captures_iter(line)
 					.map(|inner_captures| {
 						let container_bag_count: i64 = inner_captures[1].parse().unwrap();
