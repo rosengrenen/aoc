@@ -6,45 +6,56 @@ impl Solver for Day6Solver {
 	fn solve(&self, input: &str, part_two: bool) -> i64 {
 		if !part_two {
 			let mut questions_answered: i64 = 0;
-			let mut current_group_answers = Vec::new();
+			// "bitset" that represents if an answer was used, first bit represents 'a', the second 'b', ...
+			let mut answers: i64 = 0;
 			for line in input.lines() {
 				if line.is_empty() {
-					questions_answered += current_group_answers.len() as i64;
-					current_group_answers.clear();
+					questions_answered += answers.count_ones() as i64;
+					answers = 0;
 					continue;
 				}
+				// Join current person answers with the rest
 				for c in line.as_bytes().iter() {
-					if current_group_answers.iter().all(|&c1| c1 != c) {
-						current_group_answers.push(c);
-					}
+					answers |= 1 << (c - b'a');
 				}
 			}
-			questions_answered += current_group_answers.len() as i64;
+			questions_answered += answers.count_ones() as i64;
 			questions_answered
 		} else {
 			let mut questions_answered: i64 = 0;
-			let mut current_group_answers = Vec::new();
+			// "bitset" that represents if an answer was used, first bit represents 'a', the second 'b', ...
+			let mut answers: i64 = 0;
+			// Flag that signifies first loop of new batch/group of people
 			let mut first = true;
 			for line in input.lines() {
 				if line.is_empty() {
+					questions_answered += answers.count_ones() as i64;
 					first = true;
-					questions_answered += current_group_answers.len() as i64;
-					current_group_answers.clear();
 					continue;
 				}
 				if first {
 					first = false;
-					for c in line.as_bytes().iter() {
-						current_group_answers.push(c);
+					// Reset bits for new batch
+					answers = 0;
+					// Set the bits for the first person ov the group
+					for c in line.as_bytes() {
+						answers |= 1 << (c - b'a');
 					}
-				} else {
-					current_group_answers = current_group_answers
-						.into_iter()
-						.filter(|&&answer| line.as_bytes().iter().any(|&c| c == answer))
-						.collect();
+					continue;
 				}
+				let prev_answers = answers;
+				if answers == 0 {
+					continue;
+				}
+				answers = 0;
+				// Set bits for the current persons answers
+				for c in line.as_bytes() {
+					answers |= 1 << (c - b'a');
+				}
+				// AND with current and previous answers to get set intersection
+				answers &= prev_answers;
 			}
-			questions_answered += current_group_answers.len() as i64;
+			questions_answered += answers.count_ones() as i64;
 			questions_answered
 		}
 	}
