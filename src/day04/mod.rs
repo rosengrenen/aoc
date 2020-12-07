@@ -90,9 +90,9 @@ where
 		.filter(|Passport { hgt, .. }| {
 			if let Some(hgt) = hgt {
 				if let Some(cm) = hgt.strip_suffix("cm") {
-					return (150..=193).contains(&cm.parse().unwrap());
+					(150..=193).contains(&cm.parse().unwrap())
 				} else if let Some(inches) = hgt.strip_suffix("in") {
-					return (59..=76).contains(&inches.parse().unwrap());
+					(59..=76).contains(&inches.parse().unwrap())
 				} else {
 					false
 				}
