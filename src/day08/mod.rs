@@ -55,19 +55,16 @@ fn parse_program(input: &str) -> Vec<Instruction> {
 		.collect()
 }
 
+// Returns the accumulator and whether the program exited or not
 fn run_program(program: &Vec<Instruction>) -> (i64, bool) {
 	let mut accumulator = 0;
 	let mut run_instructions = BitSet::with_capacity(program.len());
 	let mut instruction_pointer: isize = 0;
 
 	let program_length = program.len() as isize;
-	loop {
-		if instruction_pointer == program_length {
-			return (accumulator, true);
-		}
-
+	while instruction_pointer < program_length {
 		if run_instructions.contains(instruction_pointer as usize) {
-			break;
+			return (accumulator, false);
 		}
 
 		run_instructions.insert(instruction_pointer as usize);
@@ -84,7 +81,7 @@ fn run_program(program: &Vec<Instruction>) -> (i64, bool) {
 		instruction_pointer += 1;
 	}
 
-	(accumulator, false)
+	(accumulator, true)
 }
 
 #[cfg(test)]
