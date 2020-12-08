@@ -1,5 +1,4 @@
 use crate::lib::Solver;
-use bit_set::BitSet;
 
 pub struct Day8Solver;
 
@@ -55,19 +54,27 @@ fn parse_program(input: &str) -> Vec<Instruction> {
 		.collect()
 }
 
+fn has_bit(bit_set: &[i64], bit_index: usize) -> bool {
+	bit_set[bit_index / 64] & 1 << bit_index % 64 != 0
+}
+
+fn set_bit(bit_set: &mut [i64], bit_index: usize) {
+	bit_set[bit_index / 64] |= 1 << bit_index % 64;
+}
+
 // Returns the accumulator and whether the program exited or not
 fn run_program(program: &Vec<Instruction>) -> (i64, bool) {
 	let mut accumulator = 0;
-	let mut run_instructions = BitSet::with_capacity(program.len());
+	let mut run_instructions = [0i64; 16];
 	let mut instruction_pointer: isize = 0;
 
 	let program_length = program.len() as isize;
 	while instruction_pointer < program_length {
-		if run_instructions.contains(instruction_pointer as usize) {
+		if has_bit(&run_instructions, instruction_pointer as usize) {
 			return (accumulator, false);
 		}
 
-		run_instructions.insert(instruction_pointer as usize);
+		set_bit(&mut run_instructions, instruction_pointer as usize);
 
 		match program[instruction_pointer as usize] {
 			Instruction::Acc(value) => accumulator += value,
