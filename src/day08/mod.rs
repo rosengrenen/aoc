@@ -1,0 +1,128 @@
+use crate::lib::Solver;
+use bit_set::BitSet;
+
+pub struct Day8Solver;
+
+impl Solver for Day8Solver {
+	fn solve(&self, input: &str, part_two: bool) -> i64 {
+		let mut program = parse_program(input);
+		if !part_two {
+			let (accumulator, _) = run_program(&program);
+			accumulator
+		} else {
+			for i in 0..program.len() {
+				program[i] = match program[i] {
+					Instruction::Jmp(value) => Instruction::Nop(value),
+					Instruction::Nop(value) => Instruction::Jmp(value),
+					instruction => instruction,
+				};
+				let (acc, exited) = run_program(&program);
+				program[i] = match program[i] {
+					Instruction::Jmp(value) => Instruction::Nop(value),
+					Instruction::Nop(value) => Instruction::Jmp(value),
+					instruction => instruction,
+				};
+
+				if exited {
+					return acc;
+				}
+			}
+
+			panic!("Could not find a program that terminates");
+		}
+	}
+}
+
+#[derive(Copy, Clone)]
+enum Instruction {
+	Acc(i64),
+	Jmp(i64),
+	Nop(i64),
+}
+
+fn parse_program(input: &str) -> Vec<Instruction> {
+	input
+		.lines()
+		.map(|line| {
+			let (instruction, value) = line.split_once(' ').unwrap();
+			match instruction {
+				"acc" => Instruction::Acc(value.parse().unwrap()),
+				"jmp" => Instruction::Jmp(value.parse().unwrap()),
+				"nop" => Instruction::Nop(value.parse().unwrap()),
+				_ => panic!(format!("Invalid instruction {}", instruction)),
+			}
+		})
+		.collect()
+}
+
+fn run_program(program: &Vec<Instruction>) -> (i64, bool) {
+	let mut accumulator = 0;
+	let mut run_instructions = BitSet::with_capacity(program.len());
+	let mut instruction_pointer: isize = 0;
+
+	let program_length = program.len() as isize;
+	loop {
+		if instruction_pointer == program_length {
+			return (accumulator, true);
+		}
+
+		if run_instructions.contains(instruction_pointer as usize) {
+			break;
+		}
+
+		run_instructions.insert(instruction_pointer as usize);
+
+		match program[instruction_pointer as usize] {
+			Instruction::Acc(value) => accumulator += value,
+			Instruction::Jmp(value) => {
+				instruction_pointer += value as isize;
+				continue;
+			}
+			Instruction::Nop(_) => (),
+		}
+
+		instruction_pointer += 1;
+	}
+
+	(accumulator, false)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use test::Bencher;
+
+	#[test]
+	fn part_one_test_cases() {
+		let input = include_str!("input.test1.txt");
+		let solver = Day8Solver {};
+		assert_eq!(solver.solve(&input, false), 5);
+	}
+
+	#[test]
+	fn part_two_test_cases() {
+		let input = include_str!("input.test1.txt");
+		let solver = Day8Solver {};
+		assert_eq!(solver.solve(&input, true), 8);
+	}
+
+	#[bench]
+	fn bench_parse_instructions(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		bencher.iter(|| parse_program(input));
+	}
+
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		let solver = Day8Solver {};
+		bencher.iter(|| solver.solve(&input, false));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		let solver = Day8Solver {};
+		bencher.iter(|| solver.solve(&input, true));
+	}
+}
