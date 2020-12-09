@@ -3,32 +3,33 @@ use crate::lib::Solver;
 pub struct Day8Solver;
 
 impl Solver for Day8Solver {
-	fn solve(&self, input: &str, part_two: bool) -> i64 {
+	fn solve_part_one(&self, input: &str) -> i64 {
+		let program = parse_program(input);
+		let (accumulator, _) = run_program(&program);
+		accumulator
+	}
+
+	fn solve_part_two(&self, input: &str) -> i64 {
 		let mut program = parse_program(input);
-		if !part_two {
-			let (accumulator, _) = run_program(&program);
-			accumulator
-		} else {
-			for i in 0..program.len() {
-				program[i] = match program[i] {
-					Instruction::Jmp(value) => Instruction::Nop(value),
-					Instruction::Nop(value) => Instruction::Jmp(value),
-					instruction => instruction,
-				};
-				let (acc, exited) = run_program(&program);
-				program[i] = match program[i] {
-					Instruction::Jmp(value) => Instruction::Nop(value),
-					Instruction::Nop(value) => Instruction::Jmp(value),
-					instruction => instruction,
-				};
+		for i in 0..program.len() {
+			program[i] = match program[i] {
+				Instruction::Jmp(value) => Instruction::Nop(value),
+				Instruction::Nop(value) => Instruction::Jmp(value),
+				instruction => instruction,
+			};
+			let (acc, exited) = run_program(&program);
+			program[i] = match program[i] {
+				Instruction::Jmp(value) => Instruction::Nop(value),
+				Instruction::Nop(value) => Instruction::Jmp(value),
+				instruction => instruction,
+			};
 
-				if exited {
-					return acc;
-				}
+			if exited {
+				return acc;
 			}
-
-			panic!("Could not find a program that terminates");
 		}
+
+		panic!("Could not find a program that terminates");
 	}
 }
 
@@ -100,14 +101,14 @@ mod tests {
 	fn part_one_test_cases() {
 		let input = include_str!("input.test1.txt");
 		let solver = Day8Solver {};
-		assert_eq!(solver.solve(&input, false), 5);
+		assert_eq!(solver.solve_part_one(input), 5);
 	}
 
 	#[test]
 	fn part_two_test_cases() {
 		let input = include_str!("input.test1.txt");
 		let solver = Day8Solver {};
-		assert_eq!(solver.solve(&input, true), 8);
+		assert_eq!(solver.solve_part_two(input), 8);
 	}
 
 	#[bench]
@@ -120,13 +121,13 @@ mod tests {
 	fn bench_part_one(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day8Solver {};
-		bencher.iter(|| solver.solve(&input, false));
+		bencher.iter(|| solver.solve_part_one(input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day8Solver {};
-		bencher.iter(|| solver.solve(&input, true));
+		bencher.iter(|| solver.solve_part_two(input));
 	}
 }

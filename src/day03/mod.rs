@@ -3,17 +3,18 @@ use crate::lib::Solver;
 pub struct Day3Solver;
 
 impl Solver for Day3Solver {
-	fn solve(&self, input: &str, part_two: bool) -> i64 {
+	fn solve_part_one(&self, input: &str) -> i64 {
 		let lines: Vec<&str> = input.lines().collect();
-		if !part_two {
-			traverse_map(&lines, 3, 1)
-		} else {
-			traverse_map(&lines, 1, 1)
-				* traverse_map(&lines, 3, 1)
-				* traverse_map(&lines, 5, 1)
-				* traverse_map(&lines, 7, 1)
-				* traverse_map(&lines, 1, 2)
-		}
+		traverse_map(&lines, 3, 1)
+	}
+
+	fn solve_part_two(&self, input: &str) -> i64 {
+		let lines: Vec<&str> = input.lines().collect();
+		traverse_map(&lines, 1, 1)
+			* traverse_map(&lines, 3, 1)
+			* traverse_map(&lines, 5, 1)
+			* traverse_map(&lines, 7, 1)
+			* traverse_map(&lines, 1, 2)
 	}
 }
 
@@ -43,7 +44,7 @@ mod tests {
 		let input = include_str!("input.test1.txt");
 
 		let solver = Day3Solver {};
-		assert_eq!(solver.solve(&input, false), 7);
+		assert_eq!(solver.solve_part_one(input), 7);
 	}
 
 	#[test]
@@ -58,20 +59,20 @@ mod tests {
 		assert_eq!(traverse_map(&lines, 1, 2), 2);
 
 		let solver = Day3Solver {};
-		assert_eq!(solver.solve(&input, true), 336);
+		assert_eq!(solver.solve_part_two(input), 336);
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day3Solver {};
-		bencher.iter(|| solver.solve(&input, false));
+		bencher.iter(|| solver.solve_part_one(input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day3Solver {};
-		bencher.iter(|| solver.solve(&input, true));
+		bencher.iter(|| solver.solve_part_two(input));
 	}
 }

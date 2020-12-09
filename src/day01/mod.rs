@@ -3,36 +3,38 @@ use crate::lib::Solver;
 pub struct Day1Solver;
 
 impl Solver for Day1Solver {
-	fn solve(&self, input: &str, part_two: bool) -> i64 {
-		let mut numbers = parse_numbers(input);
-
-		numbers.sort_unstable();
-		if !part_two {
-			for first_number in numbers.iter() {
-				for second_number in numbers.iter() {
-					if first_number + second_number == 2020 {
-						return first_number * second_number;
-					}
+	fn solve_part_one(&self, input: &str) -> i64 {
+		let numbers = parse_numbers(input);
+		for first_number in numbers.iter() {
+			for second_number in numbers.iter() {
+				if first_number + second_number == 2020 {
+					return first_number * second_number;
 				}
 			}
-		} else {
-			for &first_number in numbers.iter() {
-				if first_number > 2020 {
+		}
+
+		panic!("Could not find an answer");
+	}
+
+	fn solve_part_two(&self, input: &str) -> i64 {
+		let numbers = parse_numbers(input);
+		for &first_number in numbers.iter() {
+			if first_number > 2020 {
+				continue;
+			}
+			for &second_number in numbers.iter() {
+				if first_number + second_number > 2020 {
 					continue;
 				}
-				for &second_number in numbers.iter() {
-					if first_number + second_number > 2020 {
-						continue;
-					}
-					for &third_number in numbers.iter() {
-						if first_number + second_number + third_number == 2020 {
-							return first_number * second_number * third_number;
-						}
+				for &third_number in numbers.iter() {
+					if first_number + second_number + third_number == 2020 {
+						return first_number * second_number * third_number;
 					}
 				}
 			}
 		}
-		panic!("")
+
+		panic!("Could not find an answer");
 	}
 }
 
@@ -52,14 +54,14 @@ mod tests {
 	fn part_one_test_cases() {
 		let input = include_str!("input.test1.txt");
 		let solver: Day1Solver = Day1Solver {};
-		assert_eq!(solver.solve(input, false), 514579);
+		assert_eq!(solver.solve_part_one(input), 514579);
 	}
 
 	#[test]
 	fn part_two_test_cases() {
 		let input = include_str!("input.test1.txt");
 		let solver: Day1Solver = Day1Solver {};
-		assert_eq!(solver.solve(input, true), 241861950);
+		assert_eq!(solver.solve_part_two(input), 241861950);
 	}
 
 	#[bench]
@@ -72,13 +74,13 @@ mod tests {
 	fn bench_part_one(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day1Solver {};
-		bencher.iter(|| solver.solve(input, false));
+		bencher.iter(|| solver.solve_part_one(input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day1Solver {};
-		bencher.iter(|| solver.solve(input, true));
+		bencher.iter(|| solver.solve_part_two(input));
 	}
 }

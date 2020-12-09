@@ -3,13 +3,14 @@ use crate::lib::Solver;
 pub struct Day4Solver;
 
 impl Solver for Day4Solver {
-	fn solve(&self, input: &str, part_two: bool) -> i64 {
+	fn solve_part_one(&self, input: &str) -> i64 {
 		let parsed_passports_iter = parse_passports(input);
-		if !part_two {
-			filter_required_fields(parsed_passports_iter).count() as i64
-		} else {
-			filter_valid_fields(filter_required_fields(parsed_passports_iter)).count() as i64
-		}
+		filter_required_fields(parsed_passports_iter).count() as i64
+	}
+
+	fn solve_part_two(&self, input: &str) -> i64 {
+		let parsed_passports_iter = parse_passports(input);
+		filter_valid_fields(filter_required_fields(parsed_passports_iter)).count() as i64
 	}
 }
 
@@ -137,7 +138,7 @@ mod tests {
 	fn part_one_test_cases() {
 		let input = include_str!("input.test1.txt");
 		let solver = Day4Solver {};
-		assert_eq!(solver.solve(&input, false), 2);
+		assert_eq!(solver.solve_part_one(input), 2);
 	}
 
 	#[test]
@@ -145,21 +146,21 @@ mod tests {
 		let invalid_passports_input = include_str!("input.test2.txt");
 		let valid_passports_input = include_str!("input.test3.txt");
 		let solver = Day4Solver {};
-		assert_eq!(solver.solve(&invalid_passports_input, true), 0);
-		assert_eq!(solver.solve(&valid_passports_input, true), 4);
+		assert_eq!(solver.solve_part_two(&invalid_passports_input), 0);
+		assert_eq!(solver.solve_part_two(&valid_passports_input), 4);
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day4Solver {};
-		bencher.iter(|| solver.solve(&input, false));
+		bencher.iter(|| solver.solve_part_one(input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day4Solver {};
-		bencher.iter(|| solver.solve(&input, true));
+		bencher.iter(|| solver.solve_part_two(input));
 	}
 }

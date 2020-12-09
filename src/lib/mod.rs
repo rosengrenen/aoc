@@ -1,3 +1,4 @@
 pub trait Solver {
-	fn solve(&self, input: &str, part_two: bool) -> i64;
+	fn solve_part_one(&self, input: &str) -> i64;
+	fn solve_part_two(&self, input: &str) -> i64;
 }

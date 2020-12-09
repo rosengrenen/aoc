@@ -3,13 +3,14 @@ use crate::lib::Solver;
 pub struct Day9Solver;
 
 impl Solver for Day9Solver {
-	fn solve(&self, input: &str, part_two: bool) -> i64 {
+	fn solve_part_one(&self, input: &str) -> i64 {
 		let numbers = parse_numbers(input);
-		if !part_two {
-			find_first_invalid(&numbers, 25)
-		} else {
-			find_first_invalid_contiguous_min_max(&numbers, 25)
-		}
+		find_first_invalid(&numbers, 25)
+	}
+
+	fn solve_part_two(&self, input: &str) -> i64 {
+		let numbers = parse_numbers(input);
+		find_first_invalid_contiguous_min_max(&numbers, 25)
 	}
 }
 
@@ -108,13 +109,13 @@ mod tests {
 	fn bench_part_one(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day9Solver {};
-		bencher.iter(|| solver.solve(input, false));
+		bencher.iter(|| solver.solve_part_one(input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day9Solver {};
-		bencher.iter(|| solver.solve(input, true));
+		bencher.iter(|| solver.solve_part_two(input));
 	}
 }
