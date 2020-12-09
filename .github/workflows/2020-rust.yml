@@ -6,9 +6,8 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 2020/rust
+    env:
+      working-directory: ./2020/rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -30,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: 2020/rust
+        working-directory: ./2020/rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -52,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: 2020/rust
+        working-directory: ./2020/rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
