@@ -1,6 +1,6 @@
 on: [push, pull_request]
 
-name: \[2020 rust\] Build, test, and format
+name: "[2020 rust] Build, test, and format"
 
 jobs:
   check:
