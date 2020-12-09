@@ -60,7 +60,7 @@ impl Solver for Day6Solver {
 }
 
 fn set_bit(bit_set: &mut i64, bit_index: usize) {
-	*bit_set |= 1 << bit_index % 64;
+	*bit_set |= 1 << (bit_index % 64);
 }
 
 #[cfg(test)]

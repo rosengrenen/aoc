@@ -56,15 +56,15 @@ fn parse_program(input: &str) -> Vec<Instruction> {
 }
 
 fn has_bit(bit_set: &[i64], bit_index: usize) -> bool {
-	bit_set[bit_index / 64] & 1 << bit_index % 64 != 0
+	bit_set[bit_index / 64] & 1 << (bit_index % 64) != 0
 }
 
 fn set_bit(bit_set: &mut [i64], bit_index: usize) {
-	bit_set[bit_index / 64] |= 1 << bit_index % 64;
+	bit_set[bit_index / 64] |= 1 << (bit_index % 64);
 }
 
 // Returns the accumulator and whether the program exited or not
-fn run_program(program: &Vec<Instruction>) -> (i64, bool) {
+fn run_program(program: &[Instruction]) -> (i64, bool) {
 	let mut accumulator = 0;
 	let mut run_instructions = [0i64; 16];
 	let mut instruction_pointer: isize = 0;

@@ -18,7 +18,7 @@ fn parse_numbers(input: &str) -> Vec<i64> {
 	input.lines().map(|line| line.parse().unwrap()).collect()
 }
 
-fn find_first_invalid(numbers: &Vec<i64>, preamble_length: usize) -> i64 {
+fn find_first_invalid(numbers: &[i64], preamble_length: usize) -> i64 {
 	for i in preamble_length..numbers.len() {
 		let current_number = numbers[i];
 		if !has_sum(&numbers[(i - preamble_length)..i], current_number) {
