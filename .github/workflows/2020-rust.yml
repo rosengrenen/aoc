@@ -6,8 +6,6 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    env:
-      working-directory: ./2020/rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -23,13 +21,11 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
+          working-directory: 2020/rust
 
   test:
     name: Test Suite
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./2020/rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -45,13 +41,11 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          working-directory: 2020/rust
 
   lints:
     name: Lints
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./2020/rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -69,9 +63,11 @@ jobs:
         with:
           command: fmt
           args: --all -- --check
+          working-directory: 2020/rust
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
+          working-directory: 2020/rust
