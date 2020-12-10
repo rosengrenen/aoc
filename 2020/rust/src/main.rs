@@ -25,6 +25,8 @@ mod day08;
 use day08::Day8Solver;
 mod day09;
 use day09::Day9Solver;
+mod day10;
+use day10::Day10Solver;
 
 mod lib;
 use lib::Solver;
@@ -45,6 +47,7 @@ fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
 		7 => Box::new(Day7Solver {}),
 		8 => Box::new(Day8Solver {}),
 		9 => Box::new(Day9Solver {}),
+		10 => Box::new(Day10Solver {}),
 		n => panic!("The solver for day {} has not been implemented", n),
 	};
 	(solver, file)
