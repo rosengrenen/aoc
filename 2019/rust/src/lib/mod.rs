@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub enum SolverResult {
 	Num(i64),
 	// Text(String),
