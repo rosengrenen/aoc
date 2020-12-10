@@ -4,114 +4,90 @@ pub struct Day10Solver;
 
 impl Solver for Day10Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let mut output_joltages = parse_output_joltages(input);
-		output_joltages.push(0);
-		output_joltages.sort_unstable();
-		solve_part_one(&output_joltages)
+		let mut adapters = parse_adapters(input);
+		adapters.push(0);
+		adapters.sort_unstable();
+		solve_part_one(&adapters)
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let mut output_joltages = parse_output_joltages(input);
-		output_joltages.push(0);
-		output_joltages.sort_unstable();
-		solve_part_two(&chunk_output_joltages(&output_joltages))
+		let mut adapters = parse_adapters(input);
+		adapters.sort_unstable();
+		solve_part_two(&adapters)
 	}
 }
 
-fn solve_part_one(output_joltages: &Vec<i64>) -> i64 {
+fn solve_part_one(adapters: &[i64]) -> i64 {
 	let mut ones = 0;
 	let mut threes = 1;
-	let mut prev_output_joltage = output_joltages[0];
-	for &output_joltage in &output_joltages[1..] {
-		match output_joltage - prev_output_joltage {
+	let mut prev_adapter = adapters[0];
+	for &adapter in &adapters[1..] {
+		match adapter - prev_adapter {
 			1 => ones += 1,
 			3 => threes += 1,
 			_ => (),
 		}
 
-		prev_output_joltage = output_joltage;
+		prev_adapter = adapter;
 	}
 
 	ones * threes
 }
 
-fn solve_part_two(chunked_output_joltages: &Vec<Vec<i64>>) -> i64 {
-	chunked_output_joltages
-		.iter()
-		.map(|chunk| permutations_in_chunk(chunk))
-		.product()
+fn solve_part_two(adapters: &[i64]) -> i64 {
+	let mut sliding_window = [1, 0, 0, 0];
+	let mut sliding_window_index = adapters[adapters.len() - 1];
+	for &adapter in adapters.iter().rev() {
+		// negative number denoting how many steps have been taken since the last adapter
+		let mut current_local_sliding_window_index = adapter - sliding_window_index;
+		if current_local_sliding_window_index < 0 {
+			shift_sliding_window(&mut sliding_window, -current_local_sliding_window_index);
+			sliding_window_index = adapter;
+			current_local_sliding_window_index = 0;
+		}
+
+		if sliding_window[current_local_sliding_window_index as usize] != 0 {
+			continue;
+		}
+
+		sliding_window[0] = sliding_window[1] + sliding_window[2] + sliding_window[3];
+	}
+	shift_sliding_window(&mut sliding_window, sliding_window_index);
+	sliding_window[1] + sliding_window[2] + sliding_window[3]
 }
 
-fn parse_output_joltages(input: &str) -> Vec<i64> {
+// shift by shift_by steps to the right
+fn shift_sliding_window(sliding_window: &mut [i64], shift_by: i64) {
+	match shift_by {
+		3 => {
+			sliding_window[3] = sliding_window[0];
+			sliding_window[2] = 0;
+			sliding_window[1] = 0;
+		}
+		2 => {
+			sliding_window[3] = sliding_window[1];
+			sliding_window[2] = sliding_window[0];
+			sliding_window[1] = 0;
+		}
+		1 => {
+			sliding_window[3] = sliding_window[2];
+			sliding_window[2] = sliding_window[1];
+			sliding_window[1] = sliding_window[0];
+		}
+		_ => {
+			sliding_window[3] = 0;
+			sliding_window[2] = 0;
+			sliding_window[1] = 0;
+		}
+	}
+	sliding_window[0] = 0;
+}
+
+fn parse_adapters(input: &str) -> Vec<i64> {
 	input
 		.lines()
 		.map(|line| line.parse::<i64>().unwrap())
 		.collect()
-}
-
-fn chunk_output_joltages(output_joltages: &Vec<i64>) -> Vec<Vec<i64>> {
-	let mut chunks = Vec::new();
-	let mut current_chunk = Vec::new();
-	for &output_joltage in output_joltages {
-		if !current_chunk.is_empty() && output_joltage - current_chunk.last().unwrap() == 3 {
-			chunks.push(current_chunk);
-			current_chunk = Vec::new();
-		}
-
-		current_chunk.push(output_joltage);
-	}
-	chunks.push(current_chunk);
-	chunks
-}
-
-fn permutations_in_chunk(part: &Vec<i64>) -> i64 {
-	if part.len() < 3 {
-		return 1;
-	}
-
-	let part_length = part.len();
-	let mut permutations = 1;
-	let mut index_stack = Vec::with_capacity(64);
-	index_stack.push(1);
-	loop {
-		if index_stack[0] == part_length - 1 {
-			break;
-		}
-
-		// Unwind stack
-		while index_stack[index_stack.len() - 1] > part_length - 1 {
-			index_stack.pop();
-		}
-
-		// Check if permutation is ok
-		let mut prev_joltage = part[0];
-		let mut valid = true;
-		for i in 1..part_length {
-			if index_stack.contains(&i) {
-				continue;
-			}
-
-			let current_joltage = part[i];
-			if current_joltage - prev_joltage > 3 {
-				valid = false;
-				break;
-			}
-
-			prev_joltage = current_joltage;
-		}
-
-		if valid {
-			permutations += 1;
-			let index_stack_length = index_stack.len();
-			index_stack[index_stack_length - 1] += 1;
-			index_stack.push(index_stack[index_stack.len() - 1] + 1);
-		} else {
-			let index_stack_length = index_stack.len();
-			index_stack[index_stack_length - 1] += 1;
-		}
-	}
-
-	permutations
 }
 
 #[cfg(test)]
@@ -138,16 +114,9 @@ mod tests {
 	}
 
 	#[bench]
-	fn bench_parse_output_joltages(bencher: &mut Bencher) {
+	fn bench_parse_adapters(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
-		bencher.iter(|| parse_output_joltages(input));
-	}
-
-	#[bench]
-	fn bench_chunk_output_joltages(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		let output_joltages = parse_output_joltages(input);
-		bencher.iter(|| chunk_output_joltages(&output_joltages));
+		bencher.iter(|| parse_adapters(input));
 	}
 
 	#[bench]
@@ -158,24 +127,9 @@ mod tests {
 	}
 
 	#[bench]
-	fn bench_part_one_skip_parse(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		let output_joltages = parse_output_joltages(input);
-		bencher.iter(|| solve_part_one(&output_joltages));
-	}
-
-	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
 		let solver = Day10Solver {};
 		bencher.iter(|| solver.solve_part_two(input));
-	}
-
-	#[bench]
-	fn bench_part_two_skip_parse(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		let output_joltages = parse_output_joltages(input);
-		let chunked_output_voltages = chunk_output_joltages(&output_joltages);
-		bencher.iter(|| solve_part_two(&chunked_output_voltages));
 	}
 }
