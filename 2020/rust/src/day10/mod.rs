@@ -39,14 +39,13 @@ fn solve_part_two(adapters: &[i64]) -> i64 {
 	let mut sliding_window_index = adapters[adapters.len() - 1];
 	for &adapter in adapters.iter().rev() {
 		// negative number denoting how many steps have been taken since the last adapter
-		let mut current_local_sliding_window_index = adapter - sliding_window_index;
+		let current_local_sliding_window_index = adapter - sliding_window_index;
 		if current_local_sliding_window_index < 0 {
 			shift_sliding_window(&mut sliding_window, -current_local_sliding_window_index);
 			sliding_window_index = adapter;
-			current_local_sliding_window_index = 0;
 		}
 
-		if sliding_window[current_local_sliding_window_index as usize] != 0 {
+		if sliding_window[0] != 0 {
 			continue;
 		}
 
