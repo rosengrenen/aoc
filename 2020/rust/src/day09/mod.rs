@@ -1,4 +1,5 @@
 use crate::lib::Solver;
+use std::cmp::Ordering;
 
 pub struct Day9Solver;
 
@@ -55,12 +56,16 @@ fn has_sum(list: &[i64], target: i64) -> bool {
 }
 
 fn find_contiguous_sum(list: &[i64], target: i64) -> &[i64] {
-	use std::cmp::Ordering;
 	let mut lower_index = 0;
 	let mut upper_index = 1;
+	let mut partial_sums = Vec::with_capacity(list.len());
+	partial_sums.push(list[0]);
 	while upper_index < list.len() {
+		if upper_index == partial_sums.len() {
+			partial_sums.push(partial_sums[partial_sums.len() - 1] + list[upper_index]);
+		}
 		let current_range = &list[lower_index..=upper_index];
-		let sum: i64 = current_range.iter().sum();
+		let sum: i64 = partial_sums[upper_index] - partial_sums[lower_index];
 		match sum.cmp(&target) {
 			Ordering::Equal => return current_range,
 			Ordering::Greater => {
