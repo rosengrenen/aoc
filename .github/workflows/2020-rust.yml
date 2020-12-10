@@ -44,6 +44,10 @@ jobs:
         working-directory: 2020/rust
         run: rustup default nightly
 
+      - name: Default profile
+        working-directory: 2020/rust
+        run: rustup set profile default
+
       - name: Run cargo fmt
         working-directory: 2020/rust
         run: cargo fmt --all -- --format
