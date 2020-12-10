@@ -44,9 +44,9 @@ jobs:
         working-directory: 2019/rust
         run: rustup default nightly
 
-      - name: Default profile
+      - name: Add rustfmt
         working-directory: 2019/rust
-        run: rustup set profile default
+        run: rustup component add rustfmt
 
       - name: Run cargo fmt
         working-directory: 2019/rust
