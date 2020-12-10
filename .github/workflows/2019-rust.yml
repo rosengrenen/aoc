@@ -47,7 +47,6 @@ jobs:
       - name: Run cargo fmt
         working-directory: 2019/rust
         run: cargo fmt --all -- --format
-        uses: actions-rs/cargo@v1
 
       - name: Run cargo clippy
         working-directory: 2019/rust
