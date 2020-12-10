@@ -50,7 +50,7 @@ jobs:
 
       - name: Run cargo fmt
         working-directory: 2019/rust
-        run: cargo fmt --all -- --format
+        run: cargo fmt --all -- --check
 
       - name: Run cargo clippy
         working-directory: 2019/rust
