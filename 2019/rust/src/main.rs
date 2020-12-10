@@ -9,8 +9,8 @@ use std::time::Instant;
 
 mod day01;
 use day01::Day1Solver;
-// mod day02;
-// use day02::Day2Solver;
+mod day02;
+use day02::Day2Solver;
 // mod day03;
 // use day03::Day3Solver;
 // mod day04;
@@ -45,7 +45,7 @@ fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
 	let file = format!("src/day{:02}/input.txt", day);
 	let solver: Box<dyn Solver> = match day {
 		1 => Box::new(Day1Solver {}),
-		// 2 => Box::new(Day2Solver {}),
+		2 => Box::new(Day2Solver {}),
 		// 3 => Box::new(Day3Solver {}),
 		// 4 => Box::new(Day4Solver {}),
 		// 5 => Box::new(Day5Solver {}),

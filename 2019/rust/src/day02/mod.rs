@@ -4,20 +4,20 @@ pub struct Day2Solver;
 
 impl Solver for Day2Solver {
 	fn solve_part_one(&self, input: &str) -> SolverResult {
-		let mut program: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
-		let result = run_program(&mut program, 12, 2);
-		SolverResult::Num(result)
+		let mut program = parse_program(input);
+		program.set_noun(12);
+		program.set_verb(2);
+		SolverResult::Num(program.run())
 	}
 
 	fn solve_part_two(&self, input: &str) -> SolverResult {
-		let program_orig: Vec<i64> = input
-			.split(',')
-			.map(|s| s.parse::<i64>().unwrap())
-			.collect();
+		let program = parse_program(input);
 		for noun in 0..=99 {
 			for verb in 0..=99 {
-				let mut program = program_orig.clone();
-				if run_program(&mut program, noun, verb) == 19_690_720 {
+				let mut program = program.clone();
+				program.set_noun(noun);
+				program.set_verb(verb);
+				if program.run() == 19_690_720 {
 					return SolverResult::Num(100 * noun + verb);
 				}
 			}
@@ -27,57 +27,106 @@ impl Solver for Day2Solver {
 	}
 }
 
-fn run_program(program: &mut Vec<i64>, noun: i64, verb: i64) -> i64 {
-	program[1] = noun;
-	program[2] = verb;
-	let mut instruction_pointer: usize = 0;
-	loop {
-		let op_code = program[instruction_pointer];
+#[derive(Clone)]
+struct IntcodeComputer {
+	instructions: Vec<i64>,
+	instruction_pointer: usize,
+}
 
-		if op_code == 99 {
-			return program[0];
+impl IntcodeComputer {
+	fn new(instructions: Vec<i64>) -> IntcodeComputer {
+		IntcodeComputer {
+			instructions,
+			instruction_pointer: 0,
 		}
+	}
 
-		let a = program[program[instruction_pointer + 1] as usize];
-		let b = program[program[instruction_pointer + 2] as usize];
-		let c = program[instruction_pointer + 3];
+	fn run(&mut self) -> i64 {
+		loop {
+			let op_code = self.op_code();
+			if op_code == 99 {
+				return self.instructions[0];
+			}
 
-		match op_code {
-			1 => {
-				program[c as usize] = a + b;
-				instruction_pointer += 4;
-			}
-			2 => {
-				program[c as usize] = a * b;
-				instruction_pointer += 4;
-			}
-			_ => panic!("Invalid op code: {} at {}", op_code, instruction_pointer),
-		};
+			let arg0 = self.op_arg(0) as usize;
+			let arg1 = self.op_arg(1) as usize;
+			let arg2 = self.op_arg(2) as usize;
+
+			match op_code {
+				1 => {
+					let sum = self.read_mem_value(arg0) + self.read_mem_value(arg1);
+					self.write_mem_value(arg2, sum);
+					self.instruction_pointer += 4;
+				}
+				2 => {
+					let prod = self.read_mem_value(arg0) * self.read_mem_value(arg1);
+					self.write_mem_value(arg2, prod);
+					self.instruction_pointer += 4;
+				}
+				_ => panic!(
+					"Invalid op code: {} at {}",
+					op_code, self.instruction_pointer
+				),
+			};
+		}
+	}
+
+	fn op_code(&self) -> i64 {
+		self.read_mem_value(self.instruction_pointer)
+	}
+
+	fn op_arg(&self, arg: usize) -> i64 {
+		self.read_mem_value(self.instruction_pointer + arg + 1)
+	}
+
+	fn read_mem_value(&self, address: usize) -> i64 {
+		self.instructions[address]
+	}
+
+	fn write_mem_value(&mut self, address: usize, value: i64) {
+		self.instructions[address] = value;
+	}
+
+	fn set_noun(&mut self, noun: i64) {
+		self.instructions[1] = noun;
+	}
+
+	fn set_verb(&mut self, verb: i64) {
+		self.instructions[2] = verb;
 	}
 }
 
-// #[cfg(test)]
-// mod tests {
-// 	use super::*;
+fn parse_program(input: &str) -> IntcodeComputer {
+	let instructions: Vec<i64> = input
+		.split(',')
+		.map(|raw_instruction| raw_instruction.parse().unwrap())
+		.collect();
+	IntcodeComputer::new(instructions)
+}
 
-// 	fn test_program(mut input: &mut Vec<i32>, expected_answer: &Vec<i32>) {
-// 		let noun = input[1];
-// 		let verb = input[2];
-// 		run_program(&mut input, noun, verb);
-// 		assert_eq!(input, expected_answer);
-// 	}
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use test::Bencher;
 
-// 	#[test]
-// 	fn part_one_test_cases() {
-// 		test_program(&mut vec![1, 0, 0, 0, 99], &mut vec![2, 0, 0, 0, 99]);
-// 		test_program(&mut vec![2, 3, 0, 3, 99], &mut vec![2, 3, 0, 6, 99]);
-// 		test_program(
-// 			&mut vec![2, 4, 4, 5, 99, 0],
-// 			&mut vec![2, 4, 4, 5, 99, 9801],
-// 		);
-// 		test_program(
-// 			&mut vec![1, 1, 1, 4, 99, 5, 6, 0, 99],
-// 			&mut vec![30, 1, 1, 4, 2, 5, 6, 0, 99],
-// 		);
-// 	}
-// }
+	#[test]
+	fn part_one_test_cases() {
+		let input = include_str!("input.test1.txt");
+		let solver = Day2Solver {};
+		assert_eq!(solver.solve_part_one(input), SolverResult::Num(3500));
+	}
+
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		let solver = Day2Solver {};
+		bencher.iter(|| solver.solve_part_one(input));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		let solver = Day2Solver {};
+		bencher.iter(|| solver.solve_part_two(input));
+	}
+}
