@@ -1,36 +1,25 @@
 use crate::lib::Solver;
+use std::cmp::Ordering;
 
 pub struct Day1Solver;
 
 impl Solver for Day1Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let numbers = parse_numbers(input);
-		for first_number in numbers.iter() {
-			for second_number in numbers.iter() {
-				if first_number + second_number == 2020 {
-					return first_number * second_number;
-				}
-			}
+		let mut numbers = parse_numbers(input);
+		numbers.sort_unstable();
+		if let Some((first, second)) = sum_in_list(&numbers, 2020) {
+			first * second
+		} else {
+			panic!("Could not find an answer");
 		}
-
-		panic!("Could not find an answer");
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let numbers = parse_numbers(input);
-		for &first_number in numbers.iter() {
-			if first_number > 2020 {
-				continue;
-			}
-			for &second_number in numbers.iter() {
-				if first_number + second_number > 2020 {
-					continue;
-				}
-				for &third_number in numbers.iter() {
-					if first_number + second_number + third_number == 2020 {
-						return first_number * second_number * third_number;
-					}
-				}
+		let mut numbers = parse_numbers(input);
+		numbers.sort_unstable();
+		for &first in numbers.iter() {
+			if let Some((second, third)) = sum_in_list(&numbers, 2020 - first) {
+				return first * second * third;
 			}
 		}
 
@@ -43,6 +32,21 @@ fn parse_numbers(input: &str) -> Vec<i64> {
 		.lines()
 		.map(|line| line.parse::<i64>().unwrap())
 		.collect()
+}
+
+fn sum_in_list(list: &[i64], target: i64) -> Option<(i64, i64)> {
+	let mut lower_index = 0;
+	let mut upper_index = list.len() - 1;
+	while lower_index < upper_index {
+		let sum = list[lower_index] + list[upper_index];
+		match sum.cmp(&target) {
+			Ordering::Equal => return Some((list[lower_index], list[upper_index])),
+			Ordering::Greater => upper_index -= 1,
+			Ordering::Less => lower_index += 1,
+		}
+	}
+
+	None
 }
 
 #[cfg(test)]
