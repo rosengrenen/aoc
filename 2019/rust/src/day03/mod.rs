@@ -1,298 +1,239 @@
 use crate::lib::{Solver, SolverResult};
-use std::cmp::Eq;
-use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::cmp;
 
 pub struct Day3Solver;
 
 impl Solver for Day3Solver {
 	fn solve_part_one(&self, input: &str) -> SolverResult {
-		let mut lines = input.lines();
-		let first_path: Vec<&str> = lines.next().unwrap().split(',').collect();
-		let second_path: Vec<&str> = lines.next().unwrap().split(',').collect();
-
-		let distance = calculate_distance(&first_path, &second_path, false);
-		SolverResult::Num(distance)
+		let (first_path, second_path) = parse_paths(input);
+		let intersections = find_intersections(&first_path, &second_path);
+		let closest_intersection_distance = intersections
+			.iter()
+			.filter(|Point { x, y }| *x != 0 && *y != 0)
+			.fold(
+				std::i64::MAX,
+				|closest_intersection_distance, intersection| {
+					cmp::min(
+						closest_intersection_distance,
+						manhattan_distance_from_origin(intersection),
+					)
+				},
+			);
+		SolverResult::Num(closest_intersection_distance)
 	}
 
 	fn solve_part_two(&self, input: &str) -> SolverResult {
-		let mut lines = input.lines();
-		let first_path: Vec<&str> = lines.next().unwrap().split(',').collect();
-		let second_path: Vec<&str> = lines.next().unwrap().split(',').collect();
-
-		let distance = calculate_distance(&first_path, &second_path, true);
-		SolverResult::Num(distance)
+		let (first_path, second_path) = parse_paths(input);
+		let intersections = find_intersections_with_distance(&first_path, &second_path);
+		let closest_intersection_distance = intersections
+			.iter()
+			.filter(|(Point { x, y }, _)| *x != 0 && *y != 0)
+			.fold(
+				std::i64::MAX,
+				|closest_intersection_distance, (_, distance)| {
+					cmp::min(closest_intersection_distance, *distance)
+				},
+			);
+		SolverResult::Num(closest_intersection_distance)
 	}
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-struct Pos {
+#[derive(Copy, Clone, Debug)]
+struct Point {
 	x: i64,
 	y: i64,
 }
 
-impl Pos {
-	fn up(&mut self) {
-		self.y += 1;
-	}
-
-	fn right(&mut self) {
-		self.x += 1;
-	}
-
-	fn down(&mut self) {
-		self.y -= 1;
-	}
-
-	fn left(&mut self) {
-		self.x -= 1;
-	}
+#[derive(Copy, Clone, Debug, PartialEq)]
+enum Direction {
+	Horizontal,
+	Vertical,
 }
 
-impl Default for Pos {
-	fn default() -> Self {
-		Pos { x: 0, y: 0 }
-	}
+#[derive(Copy, Clone, Debug)]
+struct Line {
+	direction: Direction,
+	start: Point,
+	end: Point,
 }
 
-fn manhattan_distance(pos1: &Pos, pos2: &Pos) -> i64 {
-	(pos1.x - pos2.x).abs() + (pos1.y - pos2.y).abs()
+fn parse_paths(input: &str) -> (Vec<Line>, Vec<Line>) {
+	let mut lines = input.lines();
+	let first_path: Vec<&str> = lines.next().unwrap().split(',').collect();
+	let second_path: Vec<&str> = lines.next().unwrap().split(',').collect();
+
+	(build_path(&first_path), build_path(&second_path))
 }
 
-fn calculate_distance(first_path: &Vec<&str>, second_path: &Vec<&str>, part_two: bool) -> i64 {
-	let mut paths: HashMap<Pos, (i64, bool)> = HashMap::new();
-	let mut current_pos = Pos { x: 0, y: 0 };
-	let mut current_distance_travelled = 0;
-	paths.insert(current_pos, (1, false));
-
-	for &instruction in first_path.iter() {
+fn build_path(path_instructions: &[&str]) -> Vec<Line> {
+	let mut path = Vec::new();
+	let mut current_location = Point { x: 0, y: 0 };
+	for &instruction in path_instructions {
 		let (direction, distance) = instruction.split_at(1);
+		let direction = direction.as_bytes()[0];
 		let distance: i64 = distance.parse().unwrap();
-
-		match direction {
-			"U" => {
-				for _ in 0..distance {
-					current_pos.up();
-					current_distance_travelled += 1;
-					paths
-						.entry(current_pos)
-						.or_insert((current_distance_travelled, false));
-				}
-			}
-			"R" => {
-				for _ in 0..distance {
-					current_pos.right();
-					current_distance_travelled += 1;
-					if !paths.contains_key(&current_pos) {
-						paths.insert(current_pos, (current_distance_travelled, false));
-					}
-				}
-			}
-			"D" => {
-				for _ in 0..distance {
-					current_pos.down();
-					current_distance_travelled += 1;
-					if !paths.contains_key(&current_pos) {
-						paths.insert(current_pos, (current_distance_travelled, false));
-					}
-				}
-			}
-			"L" => {
-				for _ in 0..distance {
-					current_pos.left();
-					current_distance_travelled += 1;
-					if !paths.contains_key(&current_pos) {
-						paths.insert(current_pos, (current_distance_travelled, false));
-					}
-				}
-			}
-			_ => panic!("Invalid direction"),
-		}
-	}
-
-	let mut intersections: HashMap<Pos, (i64, i64)> = HashMap::new();
-	current_pos = Pos { x: 0, y: 0 };
-	current_distance_travelled = 0;
-	for &instruction in second_path.iter() {
-		let (direction, distance) = instruction.split_at(1);
-		let distance: i64 = distance.parse().unwrap();
-		match direction {
-			"U" => {
-				for _ in 0..distance {
-					current_pos.up();
-					current_distance_travelled += 1;
-
-					match paths.get(&current_pos) {
-						Some(&(distance, _)) => match intersections.get_mut(&current_pos) {
-							Some(_) => (),
-							None => {
-								intersections.insert(
-									current_pos,
-									(
-										distance + current_distance_travelled,
-										manhattan_distance(&Pos::default(), &current_pos),
-									),
-								);
-							}
-						},
-						None => (),
-					}
-				}
-			}
-			"R" => {
-				for _ in 0..distance {
-					current_pos.right();
-					current_distance_travelled += 1;
-
-					match paths.get(&current_pos) {
-						Some(&(distance, _)) => match intersections.get_mut(&current_pos) {
-							Some(_) => (),
-							None => {
-								intersections.insert(
-									current_pos,
-									(
-										distance + current_distance_travelled,
-										manhattan_distance(&Pos::default(), &current_pos),
-									),
-								);
-							}
-						},
-						None => (),
-					}
-				}
-			}
-			"D" => {
-				for _ in 0..distance {
-					current_pos.down();
-					current_distance_travelled += 1;
-
-					match paths.get(&current_pos) {
-						Some(&(distance, _)) => match intersections.get_mut(&current_pos) {
-							Some(_) => (),
-							None => {
-								intersections.insert(
-									current_pos,
-									(
-										distance + current_distance_travelled,
-										manhattan_distance(&Pos::default(), &current_pos),
-									),
-								);
-							}
-						},
-						None => (),
-					}
-				}
-			}
-			"L" => {
-				for _ in 0..distance {
-					current_pos.left();
-					current_distance_travelled += 1;
-
-					match paths.get(&current_pos) {
-						Some(&(distance, _)) => match intersections.get_mut(&current_pos) {
-							Some(_) => (),
-							None => {
-								intersections.insert(
-									current_pos,
-									(
-										distance + current_distance_travelled,
-										manhattan_distance(&Pos::default(), &current_pos),
-									),
-								);
-							}
-						},
-						None => (),
-					}
-				}
-			}
-			_ => panic!("Invalid direction"),
-		}
-	}
-
-	let intersections: Vec<(Pos, i64, i64)> = intersections
-		.iter()
-		.map(|(pos, &(distance, mh_distance))| (pos.clone(), distance, mh_distance))
-		.collect();
-
-	if part_two {
-		intersections
-			.iter()
-			.cloned()
-			.fold(std::i64::MAX, |previous, (_, distance, _)| {
-				match distance.cmp(&previous) {
-					Ordering::Equal => previous,
-					Ordering::Greater => previous,
-					Ordering::Less => distance,
-				}
-			})
-	} else {
-		intersections
-			.iter()
-			.cloned()
-			.fold(
-				std::i64::MAX,
-				|previous, (_, _, mh_distance)| match mh_distance.cmp(&previous) {
-					Ordering::Equal => previous,
-					Ordering::Greater => previous,
-					Ordering::Less => mh_distance,
+		let (next_location, direction) = match direction {
+			b'U' => (
+				Point {
+					x: current_location.x,
+					y: current_location.y + distance,
 				},
-			)
+				Direction::Vertical,
+			),
+			b'R' => (
+				Point {
+					x: current_location.x + distance,
+					y: current_location.y,
+				},
+				Direction::Horizontal,
+			),
+			b'D' => (
+				Point {
+					x: current_location.x,
+					y: current_location.y - distance,
+				},
+				Direction::Vertical,
+			),
+			b'L' => (
+				Point {
+					x: current_location.x - distance,
+					y: current_location.y,
+				},
+				Direction::Horizontal,
+			),
+			_ => panic!("Invalid direction"),
+		};
+		path.push(Line {
+			direction,
+			start: current_location,
+			end: next_location,
+		});
+		current_location = next_location;
 	}
+	path
+}
+
+fn find_intersections(first_path: &[Line], second_path: &[Line]) -> Vec<Point> {
+	let mut intersections = Vec::new();
+	for first_path_line in first_path {
+		for second_path_line in second_path {
+			if let Some(intersection_point) = find_intersection(first_path_line, second_path_line) {
+				intersections.push(intersection_point);
+			}
+		}
+	}
+	intersections
+}
+
+fn find_intersections_with_distance(
+	first_path: &[Line],
+	second_path: &[Line],
+) -> Vec<(Point, i64)> {
+	let mut intersections = Vec::new();
+	let mut first_path_distance = 0;
+	for first_line in first_path {
+		let mut second_path_distance = 0;
+		for second_line in second_path {
+			if let Some(intersection_point) = find_intersection(first_line, second_line) {
+				// Total distance travelled by both lines so far plus distance to intersection
+				// from the "ends" of those lines
+				let total_distance = first_path_distance
+					+ second_path_distance
+					+ manhattan_distance(&first_line.start, &intersection_point)
+					+ manhattan_distance(&second_line.start, &intersection_point);
+				intersections.push((intersection_point, total_distance));
+			}
+			second_path_distance += manhattan_distance(&second_line.start, &second_line.end);
+		}
+		first_path_distance += manhattan_distance(&first_line.start, &first_line.end);
+	}
+	intersections
+}
+
+fn find_intersection(first_line: &Line, second_line: &Line) -> Option<Point> {
+	if first_line.direction == second_line.direction {
+		return None;
+	}
+
+	if first_line.direction == Direction::Horizontal {
+		let min_x = cmp::min(first_line.start.x, first_line.end.x);
+		let max_x = cmp::max(first_line.start.x, first_line.end.x);
+		let min_y = cmp::min(second_line.start.y, second_line.end.y);
+		let max_y = cmp::max(second_line.start.y, second_line.end.y);
+		if (min_x..=max_x).contains(&second_line.start.x)
+			&& (min_y..=max_y).contains(&first_line.start.y)
+		{
+			Some(Point {
+				x: second_line.start.x,
+				y: first_line.start.y,
+			})
+		} else {
+			None
+		}
+	} else {
+		let min_x = cmp::min(second_line.start.x, second_line.end.x);
+		let max_x = cmp::max(second_line.start.x, second_line.end.x);
+		let min_y = cmp::min(first_line.start.y, first_line.end.y);
+		let max_y = cmp::max(first_line.start.y, first_line.end.y);
+		if (min_x..=max_x).contains(&first_line.start.x)
+			&& (min_y..=max_y).contains(&second_line.start.y)
+		{
+			Some(Point {
+				x: first_line.start.x,
+				y: second_line.start.y,
+			})
+		} else {
+			None
+		}
+	}
+}
+
+fn manhattan_distance(first_point: &Point, second_point: &Point) -> i64 {
+	(first_point.x - second_point.x).abs() + (first_point.y - second_point.y).abs()
+}
+
+fn manhattan_distance_from_origin(point: &Point) -> i64 {
+	manhattan_distance(point, &Point { x: 0, y: 0 })
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use test::Bencher;
 
 	#[test]
 	fn part_one_test_cases() {
-		assert_eq!(
-			calculate_distance(
-				&vec!["R75", "D30", "R83", "U83", "L12", "D49", "R71", "U7", "L72"],
-				&vec!["U62", "R66", "U55", "R34", "D71", "R55", "D58", "R83"],
-				false
-			),
-			159
-		);
-		assert_eq!(
-			calculate_distance(
-				&vec!["R98", "U47", "R26", "D63", "R33", "U87", "L62", "D20", "R33", "U53", "R51"],
-				&vec!["U98", "R91", "D20", "R16", "D67", "R40", "U7", "R15", "U6", "R7"],
-				false
-			),
-			135
-		);
+		let input = include_str!("input.test1.txt");
+		let input2 = include_str!("input.test2.txt");
+		let input3 = include_str!("input.test3.txt");
+		let solver = Day3Solver {};
+		assert_eq!(solver.solve_part_one(input), SolverResult::Num(6));
+		assert_eq!(solver.solve_part_one(input2), SolverResult::Num(159));
+		assert_eq!(solver.solve_part_one(input3), SolverResult::Num(135));
 	}
 
 	#[test]
 	fn part_two_test_cases() {
-		assert_eq!(
-			calculate_distance(
-				&vec!["R75", "D30", "R83", "U83", "L12", "D49", "R71", "U7", "L72"],
-				&vec!["U62", "R66", "U55", "R34", "D71", "R55", "D58", "R83"],
-				true
-			),
-			610
-		);
-		assert_eq!(
-			calculate_distance(
-				&vec!["R98", "U47", "R26", "D63", "R33", "U87", "L62", "D20", "R33", "U53", "R51"],
-				&vec!["U98", "R91", "D20", "R16", "D67", "R40", "U7", "R15", "U6", "R7"],
-				true
-			),
-			410
-		);
+		let input = include_str!("input.test1.txt");
+		let input2 = include_str!("input.test2.txt");
+		let input3 = include_str!("input.test3.txt");
+		let solver = Day3Solver {};
+		assert_eq!(solver.solve_part_two(input), SolverResult::Num(30));
+		assert_eq!(solver.solve_part_two(input2), SolverResult::Num(610));
+		assert_eq!(solver.solve_part_two(input3), SolverResult::Num(410));
 	}
 
-	#[test]
-	fn mh_distance_test() {
-		assert_eq!(
-			manhattan_distance(&Pos { x: 0, y: 0 }, &Pos { x: -7, y: 10 }),
-			17
-		);
-		assert_eq!(
-			manhattan_distance(&Pos { x: -75, y: 18 }, &Pos { x: -38, y: -17 }),
-			72
-		);
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		let solver = Day3Solver {};
+		bencher.iter(|| solver.solve_part_one(input));
+	}
+
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = include_str!("input.txt");
+		let solver = Day3Solver {};
+		bencher.iter(|| solver.solve_part_two(input));
 	}
 }
