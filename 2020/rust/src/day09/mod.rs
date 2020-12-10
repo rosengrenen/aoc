@@ -58,25 +58,17 @@ fn has_sum(list: &[i64], target: i64) -> bool {
 fn find_contiguous_sum(list: &[i64], target: i64) -> &[i64] {
 	let mut lower_index = 0;
 	let mut upper_index = 1;
-	let mut partial_sums = Vec::with_capacity(list.len());
-	partial_sums.push(list[0]);
+	let mut sum = list[lower_index] + list[upper_index];
 	while upper_index < list.len() {
-		if upper_index == partial_sums.len() {
-			partial_sums.push(partial_sums[partial_sums.len() - 1] + list[upper_index]);
-		}
-		let current_range = &list[lower_index..=upper_index];
-		let sum: i64 = partial_sums[upper_index] - partial_sums[lower_index];
 		match sum.cmp(&target) {
-			Ordering::Equal => return current_range,
+			Ordering::Equal => return &list[lower_index..=upper_index],
 			Ordering::Greater => {
-				if upper_index - lower_index == 1 {
-					upper_index += 1;
-				} else {
-					lower_index += 1;
-				}
+				sum -= list[lower_index];
+				lower_index += 1;
 			}
 			Ordering::Less => {
 				upper_index += 1;
+				sum += list[upper_index];
 			}
 		};
 	}
