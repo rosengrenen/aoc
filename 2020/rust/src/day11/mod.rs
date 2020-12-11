@@ -5,24 +5,16 @@ pub struct Day11Solver;
 impl Solver for Day11Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
 		let mut seat_layout = parse_seat_layout(input);
-		loop {
-			if let Some(new_seat_layout) = simulate_simple_behaviour(&seat_layout) {
-				seat_layout = new_seat_layout;
-			} else {
-				break;
-			}
+		while let Some(new_seat_layout) = simulate_behaviour(&seat_layout, 4, 1) {
+			seat_layout = new_seat_layout;
 		}
 		seat_layout.occupied_seats()
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
 		let mut seat_layout = parse_seat_layout(input);
-		loop {
-			if let Some(new_seat_layout) = simulate_advanced_behaviour(&seat_layout) {
-				seat_layout = new_seat_layout;
-			} else {
-				break;
-			}
+		while let Some(new_seat_layout) = simulate_behaviour(&seat_layout, 5, std::i64::MAX) {
+			seat_layout = new_seat_layout;
 		}
 		seat_layout.occupied_seats()
 	}
@@ -89,13 +81,19 @@ fn parse_seat_layout(input: &str) -> SeatLayout {
 	SeatLayout { seats }
 }
 
-fn simulate_simple_behaviour(seat_layout: &SeatLayout) -> Option<SeatLayout> {
+fn simulate_behaviour(
+	seat_layout: &SeatLayout,
+	toleration: i64,
+	vision_range: i64,
+) -> Option<SeatLayout> {
 	let mut new_seat_layout = seat_layout.clone();
 
 	let mut has_changed = false;
 	for y in 0..seat_layout.seats.len() as isize {
 		for x in 0..seat_layout.seats[y as usize].len() as isize {
-			if let Some(new_seat_state) = calc_new_seat_state_simple(seat_layout, x, y) {
+			if let Some(new_seat_state) =
+				calc_new_seat_state(seat_layout, x, y, toleration, vision_range)
+			{
 				new_seat_layout.set_seat(x, y, new_seat_state);
 				has_changed = true;
 			}
@@ -109,56 +107,13 @@ fn simulate_simple_behaviour(seat_layout: &SeatLayout) -> Option<SeatLayout> {
 	}
 }
 
-fn calc_new_seat_state_simple(seat_layout: &SeatLayout, x: isize, y: isize) -> Option<Seat> {
-	if seat_layout.get_seat(x, y) == Some(Seat::Floor) {
-		return None;
-	}
-
-	let mut occupied_seats_around = 0;
-	for dx in -1..=1 {
-		for dy in -1..=1 {
-			if dx == 0 && dy == 0 {
-				continue;
-			}
-
-			if seat_layout.get_seat(x + dx, y + dy) == Some(Seat::Occupied) {
-				occupied_seats_around += 1;
-			}
-		}
-	}
-
-	if occupied_seats_around == 0 && seat_layout.get_seat(x, y) == Some(Seat::Empty) {
-		return Some(Seat::Occupied);
-	}
-
-	if occupied_seats_around >= 4 && seat_layout.get_seat(x, y) == Some(Seat::Occupied) {
-		return Some(Seat::Empty);
-	}
-
-	None
-}
-
-fn simulate_advanced_behaviour(seat_layout: &SeatLayout) -> Option<SeatLayout> {
-	let mut new_seat_layout = seat_layout.clone();
-
-	let mut has_changed = false;
-	for y in 0..seat_layout.seats.len() as isize {
-		for x in 0..seat_layout.seats[y as usize].len() as isize {
-			if let Some(new_seat_state) = calc_new_seat_state_advanced(seat_layout, x, y) {
-				new_seat_layout.set_seat(x, y, new_seat_state);
-				has_changed = true;
-			}
-		}
-	}
-
-	if has_changed {
-		Some(new_seat_layout)
-	} else {
-		None
-	}
-}
-
-fn calc_new_seat_state_advanced(seat_layout: &SeatLayout, x: isize, y: isize) -> Option<Seat> {
+fn calc_new_seat_state(
+	seat_layout: &SeatLayout,
+	x: isize,
+	y: isize,
+	toleration: i64,
+	vision_range: i64,
+) -> Option<Seat> {
 	if seat_layout.get_seat(x, y) == Some(Seat::Floor) {
 		return None;
 	}
@@ -179,8 +134,11 @@ fn calc_new_seat_state_advanced(seat_layout: &SeatLayout, x: isize, y: isize) ->
 					} else if seat == Seat::Empty {
 						break;
 					}
-					iteration += 1;
 				} else {
+					break;
+				}
+				iteration += 1;
+				if iteration > vision_range as isize {
 					break;
 				}
 			}
@@ -191,7 +149,7 @@ fn calc_new_seat_state_advanced(seat_layout: &SeatLayout, x: isize, y: isize) ->
 		return Some(Seat::Occupied);
 	}
 
-	if occupied_seats_around >= 5 && seat_layout.get_seat(x, y) == Some(Seat::Occupied) {
+	if occupied_seats_around >= toleration && seat_layout.get_seat(x, y) == Some(Seat::Occupied) {
 		return Some(Seat::Empty);
 	}
 
