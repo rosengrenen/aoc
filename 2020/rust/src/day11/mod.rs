@@ -107,6 +107,16 @@ fn simulate_behaviour(
 	}
 }
 
+static DIRECTIONS: [(isize, isize); 8] = [
+	(0, 1),
+	(1, 1),
+	(1, 0),
+	(1, -1),
+	(0, -1),
+	(-1, -1),
+	(-1, 0),
+	(-1, 1),
+];
 fn calc_new_seat_state(
 	seat_layout: &SeatLayout,
 	x: isize,
@@ -119,28 +129,22 @@ fn calc_new_seat_state(
 	}
 
 	let mut occupied_seats_around = 0;
-	for dx in -1..=1 {
-		for dy in -1..=1 {
-			if dx == 0 && dy == 0 {
-				continue;
+	for &(dx, dy) in DIRECTIONS.iter() {
+		let mut iteration = 1;
+		loop {
+			if let Some(seat) = seat_layout.get_seat(x + iteration * dx, y + iteration * dy) {
+				if seat == Seat::Occupied {
+					occupied_seats_around += 1;
+					break;
+				} else if seat == Seat::Empty {
+					break;
+				}
+			} else {
+				break;
 			}
-
-			let mut iteration = 1;
-			loop {
-				if let Some(seat) = seat_layout.get_seat(x + iteration * dx, y + iteration * dy) {
-					if seat == Seat::Occupied {
-						occupied_seats_around += 1;
-						break;
-					} else if seat == Seat::Empty {
-						break;
-					}
-				} else {
-					break;
-				}
-				iteration += 1;
-				if iteration > vision_range as isize {
-					break;
-				}
+			iteration += 1;
+			if iteration > vision_range as isize {
+				break;
 			}
 		}
 	}
