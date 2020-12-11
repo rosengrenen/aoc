@@ -112,8 +112,8 @@ mod tests {
 	#[test]
 	fn part_one_test_cases() {
 		let input = include_str!("input.test1.txt");
-		let solver = Day2Solver {};
-		assert_eq!(solver.solve_part_one(input), SolverResult::Num(3500));
+		let mut program = parse_program(input);
+		assert_eq!(program.run(), 3500);
 	}
 
 	#[bench]
