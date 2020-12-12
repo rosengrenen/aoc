@@ -5,81 +5,86 @@ pub struct Day12Solver;
 impl Solver for Day12Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
 		let instructions = parse_instructions(input);
-		let mut facing = (1, 0);
-		let mut position = (0, 0);
-		for (instruction, value) in instructions.iter() {
-			match instruction {
-				b'N' => position.1 += value,
-				b'E' => position.0 += value,
-				b'S' => position.1 -= value,
-				b'W' => position.0 -= value,
-				b'R' => {
-					for _ in 0..(value / 90) {
-						let tmp = facing.1;
-						facing.1 = -facing.0;
-						facing.0 = tmp;
-					}
-				}
-				b'L' => {
-					for _ in 0..(value / 90) * 3 {
-						let tmp = facing.1;
-						facing.1 = -facing.0;
-						facing.0 = tmp;
-					}
-				}
+		let mut facing = Point { x: 1, y: 0 };
+		let mut position = Point { x: 0, y: 0 };
+		for &Instruction { action, value } in instructions.iter() {
+			match action {
+				b'N' => position.y += value,
+				b'E' => position.x += value,
+				b'S' => position.y -= value,
+				b'W' => position.x -= value,
+				b'R' => rotate_clockwise(&mut facing, value),
+				b'L' => rotate_anticlockwise(&mut facing, value),
 				b'F' => {
-					position.0 += facing.0 * value;
-					position.1 += facing.1 * value
+					position.x += facing.x * value;
+					position.y += facing.y * value
 				}
-				_ => panic!(),
+				_ => panic!("Invalid action"),
 			}
 		}
-		position.0.abs() + position.1.abs()
+		position.x.abs() + position.y.abs()
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
 		let instructions = parse_instructions(input);
-		let mut waypoint = (10, 1);
-		let mut position = (0, 0);
-		for (instruction, value) in instructions.iter() {
-			match instruction {
-				b'N' => waypoint.1 += value,
-				b'E' => waypoint.0 += value,
-				b'S' => waypoint.1 -= value,
-				b'W' => waypoint.0 -= value,
-				b'R' => {
-					for _ in 0..(value / 90) {
-						let tmp = waypoint.1;
-						waypoint.1 = -waypoint.0;
-						waypoint.0 = tmp;
-					}
-				}
-				b'L' => {
-					for _ in 0..(value / 90) * 3 {
-						let tmp = waypoint.1;
-						waypoint.1 = -waypoint.0;
-						waypoint.0 = tmp;
-					}
-				}
+		let mut waypoint = Point { x: 10, y: 1 };
+		let mut position = Point { x: 0, y: 0 };
+		for &Instruction { action, value } in instructions.iter() {
+			match action {
+				b'N' => waypoint.y += value,
+				b'E' => waypoint.x += value,
+				b'S' => waypoint.y -= value,
+				b'W' => waypoint.x -= value,
+				b'R' => rotate_clockwise(&mut waypoint, value),
+				b'L' => rotate_anticlockwise(&mut waypoint, value),
 				b'F' => {
-					position.0 += waypoint.0 * value;
-					position.1 += waypoint.1 * value
+					position.x += waypoint.x * value;
+					position.y += waypoint.y * value
 				}
-				_ => panic!(),
+				_ => panic!("Invalid action"),
 			}
 		}
-		position.0.abs() + position.1.abs()
+		position.x.abs() + position.y.abs()
 	}
 }
 
-fn parse_instructions(input: &str) -> Vec<(u8, i64)> {
+struct Instruction {
+	action: u8,
+	value: i64,
+}
+
+fn parse_instructions(input: &str) -> Vec<Instruction> {
 	input
 		.lines()
 		.map(|line| {
-			let (instruction, value) = line.split_at(1);
-			(instruction.as_bytes()[0], value.parse().unwrap())
+			let (action, value) = line.split_at(1);
+			Instruction {
+				action: action.as_bytes()[0],
+				value: value.parse().unwrap(),
+			}
 		})
 		.collect()
+}
+
+struct Point {
+	x: i64,
+	y: i64,
+}
+
+fn rotate_clockwise(point: &mut Point, degrees: i64) {
+	for _ in 0..(degrees / 90) {
+		let tmp = point.x;
+		point.x = point.y;
+		point.y = -tmp;
+	}
+}
+
+fn rotate_anticlockwise(point: &mut Point, degrees: i64) {
+	for _ in 0..(degrees / 90) {
+		let tmp = point.x;
+		point.x = -point.y;
+		point.y = tmp;
+	}
 }
 
 #[cfg(test)]
