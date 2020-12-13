@@ -1,5 +1,4 @@
 use crate::lib::Solver;
-use num::integer::lcm;
 
 pub struct Day13Solver;
 
@@ -31,21 +30,19 @@ impl Solver for Day13Solver {
 		// Have to subtract with index since the list is sorted and 0th index is
 		// not necessarily first anymore
 		let mut t = first_avail - buses[0].index;
+		let mut bus_index = 1;
+		let mut step = buses[0].interval;
 		loop {
-			let mut found = true;
-			let mut smallest_step_forward = buses[0].interval;
-			for &Bus { interval, index } in buses.iter().skip(1) {
-				if (t + index) % interval == 0 {
-					smallest_step_forward = lcm(smallest_step_forward, interval);
-				} else {
-					found = false;
-					break;
+			let bus = buses[bus_index];
+			if (t + bus.index) % bus.interval == 0 {
+				step *= bus.interval;
+				bus_index += 1;
+				if bus_index == buses.len() {
+					return t;
 				}
 			}
-			if found {
-				return t;
-			}
-			t += smallest_step_forward;
+
+			t += step;
 		}
 	}
 }
