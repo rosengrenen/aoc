@@ -5,105 +5,71 @@ pub struct Day13Solver;
 
 impl Solver for Day13Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let (early_off, buses) = parse(input);
-		let mut bus_number = buses[0];
-		let mut earliest = std::i64::MAX;
-		for bus in buses {
-			let a = early_off / bus;
-			let b = early_off - a * bus;
-			let mut c = 0;
-			while c < early_off {
-				c += bus;
+		let (first_poss, buses) = parse_buses(input);
+		// Here index is used as the wait time for the first bus of the specific interval to depart
+		let mut first_avail = Bus {
+			index: std::i64::MAX,
+			..buses[0]
+		};
+		for Bus { interval, .. } in buses {
+			let wait_time = ((first_poss / interval) + 1) * interval - first_poss;
+			if wait_time < first_avail.index {
+				first_avail = Bus {
+					interval,
+					index: wait_time,
+				};
 			}
-			let d = c - early_off;
-			if d < earliest {
-				earliest = d;
-				bus_number = bus;
-			}
-			println!("{}", d);
 		}
-		earliest * bus_number
+
+		first_avail.interval * first_avail.index
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let (early_off, buses) = parse2(input);
-		println!("{:?}", buses);
-		println!(
-			"{} {} {} {}",
-			early_off,
-			early_off / buses[0].0,
-			((early_off / buses[0].0) + 1) * (buses[0].0),
-			0
-		);
-		// 100000000000000
-		// 5795080000
-		let mut cur_start_time = ((early_off / buses[0].0) + 1) * (buses[0].0);
-		// let mut cur_start_time = ((100000000000000 / buses[0].0) + 1) * (buses[0].0);
-
-		let mut buses_sorted = buses.clone();
-		// buses_sorted.sort_by(|left, right| right.0.cmp(&left.0));
-		println!("{:?}", buses_sorted);
-		// buses_sorted.sort_by(|left, right| right.0.cmp(&left.0));
-		println!("{:?}", buses_sorted);
-		let mut cur_start_time = ((early_off / buses_sorted[0].0) + 1) * (buses_sorted[0].0);
+		let (first_poss, mut buses) = parse_buses(input);
+		buses.sort_by(|left, right| right.interval.cmp(&left.interval));
+		let first_avail = (first_poss / buses[0].interval + 1) * buses[0].interval;
+		// Have to subtract with index since the list is sorted and 0th index is
+		// not necessarily first anymore
+		let mut t = first_avail - buses[0].index;
 		loop {
-			// if cur_start_time % 1000 == 0 {
-			// 	println!("{}", cur_start_time);
-			// }
 			let mut found = true;
-			let mut smallest_step_forward = buses_sorted[0].0;
-			let mut matched = 0;
-			for &(time, index) in buses_sorted.iter().skip(1) {
-				if (cur_start_time + index) % time != 0 {
-					// println!("break {}", index);
-					// if time > smallest_step_forward {
-					// 	smallest_step_forward = ((time / buses[0].0) + 1) * (buses[0].0);
-					// }
-					found = false;
-
-				// break;
+			let mut smallest_step_forward = buses[0].interval;
+			for &Bus { interval, index } in buses.iter().skip(1) {
+				if (t + index) % interval == 0 {
+					smallest_step_forward = lcm(smallest_step_forward, interval);
 				} else {
-					matched += 1;
-					// println!("{}", smallest_step_forward);
-					smallest_step_forward = lcm(smallest_step_forward, time);
+					found = false;
+					break;
 				}
 			}
 			if found {
-				return cur_start_time;
+				return t;
 			}
-			// println!("{}", smallest_step_forward);
-			println!("{}/{}", matched, buses.len());
-			cur_start_time += smallest_step_forward;
-			// cur_start_time += buses_sorted[0].0;
+			t += smallest_step_forward;
 		}
-		// let current = buses.iter().map(|(bus,index)|{
-
-		// }).collect()
 	}
 }
 
-fn parse(input: &str) -> (i64, Vec<i64>) {
-	let lines: Vec<&str> = input.lines().collect();
-	(
-		lines[0].parse().unwrap(),
-		lines[1]
-			.split(',')
-			.filter(|s| s != &"x")
-			.map(|s| s.parse().unwrap())
-			.collect(),
-	)
+#[derive(Clone, Copy, Debug)]
+struct Bus {
+	interval: i64,
+	index: i64,
 }
 
-fn parse2(input: &str) -> (i64, Vec<(i64, i64)>) {
+fn parse_buses(input: &str) -> (i64, Vec<Bus>) {
 	let lines: Vec<&str> = input.lines().collect();
 
-	let mut v = Vec::new();
+	let first_poss = lines[0].parse().unwrap();
+	let mut bus_intervals = Vec::new();
 	for (i, s) in lines[1].split(',').enumerate() {
 		if s != "x" {
-			v.push((s.parse().unwrap(), i as i64))
+			bus_intervals.push(Bus {
+				interval: s.parse().unwrap(),
+				index: i as i64,
+			})
 		}
 	}
-	(lines[0].parse().unwrap(), v)
+	(first_poss, bus_intervals)
 }
 
 #[cfg(test)]
@@ -136,9 +102,9 @@ mod tests {
 	}
 
 	#[bench]
-	fn bench_parse(bencher: &mut Bencher) {
+	fn bench_parse_buses(bencher: &mut Bencher) {
 		let input = include_str!("input.txt");
-		bencher.iter(|| parse(input));
+		bencher.iter(|| parse_buses(input));
 	}
 
 	#[bench]
