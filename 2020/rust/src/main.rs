@@ -3,8 +3,8 @@
 
 extern crate test;
 
+use num_format::{Locale, ToFormattedString};
 use std::env;
-use std::fs::read_to_string;
 use std::time::Instant;
 
 mod day01;
@@ -35,76 +35,97 @@ mod day13;
 use day13::Day13Solver;
 
 mod lib;
-use lib::Solver;
+use lib::{fetch_input, Solver};
 
-pub fn read_file(filename: &str) -> String {
-	read_to_string(filename).unwrap()
-}
-
-fn get_solver(day: u32) -> (Box<dyn Solver>, String) {
-	let file = format!("src/day{:02}/input.txt", day);
-	let solver: Box<dyn Solver> = match day {
-		1 => Box::new(Day1Solver {}),
-		2 => Box::new(Day2Solver {}),
-		3 => Box::new(Day3Solver {}),
-		4 => Box::new(Day4Solver {}),
-		5 => Box::new(Day5Solver {}),
-		6 => Box::new(Day6Solver {}),
-		7 => Box::new(Day7Solver {}),
-		8 => Box::new(Day8Solver {}),
-		9 => Box::new(Day9Solver {}),
-		10 => Box::new(Day10Solver {}),
-		11 => Box::new(Day11Solver {}),
-		12 => Box::new(Day12Solver {}),
-		13 => Box::new(Day13Solver {}),
-		n => panic!("The solver for day {} has not been implemented", n),
-	};
-	(solver, file)
-}
-
-fn main() {
-	let args: Vec<String> = env::args().collect();
-	if args.len() <= 1 {
-		panic!("Must input number as first argument");
+fn get_solver(day: i64) -> Option<Box<dyn Solver>> {
+	match day {
+		1 => Some(Box::new(Day1Solver {})),
+		2 => Some(Box::new(Day2Solver {})),
+		3 => Some(Box::new(Day3Solver {})),
+		4 => Some(Box::new(Day4Solver {})),
+		5 => Some(Box::new(Day5Solver {})),
+		6 => Some(Box::new(Day6Solver {})),
+		7 => Some(Box::new(Day7Solver {})),
+		8 => Some(Box::new(Day8Solver {})),
+		9 => Some(Box::new(Day9Solver {})),
+		10 => Some(Box::new(Day10Solver {})),
+		11 => Some(Box::new(Day11Solver {})),
+		12 => Some(Box::new(Day12Solver {})),
+		13 => Some(Box::new(Day13Solver {})),
+		_ => None,
 	}
-	let day: u32 = args[1].parse().expect("Not a number");
-	let part = if args.len() >= 3 {
-		args[2].parse::<i64>().map_or_else(|_| None, Some)
+}
+
+fn solve_day(day: i64, part: Option<i64>) {
+	let solver = if let Some(solver) = get_solver(day) {
+		solver
 	} else {
-		None
+		return;
 	};
-	let (solver, file) = get_solver(day);
-	let mut total_time = 0.0;
-
-	let read_input_now = Instant::now();
-	let input = read_file(&file);
-	let read_input_time = read_input_now.elapsed().as_secs_f32();
-	println!("Day {} read input time: {}", day, read_input_time);
-
+	print_separator();
+	let input = fetch_input(day);
 	if part.is_none() || part.unwrap() == 1 {
 		let part1_now = Instant::now();
 		let part1_answer = solver.solve_part_one(&input);
-		let part1_time = part1_now.elapsed().as_secs_f32();
-		println!("Day {} (part 1) answer: {}", day, part1_answer);
-		println!("Day {} (part 1) time: {}", day, part1_time);
-		total_time += part1_time;
+		let part1_time = part1_now.elapsed().as_nanos() as i64;
+		print_answer(day, 1, part1_time, part1_answer)
 	}
 
 	if part.is_none() || part.unwrap() == 2 {
 		let part2_now = Instant::now();
 		let part2_answer = solver.solve_part_two(&input);
-		let part2_time = part2_now.elapsed().as_secs_f32();
-		println!("Day {} (part 2) answer: {}", day, part2_answer);
-		println!("Day {} (part 2) time: {}", day, part2_time);
-		total_time += part2_time;
+		let part2_time = part2_now.elapsed().as_nanos() as i64;
+		print_answer(day, 2, part2_time, part2_answer)
 	}
+}
 
-	if part.is_none() {
-		println!(
-			"Day {} total time: {}/{}",
-			day,
-			total_time,
-			total_time + read_input_time
-		);
+fn print_header() {
+	print_top_border();
+	println!("| Task          | {:<26} | {:<20} |", "Time (ns)", "Answer");
+}
+
+fn print_separator() {
+	println!(">{:-<15}+{:-<28}+{:-<22}<", "", "", "");
+}
+
+fn print_top_border() {
+	println!("/{:-<15}v{:-<28}v{:-<22}\\", "", "", "");
+}
+
+fn print_bottom_border() {
+	println!("\\{:-<15}^{:-<28}^{:-<22}/", "", "", "");
+}
+
+fn print_answer(day: i64, part: i64, time: i64, answer: i64) {
+	println!(
+		"| Day {:02} part {} | {:<26} | {:<20} |",
+		day,
+		part,
+		time.to_formatted_string(&Locale::en),
+		answer
+	);
+}
+
+fn main() {
+	let args: Vec<String> = env::args().collect();
+	if args.len() >= 2 {
+		let day: i64 = args[1].parse().expect("Not a number");
+		let part = if args.len() >= 3 {
+			args[2].parse::<i64>().map_or_else(|_| None, Some)
+		} else {
+			None
+		};
+		if part.is_some() && part.unwrap() != 1 && part.unwrap() != 2 {
+			panic!("Part can only be 1 or 2");
+		}
+		print_header();
+		solve_day(day, part);
+		print_bottom_border();
+	} else {
+		print_header();
+		for day in 0..=25 {
+			solve_day(day, None);
+		}
+		print_bottom_border();
 	}
 }

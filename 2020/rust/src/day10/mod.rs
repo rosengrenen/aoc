@@ -92,6 +92,7 @@ fn parse_adapters(input: &str) -> Vec<i64> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::fetch_input;
 	use test::Bencher;
 
 	#[test]
@@ -114,21 +115,21 @@ mod tests {
 
 	#[bench]
 	fn bench_parse_adapters(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		bencher.iter(|| parse_adapters(input));
+		let input = fetch_input(10);
+		bencher.iter(|| parse_adapters(&input));
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(10);
 		let solver = Day10Solver {};
-		bencher.iter(|| solver.solve_part_one(input));
+		bencher.iter(|| solver.solve_part_one(&input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(10);
 		let solver = Day10Solver {};
-		bencher.iter(|| solver.solve_part_two(input));
+		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

@@ -95,6 +95,7 @@ fn run_program(program: &[Instruction]) -> (i64, bool) {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::fetch_input;
 	use test::Bencher;
 
 	#[test]
@@ -113,21 +114,21 @@ mod tests {
 
 	#[bench]
 	fn bench_parse_instructions(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		bencher.iter(|| parse_program(input));
+		let input = fetch_input(8);
+		bencher.iter(|| parse_program(&input));
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(8);
 		let solver = Day8Solver {};
-		bencher.iter(|| solver.solve_part_one(input));
+		bencher.iter(|| solver.solve_part_one(&input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(8);
 		let solver = Day8Solver {};
-		bencher.iter(|| solver.solve_part_two(input));
+		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

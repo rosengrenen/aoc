@@ -75,6 +75,7 @@ fn parse_buses(input: &str) -> (i64, Vec<Bus>) {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::fetch_input;
 	use test::Bencher;
 
 	#[test]
@@ -103,21 +104,21 @@ mod tests {
 
 	#[bench]
 	fn bench_parse_buses(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		bencher.iter(|| parse_buses(input));
+		let input = fetch_input(13);
+		bencher.iter(|| parse_buses(&input));
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(13);
 		let solver = Day13Solver {};
-		bencher.iter(|| solver.solve_part_one(input));
+		bencher.iter(|| solver.solve_part_one(&input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(13);
 		let solver = Day13Solver {};
-		bencher.iter(|| solver.solve_part_two(input));
+		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

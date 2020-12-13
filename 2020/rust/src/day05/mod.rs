@@ -37,6 +37,7 @@ fn get_seat_id(partition_data: &str) -> i64 {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::fetch_input;
 	use test::Bencher;
 
 	#[test]
@@ -49,15 +50,15 @@ mod tests {
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(5);
 		let solver = Day5Solver {};
-		bencher.iter(|| solver.solve_part_one(input));
+		bencher.iter(|| solver.solve_part_one(&input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(5);
 		let solver = Day5Solver {};
-		bencher.iter(|| solver.solve_part_two(input));
+		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

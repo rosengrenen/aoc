@@ -79,6 +79,7 @@ fn find_contiguous_sum(list: &[i64], target: i64) -> &[i64] {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::fetch_input;
 	use test::Bencher;
 
 	#[test]
@@ -98,21 +99,21 @@ mod tests {
 
 	#[bench]
 	fn bench_parse_numbers(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
-		bencher.iter(|| parse_numbers(input));
+		let input = fetch_input(9);
+		bencher.iter(|| parse_numbers(&input));
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(9);
 		let solver = Day9Solver {};
-		bencher.iter(|| solver.solve_part_one(input));
+		bencher.iter(|| solver.solve_part_one(&input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(9);
 		let solver = Day9Solver {};
-		bencher.iter(|| solver.solve_part_two(input));
+		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

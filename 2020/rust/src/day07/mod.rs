@@ -107,6 +107,7 @@ fn count_bags_in_bag(parent_to_children_map: &HashMap<&str, Vec<(i64, String)>>,
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::lib::fetch_input;
 	use test::Bencher;
 
 	#[test]
@@ -127,27 +128,27 @@ mod tests {
 
 	#[bench]
 	fn bench_create_child_to_parents_map(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(7);
 		bencher.iter(|| create_child_to_parents_map(&input));
 	}
 
 	#[bench]
 	fn bench_create_parent_to_children_map(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(7);
 		bencher.iter(|| create_parent_to_children_map(&input));
 	}
 
 	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(7);
 		let solver = Day7Solver {};
-		bencher.iter(|| solver.solve_part_one(input));
+		bencher.iter(|| solver.solve_part_one(&input));
 	}
 
 	#[bench]
 	fn bench_part_two(bencher: &mut Bencher) {
-		let input = include_str!("input.txt");
+		let input = fetch_input(7);
 		let solver = Day7Solver {};
-		bencher.iter(|| solver.solve_part_two(input));
+		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }
