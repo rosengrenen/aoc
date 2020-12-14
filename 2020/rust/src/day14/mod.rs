@@ -89,6 +89,7 @@ fn instructions(input: &str) -> Vec<Instruction> {
 		.lines()
 		.map(|line| {
 			if let Some(mask) = line.strip_prefix("mask = ") {
+				// 1=masked, 0=not masked
 				let mut mask_bits = 0;
 				for &c in mask.as_bytes() {
 					mask_bits <<= 1;
@@ -97,6 +98,9 @@ fn instructions(input: &str) -> Vec<Instruction> {
 						_ => (),
 					}
 				}
+				// What the masked bit should be overwritten to, bits outside mask
+				// are just ignored, since they are always used in conjuction with
+				// mask
 				let mut override_bits = 0;
 				for &c in mask.as_bytes() {
 					override_bits <<= 1;
