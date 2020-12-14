@@ -7,7 +7,6 @@ pub trait Solver {
 }
 
 fn input_from_file(day: i64) -> Option<String> {
-	// let input = read_file(&file);
 	if let Ok(input) = read_to_string(format!("src/day{:02}/input.txt", day)) {
 		Some(input)
 	} else {
