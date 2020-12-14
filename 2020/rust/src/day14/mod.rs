@@ -5,13 +5,13 @@ pub struct Day14Solver;
 
 impl Solver for Day14Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let instructions = instructions(input);
+		let instructions = parse_instructions(input);
 		let mut mask = SetMaskArgs::default();
 		let mut mem: HashMap<i64, i64> = HashMap::new();
 		for instruction in instructions.iter() {
-			match instruction {
-				&Instruction::SetMask(mask_args) => mask = mask_args,
-				&Instruction::Write(WriteArgs { address, value }) => {
+			match *instruction {
+				Instruction::SetMask(mask_args) => mask = mask_args,
+				Instruction::Write(WriteArgs { address, value }) => {
 					// First part clears bits that are set by mask and second part
 					// sets mask bits
 					let value = (value & !mask.mask_bits) | mask.override_bits;
@@ -23,13 +23,13 @@ impl Solver for Day14Solver {
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let instructions = instructions(input);
+		let instructions = parse_instructions(input);
 		let mut mask = SetMaskArgs::default();
 		let mut mem: HashMap<i64, i64> = HashMap::new();
 		for instruction in instructions.iter() {
-			match instruction {
-				&Instruction::SetMask(mask_args) => mask = mask_args,
-				&Instruction::Write(WriteArgs { address, value }) => {
+			match *instruction {
+				Instruction::SetMask(mask_args) => mask = mask_args,
+				Instruction::Write(WriteArgs { address, value }) => {
 					// The first part only save only masked bits, since the others are
 					// and need to be initialised to 0's
 					// The second part overwrites 0's with 1's if bitmask is 1
@@ -51,11 +51,15 @@ impl Solver for Day14Solver {
 					for n in 0..2i64.pow(num_floating_bits as u32) {
 						// Make copy of address for each iteration
 						let mut address = address;
-						for i in 0..num_floating_bits {
+						for (i, floating_bit_index) in floating_bit_indices
+							.iter()
+							.enumerate()
+							.take(num_floating_bits)
+						{
 							// Bit is one, since all floating bits in address are intialised
 							// to 0's we only need to upgrade from 0's to 1's
 							if n & 1 << i != 0 {
-								address |= 1 << floating_bit_indices[i];
+								address |= 1 << floating_bit_index;
 							}
 						}
 
@@ -84,7 +88,7 @@ enum Instruction {
 	Write(WriteArgs),
 }
 
-fn instructions(input: &str) -> Vec<Instruction> {
+fn parse_instructions(input: &str) -> Vec<Instruction> {
 	input
 		.lines()
 		.map(|line| {
@@ -104,9 +108,8 @@ fn instructions(input: &str) -> Vec<Instruction> {
 				let mut override_bits = 0;
 				for &c in mask.as_bytes() {
 					override_bits <<= 1;
-					match c {
-						b'1' => override_bits |= 1,
-						_ => (),
+					if c == b'1' {
+						override_bits |= 1
 					}
 				}
 				Instruction::SetMask(SetMaskArgs {
@@ -152,7 +155,7 @@ mod tests {
 	#[bench]
 	fn bench_parse_instructions(bencher: &mut Bencher) {
 		let input = fetch_input(14);
-		bencher.iter(|| instructions(&input));
+		bencher.iter(|| parse_instructions(&input));
 	}
 
 	#[bench]
