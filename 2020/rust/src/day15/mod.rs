@@ -1,5 +1,3 @@
-use hashbrown::HashMap;
-
 use crate::lib::Solver;
 
 pub struct Day15Solver;
@@ -21,30 +19,29 @@ fn parse_numbers(input: &str) -> Vec<i64> {
 }
 
 fn find_nth_van_eck(starting_numbers: &[i64], n: i64) -> i64 {
-	let mut last_pos = HashMap::new();
+	let mut last_pos = vec![0; n as usize];
 	let mut last_num = 0;
-	for (i, &num) in starting_numbers.iter().enumerate() {
-		last_pos.insert(num, i as i64 + 1);
+	for (index, &num) in starting_numbers.iter().enumerate() {
+		last_pos[num as usize] = index as i64 + 1;
 		last_num = num;
 	}
 
-	let mut i = starting_numbers.len() as i64;
-	loop {
+	let mut index = starting_numbers.len() as i64;
+	while index < n {
 		let mut next_num = 0;
-		if let Some(v) = last_pos.get_mut(&last_num) {
-			next_num = i - *v;
-			*v = i;
+		let last_num_pos = last_pos[last_num as usize];
+		if last_num_pos != 0 {
+			next_num = index - last_num_pos;
+			last_pos[last_num as usize] = index;
 		} else {
-			last_pos.insert(last_num, i);
-		}
-
-		if i + 1 == n {
-			return next_num;
+			last_pos[last_num as usize] = index;
 		}
 
 		last_num = next_num;
-		i += 1;
+		index += 1;
 	}
+
+	last_num
 }
 
 #[cfg(test)]
