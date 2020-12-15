@@ -7,75 +7,45 @@ pub struct Day15Solver;
 impl Solver for Day15Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
 		let input = parse_numbers(input);
-		let mut map: HashMap<i64, (i64, Option<i64>)> = HashMap::new();
-		let mut last_num = 0;
-		for (i, &num) in input.iter().enumerate() {
-			map.insert(num, (i as i64 + 1, None));
-			last_num = num;
-		}
-
-		let mut i = input.len() as i64 + 1;
-		loop {
-			let next_num = if let Some(&(prev, prev_prev)) = map.get(&last_num) {
-				if let Some(prev_prev) = prev_prev {
-					prev - prev_prev
-				} else {
-					0
-				}
-			} else {
-				unreachable!();
-			};
-
-			if i == 2020 {
-				return next_num;
-			}
-
-			let entry = map.entry(next_num).or_insert((i, None));
-			*entry = (i, Some(entry.0));
-			last_num = next_num;
-			i += 1;
-		}
+		find_nth_van_eck(&input, 2020)
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
 		let input = parse_numbers(input);
-		let mut map: HashMap<i64, (i64, Option<i64>)> = HashMap::new();
-		let mut last_num = 0;
-		for (i, &num) in input.iter().enumerate() {
-			map.insert(num, (i as i64 + 1, None));
-			last_num = num;
-		}
-
-		let mut i = input.len() as i64 + 1;
-		loop {
-			let next_num = if let Some(&(prev, prev_prev)) = map.get(&last_num) {
-				if let Some(prev_prev) = prev_prev {
-					prev - prev_prev
-				} else {
-					0
-				}
-			} else {
-				unreachable!();
-			};
-
-			if i == 30_000_000 {
-				return next_num;
-			}
-
-			let entry = map.entry(next_num).or_insert((i, None));
-			*entry = (i, Some(entry.0));
-			last_num = next_num;
-			i += 1;
-		}
+		find_nth_van_eck(&input, 30_000_000)
 	}
 }
 
 fn parse_numbers(input: &str) -> Vec<i64> {
-	input
-		.trim()
-		.split(',')
-		.map(|c| c.parse().unwrap())
-		.collect()
+	input.split(',').map(|c| c.parse().unwrap()).collect()
+}
+
+fn find_nth_van_eck(starting_numbers: &[i64], n: i64) -> i64 {
+	let mut last_pos = HashMap::new();
+	let mut last_num = 0;
+	for (i, &num) in starting_numbers.iter().enumerate() {
+		last_pos.insert(num, i as i64 + 1);
+		last_num = num;
+		println!("{}", num);
+	}
+
+	let mut i = starting_numbers.len() as i64;
+	loop {
+		let mut next_num = 0;
+		if let Some(v) = last_pos.get_mut(&last_num) {
+			next_num = i - *v;
+			*v = i;
+		} else {
+			last_pos.insert(last_num, i);
+		}
+
+		if i + 1 == n {
+			return next_num;
+		}
+
+		last_num = next_num;
+		i += 1;
+	}
 }
 
 #[cfg(test)]
@@ -87,6 +57,7 @@ mod tests {
 	#[test]
 	fn part_one_test_cases() {
 		let solver = Day15Solver {};
+		assert_eq!(solver.solve_part_one(&"0,3,6"), 436);
 		assert_eq!(solver.solve_part_one(&"1,3,2"), 1);
 		assert_eq!(solver.solve_part_one(&"2,1,3"), 10);
 		assert_eq!(solver.solve_part_one(&"1,2,3"), 27);

@@ -48,9 +48,9 @@ pub fn fetch_input(day: i64) -> String {
 	if let Some(input) = input_from_file(day) {
 		input
 	} else {
-		let input = input_from_online(day);
+		let input = input_from_online(day).trim().to_owned();
 
-		write(format!("src/day{:02}/input.txt", day), &input.trim()).unwrap();
+		write(format!("src/day{:02}/input.txt", day), &input).unwrap();
 
 		input
 	}
