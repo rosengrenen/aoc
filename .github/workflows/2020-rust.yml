@@ -32,6 +32,8 @@ jobs:
       - name: Run cargo test
         working-directory: 2020/rust
         run: cargo test
+        env:
+          AOC_SESSION: ${{ secrets.AOC_SESSION }}
 
   lints:
     name: Lints

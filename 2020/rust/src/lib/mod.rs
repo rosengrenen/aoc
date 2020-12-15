@@ -1,4 +1,6 @@
+use dotenv::dotenv;
 use reqwest::header::COOKIE;
+use std::env;
 use std::fs::{read_to_string, write};
 
 pub trait Solver {
@@ -15,8 +17,9 @@ fn input_from_file(day: i64) -> Option<String> {
 }
 
 fn input_from_online(day: i64) -> String {
+	dotenv().ok();
+	let session = env::var("AOC_SESSION").unwrap();
 	let endpoint = format!("https://adventofcode.com/2020/day/{}/input", day);
-	let session = include_str!("../../aoc.session");
 	let client = reqwest::blocking::Client::new();
 	match client
 		.get(&endpoint)
