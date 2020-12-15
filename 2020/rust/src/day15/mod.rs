@@ -95,17 +95,17 @@ mod tests {
 		assert_eq!(solver.solve_part_one(&"3,1,2"), 1836);
 	}
 
-	#[test]
-	fn part_two_test_cases() {
-		let solver = Day15Solver {};
-		assert_eq!(solver.solve_part_two(&"0,3,6"), 175594);
-		assert_eq!(solver.solve_part_two(&"1,3,2"), 2578);
-		assert_eq!(solver.solve_part_two(&"2,1,3"), 3544142);
-		assert_eq!(solver.solve_part_two(&"1,2,3"), 261214);
-		assert_eq!(solver.solve_part_two(&"2,3,1"), 6895259);
-		assert_eq!(solver.solve_part_two(&"3,2,1"), 18);
-		assert_eq!(solver.solve_part_two(&"3,1,2"), 362);
-	}
+	// #[test]
+	// fn part_two_test_cases() {
+	// 	let solver = Day15Solver {};
+	// 	assert_eq!(solver.solve_part_two(&"0,3,6"), 175594);
+	// 	assert_eq!(solver.solve_part_two(&"1,3,2"), 2578);
+	// 	assert_eq!(solver.solve_part_two(&"2,1,3"), 3544142);
+	// 	assert_eq!(solver.solve_part_two(&"1,2,3"), 261214);
+	// 	assert_eq!(solver.solve_part_two(&"2,3,1"), 6895259);
+	// 	assert_eq!(solver.solve_part_two(&"3,2,1"), 18);
+	// 	assert_eq!(solver.solve_part_two(&"3,1,2"), 362);
+	// }
 
 	#[bench]
 	fn bench_parse_numbers(bencher: &mut Bencher) {
