@@ -26,7 +26,6 @@ fn find_nth_van_eck(starting_numbers: &[i64], n: i64) -> i64 {
 	for (i, &num) in starting_numbers.iter().enumerate() {
 		last_pos.insert(num, i as i64 + 1);
 		last_num = num;
-		println!("{}", num);
 	}
 
 	let mut i = starting_numbers.len() as i64;
