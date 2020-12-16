@@ -47,7 +47,7 @@ impl Solver for Day16Solver {
 			})
 			.collect();
 
-		let mut index_to_names: HashMap<usize, Vec<String>> = HashMap::new();
+		let mut index_to_names: HashMap<usize, Vec<&str>> = HashMap::new();
 		let ticket_len = data.my_ticket.len();
 		for (name, first_range, second_range) in data.field_rules.iter() {
 			for i in 0..ticket_len {
@@ -62,19 +62,19 @@ impl Solver for Day16Solver {
 				}
 				if matched {
 					let entry = index_to_names.entry(i).or_insert_with(Vec::new);
-					entry.push(name.to_owned());
+					entry.push(name);
 				}
 			}
 		}
 
-		let mut name_to_index: HashMap<String, usize> = HashMap::new();
+		let mut name_to_index: HashMap<&str, usize> = HashMap::new();
 		let mut index_to_names_vec: Vec<_> = index_to_names.iter().collect();
 		index_to_names_vec
 			.sort_by(|(_, left_vec), (_, right_vec)| left_vec.len().cmp(&right_vec.len()));
 		for &(index, names) in index_to_names_vec.iter() {
 			for name in names.iter() {
 				if !name_to_index.contains_key(name) {
-					name_to_index.insert(name.to_owned(), *index);
+					name_to_index.insert(name, *index);
 				}
 			}
 		}
@@ -105,7 +105,7 @@ fn parse_simple(input: &str) -> (Vec<Range>, Vec<i64>) {
 	}
 
 	let mut others_tickets: Vec<i64> = Vec::new();
-	for nums in split.skip(1).next().unwrap().lines().skip(1) {
+	for nums in split.nth(1).unwrap().lines().skip(1) {
 		for num in nums.split(',') {
 			others_tickets.push(num.parse().unwrap());
 		}
@@ -119,8 +119,8 @@ struct Range {
 	max: i64,
 }
 
-struct Data {
-	field_rules: Vec<(String, Range, Range)>,
+struct Data<'a> {
+	field_rules: Vec<(&'a str, Range, Range)>,
 	my_ticket: Vec<i64>,
 	others_tickets: Vec<Vec<i64>>,
 }
@@ -134,7 +134,7 @@ fn parse_advanced(input: &str) -> Data {
 		let (first_min, first_max) = first_range.trim().split_once('-').unwrap();
 		let (second_min, second_max) = second_range.trim().split_once('-').unwrap();
 		field_rules.push((
-			name.to_owned(),
+			name,
 			Range {
 				min: first_min.parse().unwrap(),
 				max: first_max.parse().unwrap(),
@@ -147,15 +147,7 @@ fn parse_advanced(input: &str) -> Data {
 	}
 
 	let mut my_ticket: Vec<i64> = Vec::new();
-	for num in split
-		.next()
-		.unwrap()
-		.lines()
-		.skip(1)
-		.next()
-		.unwrap()
-		.split(',')
-	{
+	for num in split.next().unwrap().lines().nth(1).unwrap().split(',') {
 		my_ticket.push(num.parse().unwrap());
 	}
 
