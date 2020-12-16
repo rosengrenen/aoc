@@ -25,7 +25,7 @@ impl Solver for Day16Solver {
 
 	fn solve_part_two(&self, input: &str) -> i64 {
 		let data = parse_advanced(input);
-		let others_tickets: Vec<_> = data
+		let valid_tickets: Vec<_> = data
 			.others_tickets
 			.iter()
 			.filter(|ticket| {
@@ -47,12 +47,12 @@ impl Solver for Day16Solver {
 			})
 			.collect();
 
-		let mut name_to_index: HashMap<String, Vec<usize>> = HashMap::new();
+		let mut index_to_names: HashMap<usize, Vec<String>> = HashMap::new();
 		let ticket_len = data.my_ticket.len();
 		for (name, first_range, second_range) in data.field_rules.iter() {
 			for i in 0..ticket_len {
 				let mut matched = true;
-				for ticket in others_tickets.iter() {
+				for ticket in valid_tickets.iter() {
 					if !((first_range.min..=first_range.max).contains(&ticket[i])
 						|| (second_range.min..=second_range.max).contains(&ticket[i]))
 					{
@@ -61,17 +61,9 @@ impl Solver for Day16Solver {
 					}
 				}
 				if matched {
-					let entry = name_to_index.entry(name.clone()).or_insert_with(Vec::new);
-					entry.push(i);
+					let entry = index_to_names.entry(i).or_insert_with(Vec::new);
+					entry.push(name.to_owned());
 				}
-			}
-		}
-
-		let mut index_to_names = HashMap::new();
-		for (name, indices) in name_to_index.iter() {
-			for i in indices {
-				let entry = index_to_names.entry(i).or_insert_with(Vec::new);
-				entry.push(name.clone());
 			}
 		}
 
@@ -82,10 +74,11 @@ impl Solver for Day16Solver {
 		for &(index, names) in index_to_names_vec.iter() {
 			for name in names.iter() {
 				if !name_to_index.contains_key(name) {
-					name_to_index.insert(name.to_owned(), **index);
+					name_to_index.insert(name.to_owned(), *index);
 				}
 			}
 		}
+
 		name_to_index
 			.iter()
 			.filter(|(key, _)| key.contains("departure"))
@@ -121,13 +114,11 @@ fn parse_simple(input: &str) -> (Vec<Range>, Vec<i64>) {
 	(ranges, others_tickets)
 }
 
-#[derive(Debug)]
 struct Range {
 	min: i64,
 	max: i64,
 }
 
-#[derive(Debug)]
 struct Data {
 	field_rules: Vec<(String, Range, Range)>,
 	my_ticket: Vec<i64>,
