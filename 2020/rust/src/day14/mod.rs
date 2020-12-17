@@ -1,5 +1,5 @@
 use crate::lib::Solver;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 pub struct Day14Solver;
 
