@@ -1,245 +1,311 @@
 use crate::lib::Solver;
-use hashbrown::HashSet;
 
 pub struct Day17Solver;
 
 impl Solver for Day17Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let mut input = parse(input);
-		let mut min_x = std::i64::MAX;
-		let mut max_x = std::i64::MIN;
-		let mut min_y = std::i64::MAX;
-		let mut max_y = std::i64::MIN;
-		let mut min_z = std::i64::MAX;
-		let mut max_z = std::i64::MIN;
-		for &(x, y, z) in input.iter() {
-			if x < min_x {
-				min_x = x;
-			}
-			if x > max_x {
-				max_x = x;
-			}
-			if y < min_y {
-				min_y = y;
-			}
-			if y > max_y {
-				max_y = y;
-			}
-			if z < min_z {
-				min_z = z;
-			}
-			if z > max_z {
-				max_z = z;
+		const ITERATIONS: usize = 6;
+		let (plane, x, y) = parse_plane(input);
+		let x_size = x + 2 * ITERATIONS;
+		let y_size = y + 2 * ITERATIONS;
+		let z_size = 1 + 2 * ITERATIONS;
+
+		let lo_x = -(x as i64) / 2;
+		let hi_x = (x as i64 - 1) / 2;
+		let lo_y = -(y as i64) / 2;
+		let hi_y = (y as i64 - 1) / 2;
+		let lo_z = 0;
+		let hi_z = 0;
+
+		let mut space = vec![false; x_size * y_size * z_size];
+
+		for (i, &value) in plane.iter().enumerate() {
+			if value {
+				let ax = (i % x) as i64 - (x / 2) as i64;
+				let ay = (y / 2) as i64 - (i / y) as i64;
+				set_xyz(&mut space, x_size, y_size, z_size, ax, ay, 0, true);
 			}
 		}
-		for _ in 0..6 {
-			let mut new_input = input.clone();
-			let mut new_min_x = min_x;
-			let mut new_max_x = max_x;
-			let mut new_min_y = min_y;
-			let mut new_max_y = max_y;
-			let mut new_min_z = min_z;
-			let mut new_max_z = max_z;
-			for x in min_x - 1..=max_x + 1 {
-				for y in min_y - 1..=max_y + 1 {
-					for z in min_z - 1..=max_z + 1 {
-						// println!("z:{}", z);
-						let active = input.contains(&(x, y, z));
+
+		for i in 0..ITERATIONS as i64 {
+			let mut new_space = space.clone();
+			for x in lo_x - i - 1..=hi_x + i + 1 {
+				for y in lo_y - i - 1..=hi_y + i + 1 {
+					for z in lo_z - i - 1..=hi_z + i + 1 {
+						let active = get_xyz(&space, x_size, y_size, z_size, x, y, z);
 						let mut count = 0;
-						'dx: for dx in -1..=1 {
+						'delta: for dx in -1..=1 {
 							for dy in -1..=1 {
 								for dz in -1..=1 {
 									if dx == 0 && dy == 0 && dz == 0 {
 										continue;
 									}
-									if input.contains(&(x + dx, y + dy, z + dz)) {
+
+									let ax = x + dx;
+									let ay = y + dy;
+									let az = z + dz;
+
+									if ax < lo_x - ITERATIONS as i64
+										|| ax > hi_x + ITERATIONS as i64
+									{
+										continue;
+									}
+
+									if ay < lo_y - ITERATIONS as i64
+										|| ay > hi_y + ITERATIONS as i64
+									{
+										continue;
+									}
+
+									if az < lo_z - ITERATIONS as i64
+										|| az > hi_z + ITERATIONS as i64
+									{
+										continue;
+									}
+
+									if get_xyz(&space, x_size, y_size, z_size, ax, ay, az) {
 										count += 1;
 									}
 									if count > 3 {
-										break 'dx;
+										break 'delta;
 									}
 								}
 							}
 						}
 						if active && !(count == 2 || count == 3) {
-							new_input.remove(&(x, y, z));
+							set_xyz(&mut new_space, x_size, y_size, z_size, x, y, z, false);
 						}
 						if !active && count == 3 {
-							new_input.insert((x, y, z));
-							if x < new_min_x {
-								new_min_x = x;
-							}
-							if x > new_max_x {
-								new_max_x = x;
-							}
-							if y < new_min_y {
-								new_min_y = y;
-							}
-							if y > new_max_y {
-								new_max_y = y;
-							}
-							if z < new_min_z {
-								new_min_z = z;
-							}
-							if z > new_max_z {
-								new_max_z = z;
-							}
+							set_xyz(&mut new_space, x_size, y_size, z_size, x, y, z, true);
 						}
 					}
 				}
 			}
-			input = new_input;
-			min_x = new_min_x;
-			max_x = new_max_x;
-			min_y = new_min_y;
-			max_y = new_max_y;
-			min_z = new_min_z;
-			max_z = new_max_z;
+			space = new_space;
 		}
-		input.len() as i64
+
+		space
+			.iter()
+			.fold(0, |prev, &curr| if curr { prev + 1 } else { prev })
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let mut input = parse2(input);
-		let mut min_x = std::i64::MAX;
-		let mut max_x = std::i64::MIN;
-		let mut min_y = std::i64::MAX;
-		let mut max_y = std::i64::MIN;
-		let mut min_z = std::i64::MAX;
-		let mut max_z = std::i64::MIN;
-		let mut min_w = std::i64::MAX;
-		let mut max_w = std::i64::MIN;
-		for &(x, y, z, w) in input.iter() {
-			if x < min_x {
-				min_x = x;
-			}
-			if x > max_x {
-				max_x = x;
-			}
-			if y < min_y {
-				min_y = y;
-			}
-			if y > max_y {
-				max_y = y;
-			}
-			if z < min_z {
-				min_z = z;
-			}
-			if z > max_z {
-				max_z = z;
-			}
-			if w < min_w {
-				min_w = w;
-			}
-			if w > max_w {
-				max_w = w;
+		const ITERATIONS: usize = 6;
+		let (plane, x, y) = parse_plane(input);
+		let x_size = x + 2 * ITERATIONS;
+		let y_size = y + 2 * ITERATIONS;
+		let z_size = 1 + 2 * ITERATIONS;
+		let w_size = 1 + 2 * ITERATIONS;
+
+		let lo_x = -(x as i64) / 2;
+		let hi_x = (x as i64 - 1) / 2;
+		let lo_y = -(y as i64) / 2;
+		let hi_y = (y as i64 - 1) / 2;
+		let lo_z = 0;
+		let hi_z = 0;
+		let lo_w = 0;
+		let hi_w = 0;
+
+		let mut space = vec![false; x_size * y_size * z_size * w_size];
+
+		for (i, &value) in plane.iter().enumerate() {
+			if value {
+				let ax = (i % x) as i64 - (x / 2) as i64;
+				let ay = (y / 2) as i64 - (i / y) as i64;
+				set_xyzw(
+					&mut space, x_size, y_size, z_size, w_size, ax, ay, 0, 0, true,
+				);
 			}
 		}
 
-		for _ in 0..6 {
-			let mut new_input = input.clone();
-			let mut new_min_x = min_x;
-			let mut new_max_x = max_x;
-			let mut new_min_y = min_y;
-			let mut new_max_y = max_y;
-			let mut new_min_z = min_z;
-			let mut new_max_z = max_z;
-			let mut new_min_w = min_w;
-			let mut new_max_w = max_w;
-			for x in min_x - 1..=max_x + 1 {
-				for y in min_y - 1..=max_y + 1 {
-					for z in min_z - 1..=max_z + 1 {
-						for w in min_w - 1..=max_w + 1 {
-							// println!("z:{}", z);
-							let active = input.contains(&(x, y, z, w));
+		for i in 0..ITERATIONS as i64 {
+			let mut new_space = space.clone();
+			for x in lo_x - i - 1..=hi_x + i + 1 {
+				for y in lo_y - i - 1..=hi_y + i + 1 {
+					for z in lo_z - i - 1..=hi_z + i + 1 {
+						for w in lo_w - i - 1..=hi_w + i + 1 {
+							let active =
+								get_xyzw(&space, x_size, y_size, z_size, w_size, x, y, z, w);
 							let mut count = 0;
-							'dx: for dx in -1..=1 {
+							'delta: for dx in -1..=1 {
 								for dy in -1..=1 {
 									for dz in -1..=1 {
 										for dw in -1..=1 {
 											if dx == 0 && dy == 0 && dz == 0 && dw == 0 {
 												continue;
 											}
-											if input.contains(&(x + dx, y + dy, z + dz, w + dw)) {
+
+											let ax = x + dx;
+											let ay = y + dy;
+											let az = z + dz;
+											let aw = w + dw;
+
+											if ax < lo_x - ITERATIONS as i64
+												|| ax > hi_x + ITERATIONS as i64
+											{
+												continue;
+											}
+
+											if ay < lo_y - ITERATIONS as i64
+												|| ay > hi_y + ITERATIONS as i64
+											{
+												continue;
+											}
+
+											if az < lo_z - ITERATIONS as i64
+												|| az > hi_z + ITERATIONS as i64
+											{
+												continue;
+											}
+
+											if aw < lo_w - ITERATIONS as i64
+												|| aw > hi_w + ITERATIONS as i64
+											{
+												continue;
+											}
+
+											if get_xyzw(
+												&space, x_size, y_size, z_size, w_size, ax, ay, az,
+												aw,
+											) {
 												count += 1;
 											}
 											if count > 3 {
-												break 'dx;
+												break 'delta;
 											}
 										}
 									}
 								}
 							}
 							if active && !(count == 2 || count == 3) {
-								new_input.remove(&(x, y, z, w));
+								set_xyzw(
+									&mut new_space,
+									x_size,
+									y_size,
+									z_size,
+									w_size,
+									x,
+									y,
+									z,
+									w,
+									false,
+								);
 							}
 							if !active && count == 3 {
-								new_input.insert((x, y, z, w));
-								if x < new_min_x {
-									new_min_x = x;
-								}
-								if x > new_max_x {
-									new_max_x = x;
-								}
-								if y < new_min_y {
-									new_min_y = y;
-								}
-								if y > new_max_y {
-									new_max_y = y;
-								}
-								if z < new_min_z {
-									new_min_z = z;
-								}
-								if z > new_max_z {
-									new_max_z = z;
-								}
-								if w < new_min_w {
-									new_min_w = w;
-								}
-								if w > new_max_w {
-									new_max_w = w;
-								}
+								set_xyzw(
+									&mut new_space,
+									x_size,
+									y_size,
+									z_size,
+									w_size,
+									x,
+									y,
+									z,
+									w,
+									true,
+								);
 							}
 						}
 					}
 				}
 			}
-			input = new_input;
-			min_x = new_min_x;
-			max_x = new_max_x;
-			min_y = new_min_y;
-			max_y = new_max_y;
-			min_z = new_min_z;
-			max_z = new_max_z;
-			min_w = new_min_w;
-			max_w = new_max_w;
+			space = new_space;
 		}
-		input.len() as i64
+
+		space
+			.iter()
+			.fold(0, |prev, &curr| if curr { prev + 1 } else { prev })
 	}
 }
 
-fn parse(input: &str) -> HashSet<(i64, i64, i64)> {
-	let mut space = HashSet::new();
-	for (y, line) in input.lines().enumerate() {
-		for (x, c) in line.as_bytes().iter().enumerate() {
-			if *c == b'#' {
-				space.insert((x as i64, y as i64, 0));
+fn parse_plane(input: &str) -> (Vec<bool>, usize, usize) {
+	let mut space = Vec::new();
+	let mut x = 0;
+	let mut y = 0;
+	for (cy, line) in input.lines().enumerate() {
+		if cy + 1 > y {
+			y = cy + 1;
+		}
+		for (cx, &c) in line.as_bytes().iter().enumerate() {
+			if cx + 1 > x {
+				x = cx + 1;
+			}
+			if c == b'#' {
+				space.push(true);
+			} else {
+				space.push(false);
 			}
 		}
 	}
-	space
+	(space, x, y)
 }
 
-fn parse2(input: &str) -> HashSet<(i64, i64, i64, i64)> {
-	let mut space = HashSet::new();
-	for (y, line) in input.lines().enumerate() {
-		for (x, c) in line.as_bytes().iter().enumerate() {
-			if *c == b'#' {
-				space.insert((x as i64, y as i64, 0, 0));
-			}
-		}
-	}
-	space
+fn get_xyz(
+	vec: &Vec<bool>,
+	x_size: usize,
+	y_size: usize,
+	z_size: usize,
+	x: i64,
+	y: i64,
+	z: i64,
+) -> bool {
+	let ax = (x + (x_size as i64 / 2)) as usize;
+	let ay = (y + (y_size as i64 / 2)) as usize;
+	let az = (z + (z_size as i64 / 2)) as usize;
+	vec[az * y_size * x_size + ay * y_size + ax]
+}
+
+fn set_xyz(
+	vec: &mut Vec<bool>,
+	x_size: usize,
+	y_size: usize,
+	z_size: usize,
+	x: i64,
+	y: i64,
+	z: i64,
+	value: bool,
+) {
+	let ax = (x + (x_size as i64 / 2)) as usize;
+	let ay = (y + (y_size as i64 / 2)) as usize;
+	let az = (z + (z_size as i64 / 2)) as usize;
+	vec[az * y_size * x_size + ay * y_size + ax] = value;
+}
+
+fn get_xyzw(
+	vec: &Vec<bool>,
+	x_size: usize,
+	y_size: usize,
+	z_size: usize,
+	w_size: usize,
+	x: i64,
+	y: i64,
+	z: i64,
+	w: i64,
+) -> bool {
+	let ax = (x + (x_size as i64 / 2)) as usize;
+	let ay = (y + (y_size as i64 / 2)) as usize;
+	let az = (z + (z_size as i64 / 2)) as usize;
+	let aw = (w + (w_size as i64 / 2)) as usize;
+	vec[aw * z_size * y_size * x_size + az * y_size * x_size + ay * y_size + ax]
+}
+
+fn set_xyzw(
+	vec: &mut Vec<bool>,
+	x_size: usize,
+	y_size: usize,
+	z_size: usize,
+	w_size: usize,
+	x: i64,
+	y: i64,
+	z: i64,
+	w: i64,
+	value: bool,
+) {
+	let ax = (x + (x_size as i64 / 2)) as usize;
+	let ay = (y + (y_size as i64 / 2)) as usize;
+	let az = (z + (z_size as i64 / 2)) as usize;
+	let aw = (w + (w_size as i64 / 2)) as usize;
+	vec[aw * z_size * y_size * x_size + az * y_size * x_size + ay * y_size + ax] = value;
 }
 
 #[cfg(test)]
@@ -263,9 +329,9 @@ mod tests {
 	}
 
 	#[bench]
-	fn bench_parse(bencher: &mut Bencher) {
+	fn bench_parse_plane(bencher: &mut Bencher) {
 		let input = fetch_input(17);
-		bencher.iter(|| parse(&input));
+		bencher.iter(|| parse_plane(&input));
 	}
 
 	#[bench]
