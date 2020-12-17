@@ -1,5 +1,5 @@
 use crate::lib::Solver;
-use std::collections::HashSet;
+use hashbrown::HashSet;
 
 pub struct Day17Solver;
 
@@ -32,19 +32,7 @@ impl Solver for Day17Solver {
 				max_z = z;
 			}
 		}
-		println!("{}", min_x);
-		println!("{}", max_x);
-		println!("{}", min_y);
-		println!("{}", max_y);
-		println!("{}", min_z);
-		println!("{}", max_z);
-
-		for i in 0..6 {
-			println!("---------------{}--------------", i);
-			println!("{}", input.len());
-			// for i in input.iter() {
-			// 	println!("{} {} {}", i.0, i.1, i.2);
-			// }
+		for _ in 0..6 {
 			let mut new_input = input.clone();
 			let mut new_min_x = min_x;
 			let mut new_max_x = max_x;
@@ -52,19 +40,6 @@ impl Solver for Day17Solver {
 			let mut new_max_y = max_y;
 			let mut new_min_z = min_z;
 			let mut new_max_z = max_z;
-			for z in min_z..=max_z {
-				println!("\nz={}", z);
-				for y in min_y..=max_y {
-					for x in min_x..=max_x {
-						if input.contains(&(x, y, z)) {
-							print!("#");
-						} else {
-							print!(".");
-						}
-					}
-					print!("\n");
-				}
-			}
 			for x in min_x - 1..=max_x + 1 {
 				for y in min_y - 1..=max_y + 1 {
 					for z in min_z - 1..=max_z + 1 {
@@ -161,12 +136,7 @@ impl Solver for Day17Solver {
 			}
 		}
 
-		for i in 0..6 {
-			println!("---------------{}--------------", i);
-			println!("{}", input.len());
-			// for i in input.iter() {
-			// 	println!("{} {} {}", i.0, i.1, i.2);
-			// }
+		for _ in 0..6 {
 			let mut new_input = input.clone();
 			let mut new_min_x = min_x;
 			let mut new_max_x = max_x;
@@ -176,19 +146,6 @@ impl Solver for Day17Solver {
 			let mut new_max_z = max_z;
 			let mut new_min_w = min_w;
 			let mut new_max_w = max_w;
-			// for z in min_z..=max_z {
-			// 	println!("\nz={}", z);
-			// 	for y in min_y..=max_y {
-			// 		for x in min_x..=max_x {
-			// 			if input.contains(&(x, y, z)) {
-			// 				print!("#");
-			// 			} else {
-			// 				print!(".");
-			// 			}
-			// 		}
-			// 		print!("\n");
-			// 	}
-			// }
 			for x in min_x - 1..=max_x + 1 {
 				for y in min_y - 1..=max_y + 1 {
 					for z in min_z - 1..=max_z + 1 {
@@ -305,23 +262,23 @@ mod tests {
 		assert_eq!(solver.solve_part_two(input), 848);
 	}
 
-	// #[bench]
-	// fn bench_parse(bencher: &mut Bencher) {
-	// 	let input = fetch_input(17);
-	// 	bencher.iter(|| parse(&input));
-	// }
+	#[bench]
+	fn bench_parse(bencher: &mut Bencher) {
+		let input = fetch_input(17);
+		bencher.iter(|| parse(&input));
+	}
 
-	// #[bench]
-	// fn bench_part_one(bencher: &mut Bencher) {
-	// 	let input = fetch_input(17);
-	// 	let solver = Day17Solver {};
-	// 	bencher.iter(|| solver.solve_part_one(&input));
-	// }
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = fetch_input(17);
+		let solver = Day17Solver {};
+		bencher.iter(|| solver.solve_part_one(&input));
+	}
 
-	// #[bench]
-	// fn bench_part_two(bencher: &mut Bencher) {
-	// 	let input = fetch_input(17);
-	// 	let solver = Day17Solver {};
-	// 	bencher.iter(|| solver.solve_part_two(&input));
-	// }
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = fetch_input(17);
+		let solver = Day17Solver {};
+		bencher.iter(|| solver.solve_part_two(&input));
+	}
 }
