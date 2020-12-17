@@ -34,9 +34,9 @@ impl Solver for Day17Solver {
 					for z in lo_z - i - 1..=hi_z + i + 1 {
 						let active = get_xyz(&space, x_size, y_size, z_size, x, y, z);
 						let mut count = 0;
-						'delta: for dx in -1..=1 {
-							for dy in -1..=1 {
-								for dz in -1..=1 {
+						'delta: for &dx in RANGE.iter() {
+							for &dy in RANGE.iter() {
+								for &dz in RANGE.iter() {
 									if dx == 0 && dy == 0 && dz == 0 {
 										continue;
 									}
@@ -127,10 +127,10 @@ impl Solver for Day17Solver {
 							let active =
 								get_xyzw(&space, x_size, y_size, z_size, w_size, x, y, z, w);
 							let mut count = 0;
-							'delta: for dx in -1..=1 {
-								for dy in -1..=1 {
-									for dz in -1..=1 {
-										for dw in -1..=1 {
+							'delta: for &dx in RANGE.iter() {
+								for &dy in RANGE.iter() {
+									for &dz in RANGE.iter() {
+										for &dw in RANGE.iter() {
 											if dx == 0 && dy == 0 && dz == 0 && dw == 0 {
 												continue;
 											}
@@ -217,6 +217,8 @@ impl Solver for Day17Solver {
 			.fold(0, |prev, &curr| if curr { prev + 1 } else { prev })
 	}
 }
+
+static RANGE: [i64; 3] = [-1, 0, 1];
 
 fn parse_plane(input: &str) -> (Vec<bool>, usize, usize) {
 	let mut space = Vec::new();
