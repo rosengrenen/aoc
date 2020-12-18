@@ -1,163 +1,153 @@
 use crate::lib::Solver;
+use hashbrown::HashMap;
 
 pub struct Day18Solver;
 
 impl Solver for Day18Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		input
-			.lines()
-			.fold(0, |prev, cur_line| prev + solve_recursive(cur_line))
+		let op_precedences = HashMap::new();
+		input.lines().fold(0, |prev, cur_line| {
+			let infix = parse_string_to_tokens(cur_line);
+			let postfix = infix_to_postfix(&infix, &op_precedences);
+			prev + eval_postfix(&postfix)
+		})
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
+		let mut op_precedences = HashMap::new();
+		op_precedences.insert(b'+', 1);
+		op_precedences.insert(b'*', 0);
 		input.lines().fold(0, |prev, cur_line| {
-			prev + solve_recursive_with_precedence(cur_line)
+			let infix = parse_string_to_tokens(cur_line);
+			let postfix = infix_to_postfix(&infix, &op_precedences);
+			prev + eval_postfix(&postfix)
 		})
 	}
 }
 
-fn solve_recursive(expression: &str) -> i64 {
-	let expression_bytes = expression.as_bytes();
-	let mut result = 0;
-	let mut raw_num = String::new();
-	let mut operator = ' ';
-	let mut i = 0;
-
-	while i < expression_bytes.len() {
-		let c = expression_bytes[i];
-		if c.is_ascii_digit() {
-			raw_num.push(c as char);
-			if i == expression_bytes.len() - 1 {
-				let num = raw_num.parse().unwrap();
-				match operator {
-					' ' => result = num,
-					'+' => result += num,
-					'*' => result *= num,
-					_ => (),
-				}
-			}
-		}
-
-		if c == b'+' {
-			operator = '+';
-		}
-
-		if c == b'*' {
-			operator = '*';
-		}
-
-		if c == b' ' && !raw_num.is_empty() {
-			let num = raw_num.parse().unwrap();
-			raw_num.clear();
-			match operator {
-				' ' => result = num,
-				'+' => result += num,
-				'*' => result *= num,
-				_ => (),
-			}
-		}
-
-		if c == b'(' {
-			let mut brackets = 0;
-			for j in i + 1..expression.len() {
-				let c = expression_bytes[j];
-				if c == b'(' {
-					brackets += 1;
-				}
-				if c == b')' {
-					if brackets == 0 {
-						match operator {
-							' ' => result = solve_recursive(&expression[i + 1..j]),
-							'+' => result += solve_recursive(&expression[i + 1..j]),
-							'*' => result *= solve_recursive(&expression[i + 1..j]),
-							_ => panic!(),
-						}
-						i = j + 1;
-					} else {
-						brackets -= 1;
-					}
-				}
-			}
-		}
-
-		i += 1;
-	}
-	result
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Token {
+	Num(i64),
+	Op(u8),
+	OpenParens,
+	CloseParens,
 }
 
-fn solve_recursive_with_precedence(expression: &str) -> i64 {
-	let expression_bytes = expression.as_bytes();
-	let mut raw_num = String::new();
+fn parse_string_to_tokens(input: &str) -> Vec<Token> {
+	let bytes = input.as_bytes();
+	let mut tokens = Vec::new();
+
 	let mut i = 0;
-	let mut expression_parsed = Vec::new();
-
-	while i < expression_bytes.len() {
-		let c = expression_bytes[i];
-		if c.is_ascii_digit() {
-			raw_num.push(c as char);
-			if i == expression_bytes.len() - 1 {
-				expression_parsed.push(raw_num.to_owned());
-			}
+	loop {
+		if i >= input.len() {
+			break;
 		}
 
-		if c == b'+' {
-			expression_parsed.push("+".to_owned());
-		}
-
-		if c == b'*' {
-			expression_parsed.push("*".to_owned());
-		}
-
-		if c == b' ' && !raw_num.is_empty() {
-			expression_parsed.push(raw_num.to_owned());
-			raw_num.clear();
-		}
-
-		if c == b'(' {
-			let mut brackets = 0;
-			for j in i + 1..expression.len() {
-				let c = expression_bytes[j];
-				if c == b'(' {
-					brackets += 1;
-				}
-				if c == b')' {
-					if brackets == 0 {
-						expression_parsed.push(
-							solve_recursive_with_precedence(&expression[i + 1..j]).to_string(),
-						);
-						i = j + 1;
-					} else {
-						brackets -= 1;
+		match bytes[i] {
+			b'(' => tokens.push(Token::CloseParens),
+			b')' => tokens.push(Token::OpenParens),
+			b'+' => tokens.push(Token::Op(b'+')),
+			b'*' => tokens.push(Token::Op(b'*')),
+			c if (48..=57).contains(&c) => {
+				let mut j = i + 1;
+				loop {
+					if j >= input.len() {
+						break;
 					}
+
+					if (48..=57).contains(&bytes[j]) {
+						j += 1;
+						continue;
+					}
+
+					break;
 				}
+				tokens.push(Token::Num(input[i..j].parse().unwrap()));
+				i = j;
+				continue;
 			}
+			_ => (),
 		}
 
 		i += 1;
 	}
 
-	let mut prod: Option<i64> = None;
-	let mut result = 1;
+	tokens.reverse();
+	tokens
+}
 
-	for i in 0..expression_parsed.len() {
-		if prod.is_none() {
-			prod = Some(expression_parsed[i].parse().unwrap());
-			continue;
-		}
-		if expression_parsed[i] == "*" {
-			result *= prod.unwrap();
-			prod = None;
-			continue;
-		}
+fn infix_to_postfix(infix: &Vec<Token>, op_precedences: &HashMap<u8, i64>) -> Vec<Token> {
+	let mut postfix = Vec::new();
+	let mut op_stack = Vec::new();
 
-		if expression_parsed[i] != "+" {
-			let a = prod.unwrap();
-			let b = expression_parsed[i].parse::<i64>().unwrap();
-			prod = Some(a + b);
+	for &token in infix.iter() {
+		match token {
+			Token::OpenParens => op_stack.push(Token::OpenParens),
+			Token::CloseParens => {
+				while let Some(op) = op_stack.pop() {
+					if op == Token::OpenParens {
+						break;
+					}
+
+					postfix.push(op);
+				}
+			}
+			Token::Op(op) => {
+				if let Some(op_precedence) = op_precedences.get(&op) {
+					while let Some(Token::Op(other_op)) = op_stack.last() {
+						if let Some(other_op_precendence) = op_precedences.get(other_op) {
+							if other_op_precendence > op_precedence {
+								postfix.push(op_stack.pop().unwrap());
+								// *other_op = op;
+								continue;
+							}
+						}
+
+						break;
+					}
+				}
+
+				op_stack.push(Token::Op(op));
+			}
+
+			Token::Num(num) => postfix.push(Token::Num(num)),
 		}
 	}
 
-	result * prod.unwrap()
+	while let Some(op_token) = op_stack.pop() {
+		if let Token::Op(op) = op_token {
+			postfix.push(Token::Op(op));
+		} else {
+			panic!("Only operators should exist on the stack now, check for unmatched parentheses");
+		}
+	}
+
+	postfix
+}
+
+fn eval_postfix(postfix: &Vec<Token>) -> i64 {
+	let mut stack = Vec::new();
+	for token in postfix.iter() {
+		match *token {
+			Token::Num(num) => stack.push(num),
+			Token::Op(op) => {
+				if let Some(a) = stack.pop() {
+					if let Some(b) = stack.pop() {
+						stack.push(match op {
+							b'+' => a + b,
+							b'*' => a * b,
+							_ => panic!(format!("Unknown operator: {}", op as char)),
+						});
+						continue;
+					}
+				}
+				panic!("There aren't two numbers on the stack that can be operated on");
+			}
+			_ => panic!("Invalid token at this stage"),
+		}
+	}
+
+	*stack.last().unwrap()
 }
 
 #[cfg(test)]
@@ -187,7 +177,6 @@ mod tests {
 	fn part_two_test_cases() {
 		let solver = Day18Solver {};
 		assert_eq!(solver.solve_part_two(&"1 + 2 * 3 + 4 * 5 + 6"), 231);
-
 		assert_eq!(
 			solver.solve_part_two(&"1 + (2 * 3) + (4 * (5 + 6)) still"),
 			51
@@ -202,6 +191,12 @@ mod tests {
 			solver.solve_part_two(&"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"),
 			23340
 		);
+	}
+
+	#[bench]
+	fn bench_parse_string_to_tokens(bencher: &mut Bencher) {
+		let input = fetch_input(18);
+		bencher.iter(|| parse_string_to_tokens(&input));
 	}
 
 	#[bench]
