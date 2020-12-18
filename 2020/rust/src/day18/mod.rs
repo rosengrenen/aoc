@@ -193,12 +193,6 @@ mod tests {
 	}
 
 	#[bench]
-	fn bench_parse_string_to_tokens(bencher: &mut Bencher) {
-		let input = fetch_input(18);
-		bencher.iter(|| parse_string_to_tokens(&input));
-	}
-
-	#[bench]
 	fn bench_part_one(bencher: &mut Bencher) {
 		let input = fetch_input(18);
 		let solver = Day18Solver {};
