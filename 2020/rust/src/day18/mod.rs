@@ -98,7 +98,6 @@ fn infix_to_postfix(infix: &Vec<Token>, op_precedences: &HashMap<u8, i64>) -> Ve
 						if let Some(other_op_precendence) = op_precedences.get(other_op) {
 							if other_op_precendence > op_precedence {
 								postfix.push(op_stack.pop().unwrap());
-								// *other_op = op;
 								continue;
 							}
 						}
