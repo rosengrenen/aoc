@@ -46,7 +46,7 @@ impl Solver for Day19Solver {
 		// );
 		for &m in messages.iter() {
 			// if m is valid add one to s
-			if is_valid(&valid_messages, m, 0) {
+			if is_valid2(&valid_messages, m, 0) {
 				s += 1;
 			} else {
 				println!("{} is invalid but should be valid", m);
@@ -63,6 +63,7 @@ enum K {
 }
 
 fn parse(input: &str) -> (HashMap<i64, K>, Vec<&str>) {
+	println!("{:?}", input.split("\n\n").collect::<Vec<_>>());
 	let (rules_raw, messages_raw) = input.split_once("\n\n").unwrap();
 	let messages: Vec<_> = messages_raw.lines().collect();
 	let mut rules = HashMap::new();
@@ -202,6 +203,80 @@ fn all_valid_internal_loop(
 		}
 		result.insert(i, res.clone());
 	}
+}
+
+fn is_valid2(rules: &HashMap<i64, HashSet<String>>, message: &str, rule: i64) -> bool {
+	for valid_message in rules.get(&rule).unwrap() {
+		if valid_message.len() > message.len() {
+			continue;
+		}
+
+		if valid_message == message {
+			// println!("matched {} to rule {}", message, rule);
+			return true;
+		}
+
+		let mut parts = Vec::new();
+		let mut rule_nums: Vec<i64> = Vec::new();
+
+		let mut m = Some(&valid_message[..]);
+		while let Some(loc_m) = m {
+			let mut index = None;
+			if let Some(i) = loc_m.find("11") {
+				index = Some((i, String::from("11")));
+			}
+			if let Some(i) = loc_m.find('8') {
+				if let Some((prev_index, _)) = index {
+					if i < prev_index {
+						index = Some((i, String::from("8")));
+					}
+				} else {
+					index = Some((i, String::from("8")));
+				}
+			}
+
+			if let Some((i, s)) = index {
+				parts.push(loc_m[..i].to_owned());
+				rule_nums.push(s.parse().unwrap());
+				m = Some(&loc_m[i + s.len()..]);
+			} else {
+				m = None;
+				parts.push(loc_m.to_owned());
+			}
+		}
+
+		// There was no recursive number in the valid_message
+		if rule_nums.is_empty() {
+			continue;
+		}
+
+		if let Some(message) = message.strip_prefix(parts.first().unwrap()) {
+			if let Some(message) = message.strip_suffix(parts.last().unwrap()) {
+				// If rule nums is 1, just check the only recursive part
+				if rule_nums.len() == 1 {
+					if is_valid2(rules, message, rule_nums[0]) {
+						return true;
+					}
+				} else if rule_nums.len() == 2 {
+					let middle_part = &parts[1];
+					for middle_part_index in message.match_indices(middle_part).map(|(i, _)| i) {
+						if is_valid2(rules, &message[..middle_part_index], rule_nums[0])
+							&& is_valid2(
+								rules,
+								&message[middle_part_index + middle_part.len()..],
+								rule_nums[1],
+							) {
+							return true;
+						}
+					}
+				} else {
+					panic!("According to the puzzle input there should never be 3 parts");
+				}
+			}
+		}
+	}
+
+	false
 }
 
 fn is_valid(rules: &HashMap<i64, HashSet<String>>, message: &str, rule: i64) -> bool {
