@@ -8,7 +8,7 @@ pub struct Day19Solver;
 impl Solver for Day19Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
 		let (rules, messages) = parse(input);
-		let regex = Regex::new(&create_regex(&rules, 0, 0)).unwrap();
+		let regex = Regex::new(&create_regex(&rules, 0)).unwrap();
 		messages.iter().fold(
 			0,
 			|prev, cur| if regex.is_match(cur) { prev + 1 } else { prev },
@@ -24,22 +24,35 @@ impl Solver for Day19Solver {
 			*entry = ProductionRule::NonTerminal(vec![vec![42, 31], vec![42, 11, 31]])
 		});
 
-		let regex = Regex::new(&create_regex(&rules, 0, 1)).unwrap();
-		messages.iter().fold(
-			0,
-			|prev, cur| if regex.is_match(cur) { prev + 1 } else { prev },
-		)
+		let regex_42 = &create_regex(&rules, 42);
+		let regex_31 = &create_regex(&rules, 31);
+
+		let mut regexes = Vec::new();
+		for n in 1..=5 {
+			for r in 1..=5 {
+				regexes.push(
+					Regex::new(&format!("^{}{{{}}}{}{{{}}}$", regex_42, n + r, regex_31, r))
+						.unwrap(),
+				);
+			}
+		}
+		messages.iter().fold(0, |prev, cur| {
+			if regexes.iter().any(|regex| regex.is_match(cur)) {
+				prev + 1
+			} else {
+				prev
+			}
+		})
 	}
 }
 
-fn create_regex(rules: &HashMap<i64, ProductionRule>, rule: i64, recurse_levels: i64) -> String {
+fn create_regex(rules: &HashMap<i64, ProductionRule>, rule: i64) -> String {
 	let mut regex_string = String::new();
 
 	if rule == 0 {
 		regex_string.push('^');
 	}
 
-	let mut recursive = false;
 	match rules.get(&rule).unwrap() {
 		ProductionRule::Terminal(t) => regex_string.push(*t),
 		ProductionRule::NonTerminal(ors) => {
@@ -53,25 +66,13 @@ fn create_regex(rules: &HashMap<i64, ProductionRule>, rule: i64, recurse_levels:
 
 				for rule_num in or.iter() {
 					if *rule_num == rule {
-						regex_string.push_str(&rule.to_string());
-						recursive = true;
 					} else {
-						regex_string.push_str(&create_regex(rules, *rule_num, recurse_levels));
+						regex_string.push_str(&create_regex(rules, *rule_num));
 					}
 				}
 			}
 			if ors.len() > 1 {
 				regex_string.push(')');
-			}
-		}
-	}
-
-	if recursive {
-		const ITERATIONS: i64 = 5;
-		for i in 1..ITERATIONS {
-			regex_string = regex_string.replace(&rule.to_string(), &regex_string);
-			if i == ITERATIONS - 1 {
-				regex_string = regex_string.replace(&rule.to_string(), "");
 			}
 		}
 	}
