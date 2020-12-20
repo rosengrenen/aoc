@@ -69,35 +69,229 @@ impl Solver for Day20Solver {
 
 	fn solve_part_two(&self, input: &str) -> i64 {
 		let (images, raw_images_data) = parse_images(input);
+
+		let image = images[0];
+
+		// let pos = (8, 0);
+		// println!("{:?}", pos);
+		// println!("{:?}", rotate_coord(pos, 9.0, 1));
+		// println!("{:?}", rotate_coord(pos, 9.0, 1));
+
+		// // return 0;
+		// // let meta_data = print_image_meta(image);
+		// // let image_data = raw_images_data.get(&image.id).unwrap();
+		// // let data_data = print_image_data(image_data, false, false, 0, true);
+
+		// // for i in 0..10 {
+		// // 	println!("{}\t{}", meta_data[i], data_data[i]);
+		// // }
+
+		// for r in 0..=3 {
+		// 	for &(h, v) in &[(false, false), (true, false), (false, true), (true, true)] {
+		// 		let mut image = image;
+		// 		if r > 0 {
+		// 			image = rotate_image(image, r);
+		// 		}
+
+		// 		if h {
+		// 			image = flip_image_horizontal(image);
+		// 		}
+
+		// 		if v {
+		// 			image = flip_image_vertical(image);
+		// 		}
+
+		// 		let meta_data = print_image_meta(image);
+		// 		let image_data = raw_images_data.get(&image.id).unwrap();
+		// 		let data_data = print_image_data(image_data, false, false, 0, true);
+		// 		let data_data1 = print_image_data(image_data, false, false, r as i64, true);
+		// 		let data_data2 = print_image_data(image_data, h, false, r as i64, true);
+		// 		let data_data3 = print_image_data(image_data, h, v, r as i64, true);
+
+		// 		println!("{} {} {}", h, v, r);
+
+		// 		for i in 0..10 {
+		// 			println!(
+		// 				"{}\t{}\t{}\t{}\t{}",
+		// 				meta_data[i], data_data[i], data_data1[i], data_data2[i], data_data3[i]
+		// 			);
+		// 		}
+		// 		println!("\n\n");
+		// 	}
+		// }
+
+		// return 0;
 		let images_map = fit_map_pieces(images);
-		// println!("{:#?}", images_map);
 
 		let mut min_x = std::i64::MAX;
 		let mut max_x = std::i64::MIN;
 		let mut min_y = std::i64::MAX;
 		let mut max_y = std::i64::MIN;
 
-		for map_y in min_y..=max_y {
-			for map_x in min_x..=max_x {
-				let image_meta = images_map.get(&(map_x, map_y)).unwrap();
-				print!("{} ", image_meta.id);
-			}
-			print!("\n");
+		for (&(x, y), _) in images_map.iter() {
+			min_x = min_x.min(x);
+			max_x = max_x.max(x);
+			min_y = min_y.min(y);
+			max_y = max_y.max(y);
 		}
+
+		{
+			println!("PRINTING META MAP");
+			for map_y in min_y..=max_y {
+				for y in 0..10 {
+					for map_x in min_x..=max_x {
+						for x in 0..10 {
+							let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+
+							if image_meta.rotation == 0 {
+								print!(" ");
+								continue;
+							}
+
+							if (1..9).contains(&x) && (1..9).contains(&y) {
+								print!(" ");
+							} else if y == 0 {
+								if image_meta.top & 1 << x != 0 {
+									print!("#");
+								} else {
+									print!(".");
+								}
+							} else if y == 9 {
+								if image_meta.bottom & 1 << (9 - x) != 0 {
+									print!("#");
+								} else {
+									print!(".");
+								}
+							} else if x == 0 {
+								if image_meta.left & 1 << (9 - y) != 0 {
+									print!("#");
+								} else {
+									print!(".");
+								}
+							} else if x == 9 {
+								if image_meta.right & 1 << y != 0 {
+									print!("#");
+								} else {
+									print!(".");
+								}
+							}
+						}
+						print!(" ");
+					}
+					print!("\n");
+				}
+				print!("\n");
+			}
+		}
+
+		{
+			let mut prob = HashSet::new();
+			println!("PRINTING MAP");
+			for map_y in min_y..=max_y {
+				for y in 0..10 {
+					for map_x in min_x..=max_x {
+						for x in 0..10 {
+							let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+							let image_data = raw_images_data.get(&image_meta.id).unwrap();
+
+							if image_meta.rotation == 0 {
+								print!(" ");
+								continue;
+							}
+
+							let mut ax = x;
+							let mut ay = y;
+
+							if image_meta.h_flip {
+								ax = 9 - ax;
+							}
+
+							if image_meta.v_flip {
+								ay = 9 - ay;
+							}
+
+							if image_meta.rotation > 0 {
+								(ax, ay) = rotate_coord((ax, ay), 9.0, image_meta.rotation);
+							}
+
+							let d = image_data[ay as usize][ax as usize];
+							if d {
+								print!("#");
+							} else {
+								print!(".");
+							}
+
+							if y == 0 {
+								if (image_meta.top & 1 << x != 0) != d {
+									prob.insert((map_x, map_y));
+								}
+							} else if y == 9 {
+								if (image_meta.bottom & 1 << (9 - x) != 0) != d {
+									prob.insert((map_x, map_y));
+								}
+							} else if x == 0 {
+								if (image_meta.left & 1 << (9 - y) != 0) != d {
+									prob.insert((map_x, map_y));
+								}
+							} else if x == 9 {
+								if (image_meta.right & 1 << y != 0) != d {
+									prob.insert((map_x, map_y));
+								}
+							}
+						}
+						print!(" ");
+					}
+					print!("\n");
+				}
+				print!("\n");
+			}
+
+			println!("PRINTING META");
+			for map_y in min_y..=max_y {
+				for map_x in min_x..=max_x {
+					let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+					print!("{} ", image_meta.id);
+				}
+				print!("\n");
+			}
+
+			for map_y in min_y..=max_y {
+				for map_x in min_x..=max_x {
+					let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+					print!(
+						"(h:{}, v:{}, r:{}) ",
+						if image_meta.h_flip { 1 } else { 0 },
+						if image_meta.v_flip { 1 } else { 0 },
+						image_meta.rotation
+					);
+				}
+				print!("\n");
+			}
+
+			for p in prob.iter() {
+				let image_meta = images_map.get(p).unwrap();
+				println!(
+					"({}, {}) (h:{}, v:{}, r:{})",
+					p.0,
+					p.1,
+					if image_meta.h_flip { 1 } else { 0 },
+					if image_meta.v_flip { 1 } else { 0 },
+					image_meta.rotation
+				);
+			}
+		}
+		return 0;
 
 		let joined_map = join_map(images_map, raw_images_data);
 
-		// return 0;
-
-		print!("\n");
-		for (i, y) in joined_map.iter().rev().enumerate() {
-			if i % 8 == 0 {
-				// print!("\n");
+		println!("PRINTING JOINED MAP WITH GAPS");
+		for (i, y) in joined_map.iter().enumerate() {
+			if i != 0 && i % 8 == 0 {
+				print!("\n");
 			}
-			print!("\n");
 			for (j, x) in y.iter().enumerate() {
-				if j % 8 == 0 {
-					// print!(" ");
+				if j != 0 && j % 8 == 0 {
+					print!(" ");
 				}
 				if *x {
 					print!("#");
@@ -105,8 +299,46 @@ impl Solver for Day20Solver {
 					print!(".");
 				}
 			}
+			print!("\n");
 		}
-		print!("\n\n");
+
+		// return 0;
+
+		// let mut min_x = std::i64::MAX;
+		// let mut max_x = std::i64::MIN;
+		// let mut min_y = std::i64::MAX;
+		// let mut max_y = std::i64::MIN;
+
+		// for map_y in min_y..=max_y {
+		// 	for map_x in min_x..=max_x {
+		// 		let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+		// 		print!("{} ", image_meta.id);
+		// 	}
+		// 	print!("\n");
+		// }
+
+		// let joined_map = join_map(images_map, raw_images_data);
+
+		// return 0;
+
+		// print!("\n");
+		// for (i, y) in joined_map.iter().rev().enumerate() {
+		// 	if i % 8 == 0 {
+		// 		// print!("\n");
+		// 	}
+		// 	print!("\n");
+		// 	for (j, x) in y.iter().enumerate() {
+		// 		if j % 8 == 0 {
+		// 			// print!(" ");
+		// 		}
+		// 		if *x {
+		// 			print!("#");
+		// 		} else {
+		// 			print!(".");
+		// 		}
+		// 	}
+		// }
+		// print!("\n\n");
 
 		let monster_w = 19;
 		let monster_h = 2;
@@ -128,11 +360,7 @@ impl Solver for Day20Solver {
 			(16, 2),
 		];
 
-		let mut monster_coords = HashSet::new();
-
-		println!("{}", joined_map.len());
-		println!("{}", joined_map[0].len());
-		println!("{:?}", rotate_coord((0, 4), 23.0, 1));
+		let mut monster_count = 0; // = HashSet::new();
 
 		let mut r = 0;
 		let mut h = false;
@@ -141,6 +369,7 @@ impl Solver for Day20Solver {
 		'out: for rotations in 0..=3 {
 			for &(flip_h, flip_v) in FLIPS.iter() {
 				// let mut local_monster_count = 0;
+				let mut local_monster_coords = HashSet::new();
 				for y in 0..joined_map.len() - monster_h {
 					for x in 0..joined_map[y].len() - monster_w {
 						// println!("{} {}", x, y);
@@ -193,28 +422,28 @@ impl Solver for Day20Solver {
 									ay = joined_map.len() as i64 - ay;
 								}
 
-								monster_coords.insert((ax, ay));
+								local_monster_coords.insert((ax, ay));
 							}
 							// local_monster_count += 1;
 						}
 					}
 				}
 
-				// if local_monster_count > monster_count {
-				// 	monster_count = local_monster_count;
-				// }
+				if local_monster_coords.len() > monster_count {
+					monster_count = local_monster_coords.len();
+				}
 			}
 		}
 
 		println!("{} {} {}", r, h, v);
 
-		println!("{}", monster_coords.len());
+		// println!("{}", monster_coords.len());
 
 		joined_map.iter().fold(0, |prev, cur| {
 			prev + cur
 				.iter()
 				.fold(0, |prev, cur| prev + if *cur { 1 } else { 0 })
-		}) - monster_coords.len() as i64
+		}) - monster_count as i64
 	}
 }
 
@@ -234,56 +463,56 @@ fn join_map(
 		max_y = max_y.max(y);
 	}
 
-	for map_y in (min_y..=max_y).rev() {
-		for y in 0..10 {
-			for map_x in min_x..=max_x {
-				let image_meta = images_map.get(&(map_x, map_y)).unwrap();
-				let image_data = raw_images_data.get(&image_meta.id).unwrap();
-				for x in 0..10 {
-					if x == 0 || x == 9 || y == 0 || y == 9 {
-						// print!(".");
-						// continue;
-					}
-					let mut ay = y;
-					let mut ax = x;
+	// for map_y in (min_y..=max_y).rev() {
+	// 	for y in 0..10 {
+	// 		for map_x in min_x..=max_x {
+	// 			let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+	// 			let image_data = raw_images_data.get(&image_meta.id).unwrap();
+	// 			for x in 0..10 {
+	// 				if x == 0 || x == 9 || y == 0 || y == 9 {
+	// 					// print!(".");
+	// 					// continue;
+	// 				}
+	// 				let mut ay = y;
+	// 				let mut ax = x;
 
-					if image_meta.rotation > 0 {
-						// println!("Rotating ({}, {}) {} times...", ax, ay, image_meta.rotation);
-						(ax, ay) = rotate_coord((ax, ay), 9.0, image_meta.rotation);
-						// println!("...to ({}, {})", ax, ay);
-					}
+	// 				if image_meta.rotation > 0 {
+	// 					// println!("Rotating ({}, {}) {} times...", ax, ay, image_meta.rotation);
+	// 					(ax, ay) = rotate_coord((ax, ay), 9.0, image_meta.rotation);
+	// 					// println!("...to ({}, {})", ax, ay);
+	// 				}
 
-					if image_meta.v_flip {
-						ay = 9 - ay;
-					}
+	// 				if image_meta.v_flip {
+	// 					ay = 9 - ay;
+	// 				}
 
-					if image_meta.h_flip {
-						ax = 9 - ax;
-					}
+	// 				if image_meta.h_flip {
+	// 					ax = 9 - ax;
+	// 				}
 
-					print!(
-						"{}",
-						if image_data[ay as usize][ax as usize] {
-							"#"
-						} else {
-							"."
-						}
-					);
-				}
-				print!(" ");
-			}
-			print!("\n");
-		}
-		print!("\n");
-	}
+	// 				print!(
+	// 					"{}",
+	// 					if image_data[ay as usize][ax as usize] {
+	// 						"#"
+	// 					} else {
+	// 						"."
+	// 					}
+	// 				);
+	// 			}
+	// 			print!(" ");
+	// 		}
+	// 		print!("\n");
+	// 	}
+	// 	print!("\n");
+	// }
 
-	for map_y in min_y..=max_y {
-		for map_x in min_x..=max_x {
-			let image_meta = images_map.get(&(map_x, map_y)).unwrap();
-			print!("{} ", image_meta.id);
-		}
-		print!("\n");
-	}
+	// for map_y in min_y..=max_y {
+	// 	for map_x in min_x..=max_x {
+	// 		let image_meta = images_map.get(&(map_x, map_y)).unwrap();
+	// 		print!("{} ", image_meta.id);
+	// 	}
+	// 	print!("\n");
+	// }
 
 	let mut joined_map =
 		vec![vec![false; 8 * (max_x - min_x) as usize + 8]; 8 * (max_y - min_y) as usize + 8];
@@ -294,18 +523,11 @@ fn join_map(
 			for y in 0..8 {
 				for x in 0..8 {
 					// Fix rotation
-					let mut ay = 7 - y;
+					let mut ay = y;
 					let mut ax = x;
 
 					if image_meta.rotation > 0 {
 						(ax, ay) = rotate_coord((ax, ay), 7.0, image_meta.rotation);
-						// for _ in 0..image_meta.rotation {
-						// 	let fx = ax as f64 - 3.5;
-						// 	let fy = ay as f64 - 3.5;
-						// 	let (fx, fy) = (fy, -fx);
-						// 	ax = (fx + 3.5) as usize;
-						// 	ay = (fy + 3.5) as usize;
-						// }
 					}
 
 					if image_meta.v_flip {
@@ -331,13 +553,89 @@ fn join_map(
 	joined_map
 }
 
+fn print_image_meta(image: Image) -> Vec<String> {
+	let mut rows = Vec::new();
+	for y in 0..10 {
+		let mut row = String::new();
+		for x in 0..10 {
+			if (1..9).contains(&x) && (1..9).contains(&y) {
+				row.push(' ');
+			} else if y == 0 {
+				if image.top & 1 << x != 0 {
+					row.push('#');
+				} else {
+					row.push('.');
+				}
+			} else if y == 9 {
+				if image.bottom & 1 << (9 - x) != 0 {
+					row.push('#');
+				} else {
+					row.push('.');
+				}
+			} else if x == 0 {
+				if image.left & 1 << (9 - y) != 0 {
+					row.push('#');
+				} else {
+					row.push('.');
+				}
+			} else if x == 9 {
+				if image.right & 1 << y != 0 {
+					row.push('#');
+				} else {
+					row.push('.');
+				}
+			}
+		}
+		rows.push(row);
+	}
+
+	rows
+}
+
+fn print_image_data(data: &Vec<Vec<bool>>, h: bool, v: bool, r: i64, hollow: bool) -> Vec<String> {
+	let mut rows = Vec::new();
+	for y in 0..10 {
+		let mut row = String::new();
+		for x in 0..10 {
+			if hollow && (1..9).contains(&x) && (1..9).contains(&y) {
+				row.push(' ');
+				continue;
+			}
+
+			let mut ax = x;
+			let mut ay = y;
+
+			if h {
+				ax = 9 - ax;
+			}
+
+			if v {
+				ay = 9 - ay;
+			}
+
+			if r > 0 {
+				(ax, ay) = rotate_coord((ax, ay), 9.0, r);
+			}
+
+			if data[ay as usize][ax as usize] {
+				row.push('#');
+			} else {
+				row.push('.');
+			}
+		}
+		rows.push(row);
+	}
+
+	rows
+}
+
 fn rotate_coord(coord: (i64, i64), size: f64, turns: i64) -> (i64, i64) {
 	let half_size = size / 2.0;
 	let (mut x, mut y) = coord;
 	for _ in 0..turns {
 		let fx = x as f64 - half_size;
 		let fy = y as f64 - half_size;
-		let (fx, fy) = (-fy, fx);
+		let (fx, fy) = (fy, -fx);
 		x = (fx + half_size) as i64;
 		y = (fy + half_size) as i64;
 	}
@@ -459,9 +757,9 @@ fn fit_map_pieces(mut images: Vec<Image>) -> HashMap<(i64, i64), Image> {
 						let pos_y = pos_y + dy;
 						// This point in the image map does not exist, let's try to fit it
 						if let Some(fitted_image) = piece_fits(
-							images_map.get(&(pos_x, pos_y + 1)),
-							images_map.get(&(pos_x + 1, pos_y)),
 							images_map.get(&(pos_x, pos_y - 1)),
+							images_map.get(&(pos_x + 1, pos_y)),
+							images_map.get(&(pos_x, pos_y + 1)),
 							images_map.get(&(pos_x - 1, pos_y)),
 							*image,
 						) {
