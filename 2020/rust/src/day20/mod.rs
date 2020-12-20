@@ -280,7 +280,6 @@ impl Solver for Day20Solver {
 				);
 			}
 		}
-		return 0;
 
 		let joined_map = join_map(images_map, raw_images_data);
 
@@ -343,7 +342,7 @@ impl Solver for Day20Solver {
 		let monster_w = 19;
 		let monster_h = 2;
 		let monster = [
-			(19, 0),
+			(18, 0),
 			(0, 1),
 			(5, 1),
 			(6, 1),
@@ -366,9 +365,10 @@ impl Solver for Day20Solver {
 		let mut h = false;
 		let mut v = false;
 
+		let mut global_monster_coords = HashSet::new();
 		'out: for rotations in 0..=3 {
 			for &(flip_h, flip_v) in FLIPS.iter() {
-				// let mut local_monster_count = 0;
+				let mut local_monster_count = 0;
 				let mut local_monster_coords = HashSet::new();
 				for y in 0..joined_map.len() - monster_h {
 					for x in 0..joined_map[y].len() - monster_w {
@@ -379,14 +379,6 @@ impl Solver for Day20Solver {
 
 							// println!("!! {} {} {} {}", ax, ay, mx, my);
 
-							if rotations > 0 {
-								(ax, ay) = rotate_coord(
-									(ax as i64, ay as i64),
-									joined_map.len() as f64 - 1.0,
-									rotations,
-								);
-							}
-
 							if flip_h {
 								ax = joined_map.len() as i64 - ax - 1;
 							}
@@ -395,8 +387,17 @@ impl Solver for Day20Solver {
 								ay = joined_map.len() as i64 - ay - 1;
 							}
 
+							if rotations > 0 {
+								(ax, ay) = rotate_coord(
+									(ax as i64, ay as i64),
+									joined_map.len() as f64 - 1.0,
+									rotations,
+								);
+							}
+
 							joined_map[ay as usize][ax as usize]
 						}) {
+							local_monster_count += 1;
 							r = rotations;
 							h = flip_h;
 							v = flip_v;
@@ -406,6 +407,14 @@ impl Solver for Day20Solver {
 								let mut ax = x as i64 + mx;
 								let mut ay = y as i64 + my;
 
+								if flip_h {
+									ax = joined_map.len() as i64 - ax - 1;
+								}
+
+								if flip_v {
+									ay = joined_map.len() as i64 - ay - 1;
+								}
+
 								if rotations > 0 {
 									(ax, ay) = rotate_coord(
 										(ax as i64, ay as i64),
@@ -414,20 +423,16 @@ impl Solver for Day20Solver {
 									);
 								}
 
-								if flip_h {
-									ax = joined_map.len() as i64 - ax;
-								}
-
-								if flip_v {
-									ay = joined_map.len() as i64 - ay;
-								}
-
+								global_monster_coords.insert((ax, ay));
 								local_monster_coords.insert((ax, ay));
 							}
 							// local_monster_count += 1;
 						}
 					}
 				}
+
+				println!("{} DRAGONS THIS TIME", local_monster_count);
+				println!("{} UNIQUE LOL", local_monster_coords.len());
 
 				if local_monster_coords.len() > monster_count {
 					monster_count = local_monster_coords.len();
@@ -439,11 +444,37 @@ impl Solver for Day20Solver {
 
 		// println!("{}", monster_coords.len());
 
+		println!(
+			"this many hashtags {}",
+			joined_map.iter().fold(0, |prev, cur| {
+				prev + cur
+					.iter()
+					.fold(0, |prev, cur| prev + if *cur { 1 } else { 0 })
+			})
+		);
+
+		println!("THIS MANY GLOBAL COORDS {}", global_monster_coords.len());
+
+		println!("PRINTING JOINED MAP WITH DRAGONS");
+		for (i, y) in joined_map.iter().enumerate() {
+			for (j, x) in y.iter().enumerate() {
+				if global_monster_coords.contains(&(j as i64, i as i64)) {
+					print!("O");
+				} else if *x {
+					print!("#");
+				} else {
+					print!(".");
+				}
+			}
+			print!("\n");
+		}
+
 		joined_map.iter().fold(0, |prev, cur| {
 			prev + cur
 				.iter()
 				.fold(0, |prev, cur| prev + if *cur { 1 } else { 0 })
 		}) - monster_count as i64
+			- 1
 	}
 }
 
@@ -526,16 +557,16 @@ fn join_map(
 					let mut ay = y;
 					let mut ax = x;
 
-					if image_meta.rotation > 0 {
-						(ax, ay) = rotate_coord((ax, ay), 7.0, image_meta.rotation);
-					}
-
 					if image_meta.v_flip {
 						ay = 7 - ay;
 					}
 
 					if image_meta.h_flip {
 						ax = 7 - ax;
+					}
+
+					if image_meta.rotation > 0 {
+						(ax, ay) = rotate_coord((ax, ay), 7.0, image_meta.rotation);
 					}
 
 					// let hy = 8 * ((max_y - min_y - map_y) as usize + ay;
