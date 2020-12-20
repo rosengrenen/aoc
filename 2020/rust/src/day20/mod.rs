@@ -57,7 +57,7 @@ impl Solver for Day20Solver {
 			for &(flip_h, flip_v) in FLIPS.iter() {
 				for y in 0..joined_map.len() - monster_h {
 					for x in 0..joined_map[y].len() - monster_w {
-						if monster.iter().all(|&(mx, my)| {
+						let is_monster = monster.iter().all(|&(mx, my)| {
 							let mut ax = x as i64 + mx;
 							let mut ay = y as i64 + my;
 
@@ -78,7 +78,8 @@ impl Solver for Day20Solver {
 							}
 
 							joined_map[ay as usize][ax as usize]
-						}) {
+						});
+						if is_monster {
 							monster_count += 1;
 						}
 					}

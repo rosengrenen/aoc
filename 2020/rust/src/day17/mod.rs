@@ -23,7 +23,7 @@ impl Solver for Day17Solver {
 			if value {
 				let ax = (i % x) as i64 - (x / 2) as i64;
 				let ay = (y / 2) as i64 - (i / y) as i64;
-				set_xyz(&mut space, x_size, y_size, z_size, ax, ay, 0, true);
+				set_xyz(&mut space, (x_size, y_size, z_size), (ax, ay, 0), true);
 			}
 		}
 
@@ -32,7 +32,7 @@ impl Solver for Day17Solver {
 			for x in lo_x - i - 1..=hi_x + i + 1 {
 				for y in lo_y - i - 1..=hi_y + i + 1 {
 					for z in lo_z - i - 1..=hi_z + i + 1 {
-						let active = get_xyz(&space, x_size, y_size, z_size, x, y, z);
+						let active = get_xyz(&space, (x_size, y_size, z_size), (x, y, z));
 						let mut count = 0;
 						'delta: for &dx in RANGE.iter() {
 							for &dy in RANGE.iter() {
@@ -63,7 +63,7 @@ impl Solver for Day17Solver {
 										continue;
 									}
 
-									if get_xyz(&space, x_size, y_size, z_size, ax, ay, az) {
+									if get_xyz(&space, (x_size, y_size, z_size), (ax, ay, az)) {
 										count += 1;
 									}
 									if count > 3 {
@@ -73,10 +73,10 @@ impl Solver for Day17Solver {
 							}
 						}
 						if active && !(count == 2 || count == 3) {
-							set_xyz(&mut new_space, x_size, y_size, z_size, x, y, z, false);
+							set_xyz(&mut new_space, (x_size, y_size, z_size), (x, y, z), false);
 						}
 						if !active && count == 3 {
-							set_xyz(&mut new_space, x_size, y_size, z_size, x, y, z, true);
+							set_xyz(&mut new_space, (x_size, y_size, z_size), (x, y, z), true);
 						}
 					}
 				}
@@ -113,7 +113,10 @@ impl Solver for Day17Solver {
 				let ax = (i % x) as i64 - (x / 2) as i64;
 				let ay = (y / 2) as i64 - (i / y) as i64;
 				set_xyzw(
-					&mut space, x_size, y_size, z_size, w_size, ax, ay, 0, 0, true,
+					&mut space,
+					(x_size, y_size, z_size, w_size),
+					(ax, ay, 0, 0),
+					true,
 				);
 			}
 		}
@@ -125,7 +128,7 @@ impl Solver for Day17Solver {
 					for z in lo_z - i - 1..=hi_z + i + 1 {
 						for w in lo_w - i - 1..=hi_w + i + 1 {
 							let active =
-								get_xyzw(&space, x_size, y_size, z_size, w_size, x, y, z, w);
+								get_xyzw(&space, (x_size, y_size, z_size, w_size), (x, y, z, w));
 							let mut count = 0;
 							'delta: for &dx in RANGE.iter() {
 								for &dy in RANGE.iter() {
@@ -165,8 +168,9 @@ impl Solver for Day17Solver {
 											}
 
 											if get_xyzw(
-												&space, x_size, y_size, z_size, w_size, ax, ay, az,
-												aw,
+												&space,
+												(x_size, y_size, z_size, w_size),
+												(ax, ay, az, aw),
 											) {
 												count += 1;
 											}
@@ -180,28 +184,16 @@ impl Solver for Day17Solver {
 							if active && !(count == 2 || count == 3) {
 								set_xyzw(
 									&mut new_space,
-									x_size,
-									y_size,
-									z_size,
-									w_size,
-									x,
-									y,
-									z,
-									w,
+									(x_size, y_size, z_size, w_size),
+									(x, y, z, w),
 									false,
 								);
 							}
 							if !active && count == 3 {
 								set_xyzw(
 									&mut new_space,
-									x_size,
-									y_size,
-									z_size,
-									w_size,
-									x,
-									y,
-									z,
-									w,
+									(x_size, y_size, z_size, w_size),
+									(x, y, z, w),
 									true,
 								);
 							}
@@ -243,14 +235,12 @@ fn parse_plane(input: &str) -> (Vec<bool>, usize, usize) {
 }
 
 fn get_xyz(
-	vec: &Vec<bool>,
-	x_size: usize,
-	y_size: usize,
-	z_size: usize,
-	x: i64,
-	y: i64,
-	z: i64,
+	vec: &[bool],
+	dimension_sizes: (usize, usize, usize),
+	position: (i64, i64, i64),
 ) -> bool {
+	let (x_size, y_size, z_size) = dimension_sizes;
+	let (x, y, z) = position;
 	let ax = (x + (x_size as i64 / 2)) as usize;
 	let ay = (y + (y_size as i64 / 2)) as usize;
 	let az = (z + (z_size as i64 / 2)) as usize;
@@ -259,14 +249,12 @@ fn get_xyz(
 
 fn set_xyz(
 	vec: &mut Vec<bool>,
-	x_size: usize,
-	y_size: usize,
-	z_size: usize,
-	x: i64,
-	y: i64,
-	z: i64,
+	dimension_sizes: (usize, usize, usize),
+	position: (i64, i64, i64),
 	value: bool,
 ) {
+	let (x_size, y_size, z_size) = dimension_sizes;
+	let (x, y, z) = position;
 	let ax = (x + (x_size as i64 / 2)) as usize;
 	let ay = (y + (y_size as i64 / 2)) as usize;
 	let az = (z + (z_size as i64 / 2)) as usize;
@@ -274,16 +262,12 @@ fn set_xyz(
 }
 
 fn get_xyzw(
-	vec: &Vec<bool>,
-	x_size: usize,
-	y_size: usize,
-	z_size: usize,
-	w_size: usize,
-	x: i64,
-	y: i64,
-	z: i64,
-	w: i64,
+	vec: &[bool],
+	dimension_sizes: (usize, usize, usize, usize),
+	position: (i64, i64, i64, i64),
 ) -> bool {
+	let (x_size, y_size, z_size, w_size) = dimension_sizes;
+	let (x, y, z, w) = position;
 	let ax = (x + (x_size as i64 / 2)) as usize;
 	let ay = (y + (y_size as i64 / 2)) as usize;
 	let az = (z + (z_size as i64 / 2)) as usize;
@@ -293,16 +277,12 @@ fn get_xyzw(
 
 fn set_xyzw(
 	vec: &mut Vec<bool>,
-	x_size: usize,
-	y_size: usize,
-	z_size: usize,
-	w_size: usize,
-	x: i64,
-	y: i64,
-	z: i64,
-	w: i64,
+	dimension_sizes: (usize, usize, usize, usize),
+	position: (i64, i64, i64, i64),
 	value: bool,
 ) {
+	let (x_size, y_size, z_size, w_size) = dimension_sizes;
+	let (x, y, z, w) = position;
 	let ax = (x + (x_size as i64 / 2)) as usize;
 	let ay = (y + (y_size as i64 / 2)) as usize;
 	let az = (z + (z_size as i64 / 2)) as usize;

@@ -76,7 +76,7 @@ fn parse_string_to_tokens(input: &str) -> Vec<Token> {
 	tokens
 }
 
-fn infix_to_postfix(infix: &Vec<Token>, op_precedences: &HashMap<u8, i64>) -> Vec<Token> {
+fn infix_to_postfix(infix: &[Token], op_precedences: &HashMap<u8, i64>) -> Vec<Token> {
 	let mut postfix = Vec::new();
 	let mut op_stack = Vec::new();
 
@@ -124,7 +124,7 @@ fn infix_to_postfix(infix: &Vec<Token>, op_precedences: &HashMap<u8, i64>) -> Ve
 	postfix
 }
 
-fn eval_postfix(postfix: &Vec<Token>) -> i64 {
+fn eval_postfix(postfix: &[Token]) -> i64 {
 	let mut stack = Vec::new();
 	for token in postfix.iter() {
 		match *token {
