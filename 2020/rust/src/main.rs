@@ -1,3 +1,4 @@
+#![feature(destructuring_assignment)]
 #![feature(str_split_once)]
 #![feature(test)]
 
@@ -45,6 +46,8 @@ mod day18;
 use day18::Day18Solver;
 mod day19;
 use day19::Day19Solver;
+mod day20;
+use day20::Day20Solver;
 
 mod lib;
 use lib::{fetch_input, Solver};
@@ -70,6 +73,7 @@ fn get_solver(day: i64) -> Option<Box<dyn Solver>> {
 		17 => Some(Box::new(Day17Solver {})),
 		18 => Some(Box::new(Day18Solver {})),
 		19 => Some(Box::new(Day19Solver {})),
+		20 => Some(Box::new(Day20Solver {})),
 		_ => None,
 	}
 }
