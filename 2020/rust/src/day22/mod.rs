@@ -80,7 +80,6 @@ fn parse_decks(input: &str) -> (LinkedList<i64>, LinkedList<i64>) {
 fn play_recurse(mut p1_deck: LinkedList<i64>, mut p2_deck: LinkedList<i64>) -> bool {
 	let mut prev_games = HashSet::new();
 	while !p1_deck.is_empty() && !p2_deck.is_empty() {
-		// let decks_pair = (p1_deck.clone(), p2_deck.clone());
 		let decks_pair = (deck_value(&p1_deck), deck_value(&p2_deck));
 		if prev_games.contains(&decks_pair) {
 			return true;
