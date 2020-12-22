@@ -1,5 +1,3 @@
-use std::collections::LinkedList;
-
 use hashbrown::HashSet;
 
 use crate::lib::Solver;
@@ -10,14 +8,16 @@ impl Solver for Day22Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
 		let (mut p1_deck, mut p2_deck) = parse_decks(input);
 		while !p1_deck.is_empty() && !p2_deck.is_empty() {
-			let p1_card = p1_deck.pop_front().unwrap();
-			let p2_card = p2_deck.pop_front().unwrap();
+			let p1_card = p1_deck[0];
+			p1_deck.remove(0);
+			let p2_card = p2_deck[0];
+			p2_deck.remove(0);
 			if p1_card > p2_card {
-				p1_deck.push_back(p1_card);
-				p1_deck.push_back(p2_card);
+				p1_deck.push(p1_card);
+				p1_deck.push(p2_card);
 			} else {
-				p2_deck.push_back(p2_card);
-				p2_deck.push_back(p1_card);
+				p2_deck.push(p2_card);
+				p2_deck.push(p1_card);
 			}
 		}
 
@@ -31,25 +31,27 @@ impl Solver for Day22Solver {
 	fn solve_part_two(&self, input: &str) -> i64 {
 		let (mut p1_deck, mut p2_deck) = parse_decks(input);
 		while !p1_deck.is_empty() && !p2_deck.is_empty() {
-			let p1_card = p1_deck.pop_front().unwrap();
-			let p2_card = p2_deck.pop_front().unwrap();
+			let p1_card = p1_deck[0];
+			p1_deck.remove(0);
+			let p2_card = p2_deck[0];
+			p2_deck.remove(0);
 			if p1_deck.len() as i64 >= p1_card && p2_deck.len() as i64 >= p2_card {
 				let new_p1 = p1_deck.iter().cloned().take(p1_card as usize).collect();
 				let new_p2 = p2_deck.iter().cloned().take(p2_card as usize).collect();
 				if play_recurse(new_p1, new_p2) {
-					p1_deck.push_back(p1_card);
-					p1_deck.push_back(p2_card);
+					p1_deck.push(p1_card);
+					p1_deck.push(p2_card);
 				} else {
-					p2_deck.push_back(p2_card);
-					p2_deck.push_back(p1_card);
+					p2_deck.push(p2_card);
+					p2_deck.push(p1_card);
 				}
 			} else {
 				if p1_card > p2_card {
-					p1_deck.push_back(p1_card);
-					p1_deck.push_back(p2_card);
+					p1_deck.push(p1_card);
+					p1_deck.push(p2_card);
 				} else {
-					p2_deck.push_back(p2_card);
-					p2_deck.push_back(p1_card);
+					p2_deck.push(p2_card);
+					p2_deck.push(p1_card);
 				}
 			}
 		}
@@ -62,14 +64,14 @@ impl Solver for Day22Solver {
 	}
 }
 
-fn deck_value(p: &LinkedList<i64>) -> i64 {
+fn deck_value(p: &Vec<i64>) -> i64 {
 	p.iter()
 		.rev()
 		.enumerate()
 		.fold(0, |prev, (i, cur)| prev + (i as i64 + 1) * cur)
 }
 
-fn parse_decks(input: &str) -> (LinkedList<i64>, LinkedList<i64>) {
+fn parse_decks(input: &str) -> (Vec<i64>, Vec<i64>) {
 	let (p1, p2) = input.split_once("\n\n").unwrap();
 
 	let p1 = p1.lines().skip(1).map(|l| l.parse().unwrap()).collect();
@@ -77,35 +79,37 @@ fn parse_decks(input: &str) -> (LinkedList<i64>, LinkedList<i64>) {
 	(p1, p2)
 }
 
-fn play_recurse(mut p1_deck: LinkedList<i64>, mut p2_deck: LinkedList<i64>) -> bool {
+fn play_recurse(mut p1_deck: Vec<i64>, mut p2_deck: Vec<i64>) -> bool {
 	let mut prev_games = HashSet::new();
 	while !p1_deck.is_empty() && !p2_deck.is_empty() {
-		let decks_pair = (deck_value(&p1_deck), deck_value(&p2_deck));
+		let decks_pair = (p1_deck.clone(), p2_deck.clone());
 		if prev_games.contains(&decks_pair) {
 			return true;
 		} else {
 			prev_games.insert(decks_pair);
 		}
 
-		let p1_card = p1_deck.pop_front().unwrap();
-		let p2_card = p2_deck.pop_front().unwrap();
+		let p1_card = p1_deck[0];
+		p1_deck.remove(0);
+		let p2_card = p2_deck[0];
+		p2_deck.remove(0);
 		if p1_deck.len() as i64 >= p1_card && p2_deck.len() as i64 >= p2_card {
 			let new_p1_deck = p1_deck.iter().cloned().take(p1_card as usize).collect();
 			let new_p2_deck = p2_deck.iter().cloned().take(p2_card as usize).collect();
 			if play_recurse(new_p1_deck, new_p2_deck) {
-				p1_deck.push_back(p1_card);
-				p1_deck.push_back(p2_card);
+				p1_deck.push(p1_card);
+				p1_deck.push(p2_card);
 			} else {
-				p2_deck.push_back(p2_card);
-				p2_deck.push_back(p1_card);
+				p2_deck.push(p2_card);
+				p2_deck.push(p1_card);
 			}
 		} else {
 			if p1_card > p2_card {
-				p1_deck.push_back(p1_card);
-				p1_deck.push_back(p2_card);
+				p1_deck.push(p1_card);
+				p1_deck.push(p2_card);
 			} else {
-				p2_deck.push_back(p2_card);
-				p2_deck.push_back(p1_card);
+				p2_deck.push(p2_card);
+				p2_deck.push(p1_card);
 			}
 		}
 	}
