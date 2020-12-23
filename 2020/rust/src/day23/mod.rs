@@ -1,142 +1,22 @@
-use hashbrown::{HashMap, HashSet};
-use std::collections::{LinkedList, VecDeque};
-
 use crate::lib::Solver;
 
 pub struct Day23Solver;
 
 impl Solver for Day23Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let mut input = parse_cups(input);
-		let mut numbers = input.clone();
-		numbers.sort_unstable();
-
-		// println!("{:?}", input);
-		let mut current = input[0];
-
-		for m in 0..100 {
-			println!("\n-- move {} --", m + 1);
-			print!("cups: ");
-			for cup in input.iter() {
-				if *cup == current {
-					print!("({}) ", cup);
-				} else {
-					print!("{} ", cup);
-				}
-			}
-			print!("\n");
-
-			let mut a = 0;
-			let mut b = 0;
-			let mut c = 0;
-			let mut i = 0;
-			loop {
-				if input[i] == current {
-					a = input[(i + 1) % input.len()];
-					b = input[(i + 2) % input.len()];
-					c = input[(i + 3) % input.len()];
-					input = input
-						.into_iter()
-						.filter(|&n| n != a && n != b && n != c)
-						.collect();
-					break;
-				}
-
-				i = i + 1 % input.len();
-			}
-
-			println!("pick up: {}, {}, {}", a, b, c);
-			let mut destination = 0;
-			let mut i = 0;
-			loop {
-				if numbers[i] == current {
-					loop {
-						if i == 0 {
-							i = numbers.len() - 1;
-						} else {
-							i -= 1;
-						}
-
-						// println!("{}, {} {} {}", numbers[i], a, b, c);
-
-						if numbers[i] != a && numbers[i] != b && numbers[i] != c {
-							destination = numbers[i];
-							break;
-						}
-					}
-
-					break;
-				}
-
-				i += 1;
-			}
-			println!("destination: {}", destination);
-			let mut i = 0;
-			loop {
-				if input[i] == destination {
-					input.insert(i + 1, a);
-					input.insert(i + 2, b);
-					input.insert(i + 3, c);
-					break;
-				}
-				i += 1;
-			}
-			println!("{:?}", input);
-			let mut i = 0;
-			loop {
-				if input[i] == current {
-					current = input[(i + 1) % input.len()];
-					break;
-				}
-
-				i += 1;
-			}
-		}
-
-		let mut i = 0;
-		loop {
-			if input[i] == 1 {
-				break;
-			}
-			i += 1;
-		}
-		i += 1;
-		let mut num = 0;
-		loop {
-			if input[i] == 1 {
-				break;
-			}
-
-			num *= 10;
-			num += input[i];
-
-			i = (i + 1) % input.len();
-		}
-
-		num
-	}
-
-	fn solve_part_two(&self, input: &str) -> i64 {
 		let input = parse_cups(input);
-		let mut forward_map = HashMap::new();
-		let input_max = *input.iter().max().unwrap();
+		let mut forward_links = vec![0; input.len()];
 		for i in 0..input.len() - 1 {
-			forward_map.insert(input[i], input[i + 1]);
+			forward_links[input[i] as usize - 1] = input[i + 1];
 		}
-		forward_map.insert(input[input.len() - 1], input_max + 1);
-
-		for i in input_max + 1..1_000_000 {
-			forward_map.insert(i, i + 1);
-		}
-		forward_map.insert(1_000_000, input[0]);
+		forward_links[input[input.len() - 1] as usize - 1] = input[0];
 
 		let mut current = input[0];
-		let input_max = 1_000_000;
-
-		for _ in 0..10_000_000 {
-			let a = *forward_map.get(&current).unwrap();
-			let b = *forward_map.get(&a).unwrap();
-			let c = *forward_map.get(&b).unwrap();
+		let input_max = *input.iter().max().unwrap();
+		for _ in 0..100 {
+			let a = forward_links[current as usize - 1];
+			let b = forward_links[a as usize - 1];
+			let c = forward_links[b as usize - 1];
 
 			let mut destination = current;
 			loop {
@@ -152,27 +32,76 @@ impl Solver for Day23Solver {
 			}
 
 			// "remove" picked values
-			let next_current = *forward_map.get(&c).unwrap();
-			forward_map
-				.entry(current)
-				.and_modify(|entry| *entry = next_current);
+			let next_current = forward_links[c as usize - 1];
+			forward_links[current as usize - 1] = next_current;
 
 			// "insert" picked values after destination
-			let after_destination = *forward_map.get(&destination).unwrap();
-			forward_map
-				.entry(destination)
-				.and_modify(|entry| *entry = a);
-			forward_map
-				.entry(c)
-				.and_modify(|entry| *entry = after_destination);
+			let after_destination = forward_links[destination as usize - 1];
+			forward_links[destination as usize - 1] = a;
+			forward_links[c as usize - 1] = after_destination;
 
 			current = next_current;
 		}
 
-		let first_number = *forward_map.get(&1).unwrap();
-		let second_number = *forward_map.get(&first_number).unwrap();
+		let mut num = 0;
+		let mut next = forward_links[0];
+		while next != 1 {
+			num *= 10;
+			num += next;
+			next = forward_links[next as usize - 1];
+		}
+		num
+	}
 
-		println!("{} {}", first_number, second_number);
+	fn solve_part_two(&self, input: &str) -> i64 {
+		const FILL_SIZE: usize = 1_000_000;
+		let input = parse_cups(input);
+		let mut forward_links = vec![0; FILL_SIZE];
+		let input_max = *input.iter().max().unwrap();
+		for i in 0..input.len() - 1 {
+			forward_links[input[i] as usize - 1] = input[i + 1];
+		}
+		forward_links[input[input.len() - 1] as usize - 1] = input_max + 1;
+
+		for i in input_max + 1..FILL_SIZE as i64 {
+			forward_links[i as usize - 1] = i + 1;
+		}
+		forward_links[FILL_SIZE - 1] = input[0];
+
+		let mut current = input[0];
+		let input_max = FILL_SIZE as i64;
+		for _ in 0..10_000_000 {
+			let a = forward_links[current as usize - 1];
+			let b = forward_links[a as usize - 1];
+			let c = forward_links[b as usize - 1];
+
+			let mut destination = current;
+			loop {
+				if destination == 1 {
+					destination = input_max;
+				} else {
+					destination -= 1;
+				}
+
+				if destination != a && destination != b && destination != c {
+					break;
+				}
+			}
+
+			// "remove" picked values
+			let next_current = forward_links[c as usize - 1];
+			forward_links[current as usize - 1] = next_current;
+
+			// "insert" picked values after destination
+			let after_destination = forward_links[destination as usize - 1];
+			forward_links[destination as usize - 1] = a;
+			forward_links[c as usize - 1] = after_destination;
+
+			current = next_current;
+		}
+
+		let first_number = forward_links[0];
+		let second_number = forward_links[first_number as usize - 1];
 
 		first_number * second_number
 	}
