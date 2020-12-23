@@ -1,4 +1,4 @@
-use hashbrown::HashSet;
+use hashbrown::{HashMap, HashSet};
 use std::collections::{LinkedList, VecDeque};
 
 use crate::lib::Solver;
@@ -7,7 +7,7 @@ pub struct Day23Solver;
 
 impl Solver for Day23Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let mut input = parse(input);
+		let mut input = parse_cups(input);
 		let mut numbers = input.clone();
 		numbers.sort_unstable();
 
@@ -117,42 +117,31 @@ impl Solver for Day23Solver {
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let mut input = parse(input);
-		// let mut input: VecDeque<_> = input.into_iter().collect();
-		for i in 10..=1_000_000 {
-			input.push(i);
+		let input = parse_cups(input);
+		let mut forward_map = HashMap::new();
+		let input_max = *input.iter().max().unwrap();
+		for i in 0..input.len() - 1 {
+			forward_map.insert(input[i], input[i + 1]);
 		}
-		// let mut numbers = input.clone();
-		// numbers.sort_unstable();
+		forward_map.insert(input[input.len() - 1], input_max + 1);
 
-		// println!("{:?}", input);
-		let mut current_index = 0;
+		for i in input_max + 1..1_000_000 {
+			forward_map.insert(i, i + 1);
+		}
+		forward_map.insert(1_000_000, input[0]);
 
-		for m in 0..100 {
-			let current = input[current_index];
+		let mut current = input[0];
+		let input_max = 1_000_000;
 
-			if m % 1000 == 0 {
-				println!("\n-- move {} --", m + 1);
-			}
-			// print!("cups: ");
-			// for cup in input.iter() {
-			// 	if *cup == current {
-			// 		print!("({})", cup);
-			// 	} else {
-			// 		print!(" {} ", cup);
-			// 	}
-			// }
-			// print!("\n");
+		for _ in 0..10_000_000 {
+			let a = *forward_map.get(&current).unwrap();
+			let b = *forward_map.get(&a).unwrap();
+			let c = *forward_map.get(&b).unwrap();
 
-			let a = input[(current_index + 1) % input.len()];
-			let b = input[(current_index + 2) % input.len()];
-			let c = input[(current_index + 3) % input.len()];
-
-			// println!("pick up: {}, {}, {}", pick[0], pick[1], pick[2]);
 			let mut destination = current;
 			loop {
 				if destination == 1 {
-					destination = 10_000_000;
+					destination = input_max;
 				} else {
 					destination -= 1;
 				}
@@ -162,95 +151,38 @@ impl Solver for Day23Solver {
 				}
 			}
 
-			// println!("destination: {}", destination);
-			let input_len = input.len();
-			let mut from_index = (current_index + 4) % input_len;
-			let mut to_index = (current_index + 1) % input_len;
-			while to_index != current_index {
-				if input[from_index] == destination {
-					input[to_index] = input[from_index];
-					input[(to_index + 1) % input_len] = a;
-					input[(to_index + 2) % input_len] = b;
-					input[(to_index + 3) % input_len] = c;
-					to_index = (to_index + 4) % input_len;
-					from_index = (from_index + 1) % input_len;
-				} else {
-					input[to_index] = input[from_index];
-					to_index = (to_index + 1) % input_len;
-					from_index = (from_index + 1) % input_len;
-				}
-			}
+			// "remove" picked values
+			let next_current = *forward_map.get(&c).unwrap();
+			forward_map
+				.entry(current)
+				.and_modify(|entry| *entry = next_current);
 
-			// for i in 1..input.len() - 3 {
-			// 	let offset = if placed { 3 } else { 0 };
-			// 	let from_index = (current_index + i + 3 + offset) % input_len;
-			// 	let to_index = (current_index + i + offset) % input_len;
-			// 	if destination == input[from_index] {
-			// 		placed = true;
-			// 		println!("{}", input[from_index]);
-			// 		println!("{}", pick[0]);
-			// 		println!("{}", pick[1]);
-			// 		println!("{}", pick[2]);
-			// 	} else {
-			// 		println!("{}", input[from_index]);
-			// 	}
-			// 	// input[(current_index + i) % input_len] = input[(current_index + i + 3) % input_len];
-			// }
-			// let mut i = 0;
-			// loop {
-			// 	if input[i] == destination {
-			// 		input.insert(i + 1, a);
-			// 		input.insert(i + 2, b);
-			// 		input.insert(i + 3, c);
-			// 		break;
-			// 	}
-			// 	i += 1;
-			// }
-			// println!("{:?}", input);
-			current_index = (current_index + 1) % input.len();
-			// let mut i = 0;
-			// loop {
-			// 	if input[i] == current {
-			// 		current = input[(i + 1) % input.len()];
-			// 		break;
-			// 	}
+			// "insert" picked values after destination
+			let after_destination = *forward_map.get(&destination).unwrap();
+			forward_map
+				.entry(destination)
+				.and_modify(|entry| *entry = a);
+			forward_map
+				.entry(c)
+				.and_modify(|entry| *entry = after_destination);
 
-			// 	i += 1;
-			// }
+			current = next_current;
 		}
 
-		let mut i = 0;
-		loop {
-			if input[i] == 1 {
-				break;
-			}
-			i += 1;
-		}
-		i += 1;
-		let mut num = 0;
-		loop {
-			if input[i] == 1 {
-				break;
-			}
+		let first_number = *forward_map.get(&1).unwrap();
+		let second_number = *forward_map.get(&first_number).unwrap();
 
-			num *= 10;
-			num += input[i];
+		println!("{} {}", first_number, second_number);
 
-			i = (i + 1) % input.len();
-		}
-
-		num
+		first_number * second_number
 	}
 }
 
-fn parse(input: &str) -> Vec<i64> {
+fn parse_cups(input: &str) -> Vec<i64> {
 	input
 		.as_bytes()
 		.iter()
-		.map(|c| {
-			println!("{} {}", c, b'0');
-			(*c - b'0') as i64
-		})
+		.map(|c| (*c - b'0') as i64)
 		.collect()
 }
 
@@ -274,23 +206,23 @@ mod tests {
 		assert_eq!(solver.solve_part_two(input), 149245887792);
 	}
 
-	// #[bench]
-	// fn bench_parse(bencher: &mut Bencher) {
-	// 	let input = fetch_input(23);
-	// 	bencher.iter(|| parse(&input));
-	// }
+	#[bench]
+	fn bench_parse_cups(bencher: &mut Bencher) {
+		let input = fetch_input(23);
+		bencher.iter(|| parse_cups(&input));
+	}
 
-	// #[bench]
-	// fn bench_part_one(bencher: &mut Bencher) {
-	// 	let input = fetch_input(23);
-	// 	let solver = Day23Solver {};
-	// 	bencher.iter(|| solver.solve_part_one(&input));
-	// }
+	#[bench]
+	fn bench_part_one(bencher: &mut Bencher) {
+		let input = fetch_input(23);
+		let solver = Day23Solver {};
+		bencher.iter(|| solver.solve_part_one(&input));
+	}
 
-	// #[bench]
-	// fn bench_part_two(bencher: &mut Bencher) {
-	// 	let input = fetch_input(23);
-	// 	let solver = Day23Solver {};
-	// 	bencher.iter(|| solver.solve_part_two(&input));
-	// }
+	#[bench]
+	fn bench_part_two(bencher: &mut Bencher) {
+		let input = fetch_input(23);
+		let solver = Day23Solver {};
+		bencher.iter(|| solver.solve_part_two(&input));
+	}
 }
