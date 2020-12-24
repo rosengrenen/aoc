@@ -54,6 +54,8 @@ mod day22;
 use day22::Day22Solver;
 mod day23;
 use day23::Day23Solver;
+mod day24;
+use day24::Day24Solver;
 
 mod lib;
 use lib::{fetch_input, Solver};
@@ -83,6 +85,7 @@ fn get_solver(day: i64) -> Option<Box<dyn Solver>> {
 		21 => Some(Box::new(Day21Solver {})),
 		22 => Some(Box::new(Day22Solver {})),
 		23 => Some(Box::new(Day23Solver {})),
+		24 => Some(Box::new(Day24Solver {})),
 		_ => None,
 	}
 }
