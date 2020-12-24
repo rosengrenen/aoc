@@ -6,42 +6,42 @@ pub struct Day24Solver;
 
 impl Solver for Day24Solver {
 	fn solve_part_one(&self, input: &str) -> i64 {
-		let directions_list = parse(input);
+		let instructions = parse_instructions(input);
 		let mut tiles = HashSet::new();
-		for directions in directions_list.iter() {
+		for instruction in instructions.iter() {
 			let mut pos = (0, 0);
-			for &direction in directions.iter() {
+			for &direction in instruction.iter() {
 				match direction {
-					Direction::E => pos = (pos.0 + 1, pos.1),
-					Direction::NE => {
+					Dir::E => pos = (pos.0 + 1, pos.1),
+					Dir::NE => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0 + 1, pos.1 + 1)
 						} else {
 							pos = (pos.0, pos.1 + 1)
 						}
 					}
-					Direction::NW => {
+					Dir::NW => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0, pos.1 + 1)
 						} else {
 							pos = (pos.0 - 1, pos.1 + 1)
 						}
 					}
-					Direction::SE => {
+					Dir::SE => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0 + 1, pos.1 - 1)
 						} else {
 							pos = (pos.0, pos.1 - 1)
 						}
 					}
-					Direction::SW => {
+					Dir::SW => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0, pos.1 - 1)
 						} else {
 							pos = (pos.0 - 1, pos.1 - 1)
 						}
 					}
-					Direction::W => pos = (pos.0 - 1, pos.1),
+					Dir::W => pos = (pos.0 - 1, pos.1),
 				}
 			}
 
@@ -56,42 +56,42 @@ impl Solver for Day24Solver {
 	}
 
 	fn solve_part_two(&self, input: &str) -> i64 {
-		let directions_list = parse(input);
+		let directions_list = parse_instructions(input);
 		let mut tiles = HashSet::new();
 		for directions in directions_list.iter() {
 			let mut pos = (0, 0);
 			for &direction in directions.iter() {
 				match direction {
-					Direction::E => pos = (pos.0 + 1, pos.1),
-					Direction::NE => {
+					Dir::E => pos = (pos.0 + 1, pos.1),
+					Dir::NE => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0 + 1, pos.1 + 1)
 						} else {
 							pos = (pos.0, pos.1 + 1)
 						}
 					}
-					Direction::NW => {
+					Dir::NW => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0, pos.1 + 1)
 						} else {
 							pos = (pos.0 - 1, pos.1 + 1)
 						}
 					}
-					Direction::SE => {
+					Dir::SE => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0 + 1, pos.1 - 1)
 						} else {
 							pos = (pos.0, pos.1 - 1)
 						}
 					}
-					Direction::SW => {
+					Dir::SW => {
 						if pos.1 % 2 == 0 {
 							pos = (pos.0, pos.1 - 1)
 						} else {
 							pos = (pos.0 - 1, pos.1 - 1)
 						}
 					}
-					Direction::W => pos = (pos.0 - 1, pos.1),
+					Dir::W => pos = (pos.0 - 1, pos.1),
 				}
 			}
 
@@ -105,10 +105,7 @@ impl Solver for Day24Solver {
 		let even_neighbours = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, 0)];
 		let odd_neighbours = [(-1, 1), (0, 1), (1, 0), (0, -1), (-1, -1), (-1, 0)];
 
-		// println!("{}", tiles.len());
-		// print_tiles(&tiles);
 		for _ in 0..100 {
-			// println!("{:?}", tiles);
 			let mut new_tiles = HashSet::new();
 			for &(x, y) in tiles.iter() {
 				let neighbours = if y % 2 == 0 {
@@ -120,7 +117,6 @@ impl Solver for Day24Solver {
 					let ax = x + dx;
 					let ay = y + dy;
 					let count = count_neighbours(&tiles, (ax, ay));
-					// println!("{},{} has {} neighbours", ax, ay, count);
 
 					if tiles.contains(&(ax, ay)) {
 						if count == 1 || count == 2 {
@@ -134,9 +130,6 @@ impl Solver for Day24Solver {
 				}
 			}
 			tiles = new_tiles;
-
-			println!("{}", tiles.len());
-			// print_tiles(&tiles);
 		}
 
 		tiles.len() as i64
@@ -156,7 +149,6 @@ fn count_neighbours(tiles: &HashSet<(i64, i64)>, pos: (i64, i64)) -> i64 {
 	let mut count = 0;
 	for (dx, dy) in neightbours.iter() {
 		if tiles.contains(&(x + dx, y + dy)) {
-			// println!("{},{} has neighbour {},{}", x, y, x + dx, y + dy);
 			count += 1;
 		}
 	}
@@ -164,45 +156,8 @@ fn count_neighbours(tiles: &HashSet<(i64, i64)>, pos: (i64, i64)) -> i64 {
 	count
 }
 
-fn print_tiles(tiles: &HashSet<(i64, i64)>) {
-	let mut min_x = std::i64::MAX;
-	let mut max_x = std::i64::MIN;
-	let mut min_y = std::i64::MAX;
-	let mut max_y = std::i64::MIN;
-
-	for &(x, y) in tiles.iter() {
-		min_x = min_x.min(x);
-		max_x = max_x.max(x);
-		min_y = min_y.min(y);
-		max_y = max_y.max(y);
-	}
-
-	min_x = -2;
-	max_x = 2;
-	min_y = -4;
-	max_y = 3;
-
-	println!(
-		"Printing map in range {},{} {},{}",
-		min_x, max_x, min_y, max_y
-	);
-	for y in min_y..=max_y {
-		if (y + 1000) % 2 == 0 {
-			print!(" ");
-		}
-		for x in min_x..=max_x {
-			if tiles.contains(&(x, y)) {
-				print!("x ");
-			} else {
-				print!("  ");
-			}
-		}
-		print!("\n");
-	}
-}
-
 #[derive(Copy, Clone, Debug)]
-enum Direction {
+enum Dir {
 	E,
 	SE,
 	SW,
@@ -211,7 +166,7 @@ enum Direction {
 	NE,
 }
 
-fn parse(input: &str) -> Vec<Vec<Direction>> {
+fn parse_instructions(input: &str) -> Vec<Vec<Dir>> {
 	let mut directions_list = Vec::new();
 	for line in input.lines() {
 		let mut directions = Vec::new();
@@ -221,25 +176,25 @@ fn parse(input: &str) -> Vec<Vec<Direction>> {
 			directions.push(match bytes[i] {
 				b'e' => {
 					i += 1;
-					Direction::E
+					Dir::E
 				}
 				b's' => {
 					i += 2;
 					match bytes[i - 1] {
-						b'e' => Direction::SE,
-						b'w' => Direction::SW,
+						b'e' => Dir::SE,
+						b'w' => Dir::SW,
 						_ => panic!(),
 					}
 				}
 				b'w' => {
 					i += 1;
-					Direction::W
+					Dir::W
 				}
 				b'n' => {
 					i += 2;
 					match bytes[i - 1] {
-						b'e' => Direction::NE,
-						b'w' => Direction::NW,
+						b'e' => Dir::NE,
+						b'w' => Dir::NW,
 						_ => panic!(),
 					}
 				}
@@ -251,6 +206,63 @@ fn parse(input: &str) -> Vec<Vec<Direction>> {
 	}
 
 	directions_list
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+struct Pos {
+	x: i64,
+	y: i64,
+}
+
+impl Pos {
+	fn new(x: i64, y: i64) -> Self {
+		Self { x, y }
+	}
+}
+
+fn tiles_from_instructions(instructions: &Vec<Vec<Dir>>) -> HashSet<Pos> {
+	let mut tiles = HashSet::new();
+	for instruction in instructions.iter() {
+		let mut pos = Pos::new(0, 0);
+		for &direction in instruction.iter() {
+			match direction {
+				Dir::E => pos.x += 1,
+				Dir::NE => {
+					if pos.y % 2 == 0 {
+						pos.x += 1;
+					}
+					pos.y += 1;
+				}
+				Dir::NW => {
+					if pos.y % 2 == 1 {
+						pos.x -= 1;
+					}
+					pos.y += 1;
+				}
+				Dir::SE => {
+					if pos.y % 2 == 0 {
+						pos.x += 1;
+					}
+					pos.y -= 1;
+				}
+				Dir::SW => {
+					if pos.y % 2 == 1 {
+						pos.x -= 1;
+					}
+					pos.y -= 1;
+				}
+				Dir::W => pos.x -= 1,
+			}
+		}
+
+		if tiles.contains(&pos) {
+			tiles.remove(&pos);
+		} else {
+			tiles.insert(pos);
+		}
+	}
+
+	tiles
 }
 
 #[cfg(test)]
