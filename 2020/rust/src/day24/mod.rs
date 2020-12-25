@@ -86,7 +86,7 @@ impl Pos {
 	}
 }
 
-fn tiles_from_instructions(instructions: &Vec<Vec<Dir>>) -> HashSet<Pos> {
+fn tiles_from_instructions(instructions: &[Vec<Dir>]) -> HashSet<Pos> {
 	let mut tiles = HashSet::new();
 	for instruction in instructions.iter() {
 		let mut pos = Pos::new(0, 0);
@@ -167,10 +167,8 @@ fn simulate(tiles: &HashSet<Pos>) -> HashSet<Pos> {
 				if count == 1 || count == 2 {
 					new_tiles.insert(cur_pos);
 				}
-			} else {
-				if count == 2 {
-					new_tiles.insert(cur_pos);
-				}
+			} else if count == 2 {
+				new_tiles.insert(cur_pos);
 			}
 		}
 	}

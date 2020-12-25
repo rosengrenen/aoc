@@ -10,7 +10,7 @@ impl Solver for Day25Solver {
 		let mut value = 1;
 		loop {
 			value *= 7;
-			value = value % 20_201_227;
+			value %= 20_201_227;
 			if value == door_pub_key {
 				break;
 			}
@@ -21,7 +21,7 @@ impl Solver for Day25Solver {
 		let mut value = 1;
 		for _ in 0..door_loop_size {
 			value *= card_pub_key;
-			value = value % 20_201_227;
+			value %= 20_201_227;
 		}
 
 		value

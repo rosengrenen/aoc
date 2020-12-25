@@ -59,10 +59,10 @@ fn parse_foods(input: &str) -> Vec<(HashSet<&str>, HashSet<&str>)> {
 }
 
 fn find_ingredient_allergent_pairs<'a>(
-	foods: &Vec<(HashSet<&'a str>, HashSet<&'a str>)>,
+	foods: &[(HashSet<&'a str>, HashSet<&'a str>)],
 ) -> HashMap<&'a str, &'a str> {
 	let mut all_allergents: HashSet<&str> = HashSet::new();
-	for (_, allergents) in foods.into_iter() {
+	for (_, allergents) in foods.iter() {
 		for &allergent in allergents.iter() {
 			all_allergents.insert(allergent);
 		}
@@ -78,7 +78,7 @@ fn find_ingredient_allergent_pairs<'a>(
 			// Since the matching_ingredients set is empty from the beginning, we need
 			// to fill it up with the first matching food's ingredients, and then reduce
 			let mut first_matching_food = true;
-			for (ingredients, allergents) in foods.into_iter() {
+			for (ingredients, allergents) in foods.iter() {
 				if allergents.contains(allergent) {
 					if first_matching_food {
 						first_matching_food = false;

@@ -42,14 +42,12 @@ impl Solver for Day22Solver {
 					p2_deck.push_back(p2_card);
 					p2_deck.push_back(p1_card);
 				}
+			} else if p1_card > p2_card {
+				p1_deck.push_back(p1_card);
+				p1_deck.push_back(p2_card);
 			} else {
-				if p1_card > p2_card {
-					p1_deck.push_back(p1_card);
-					p1_deck.push_back(p2_card);
-				} else {
-					p2_deck.push_back(p2_card);
-					p2_deck.push_back(p1_card);
-				}
+				p2_deck.push_back(p2_card);
+				p2_deck.push_back(p1_card);
 			}
 		}
 
@@ -98,14 +96,12 @@ fn play_recurse(mut p1_deck: VecDeque<i64>, mut p2_deck: VecDeque<i64>) -> bool 
 				p2_deck.push_back(p2_card);
 				p2_deck.push_back(p1_card);
 			}
+		} else if p1_card > p2_card {
+			p1_deck.push_back(p1_card);
+			p1_deck.push_back(p2_card);
 		} else {
-			if p1_card > p2_card {
-				p1_deck.push_back(p1_card);
-				p1_deck.push_back(p2_card);
-			} else {
-				p2_deck.push_back(p2_card);
-				p2_deck.push_back(p1_card);
-			}
+			p2_deck.push_back(p2_card);
+			p2_deck.push_back(p1_card);
 		}
 	}
 
