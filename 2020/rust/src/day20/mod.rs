@@ -1,11 +1,11 @@
+use aoc_util::{Solver, SolverOutput};
 use hashbrown::HashMap;
 
-use crate::lib::Solver;
+#[derive(Default)]
+pub struct Day20;
 
-pub struct Day20Solver;
-
-impl Solver for Day20Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day20 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let (images, _) = parse_images(input);
 		let images_map = fit_map_pieces(images);
 
@@ -25,10 +25,12 @@ impl Solver for Day20Solver {
 		let bottom_left_corner = images_map.get(&(min_x, min_y)).unwrap().id;
 		let top_left_corner = images_map.get(&(min_x, max_y)).unwrap().id;
 
-		top_right_corner * bottom_right_corner * bottom_left_corner * top_left_corner
+		SolverOutput::Num(
+			top_right_corner * bottom_right_corner * bottom_left_corner * top_left_corner,
+		)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let (images, raw_images_data) = parse_images(input);
 		let images_map = fit_map_pieces(images);
 		let joined_map = join_map(images_map, raw_images_data);
@@ -91,11 +93,13 @@ impl Solver for Day20Solver {
 			}
 		}
 
-		joined_map.iter().fold(0, |prev, cur| {
-			prev + cur
-				.iter()
-				.fold(0, |prev, cur| prev + if *cur { 1 } else { 0 })
-		}) - monster_count * 15
+		SolverOutput::Num(
+			joined_map.iter().fold(0, |prev, cur| {
+				prev + cur
+					.iter()
+					.fold(0, |prev, cur| prev + if *cur { 1 } else { 0 })
+			}) - monster_count * 15,
+		)
 	}
 }
 
@@ -370,46 +374,5 @@ fn rotate_image_once(image: Image) -> Image {
 		left: image.bottom,
 		rotation: image.rotation + 1 % 4,
 		..image
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day20Solver {};
-		assert_eq!(solver.solve_part_one(input), 20899048083289);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day20Solver {};
-		assert_eq!(solver.solve_part_two(input), 273);
-	}
-
-	#[bench]
-	fn bench_parse_images(bencher: &mut Bencher) {
-		let input = fetch_input(20);
-		bencher.iter(|| parse_images(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(20);
-		let solver = Day20Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(20);
-		let solver = Day20Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

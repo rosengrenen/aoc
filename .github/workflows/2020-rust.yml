@@ -1,22 +1,29 @@
+name: "2020 rust"
+
 on: [push, pull_request]
 
-name: "[2020 rust] Build, test, and format"
+defaults:
+  run:
+    working-directory: ./2020/rust
 
 jobs:
-  check:
-    name: Check
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install nightly toolchain
-        working-directory: 2020/rust
-        run: rustup default nightly
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
 
       - name: Run cargo check
-        working-directory: 2020/rust
-        run: cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
 
   test:
     name: Test Suite
@@ -25,37 +32,53 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install nightly toolchain
-        working-directory: 2020/rust
-        run: rustup default nightly
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
 
       - name: Run cargo test
-        working-directory: 2020/rust
-        run: cargo test
-        env:
-          AOC_SESSION: ${{ secrets.AOC_SESSION }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
 
-  lints:
+  format:
     name: Lints
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install nightly toolchain
-        working-directory: 2020/rust
-        run: rustup default nightly
-
-      - name: Add rustfmt
-        run: rustup component add rustfmt
-
-      - name: Add rustfmt
-        run: rustup component add clippy
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt
 
       - name: Run cargo fmt
-        working-directory: 2020/rust
-        run: cargo fmt --all -- --check
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  lint:
+    name: Lints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: clippy
 
       - name: Run cargo clippy
-        working-directory: 2020/rust
-        run: cargo clippy -- -D warnings
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings

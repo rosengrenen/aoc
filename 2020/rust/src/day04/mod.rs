@@ -1,16 +1,19 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day4Solver;
+#[derive(Default)]
+pub struct Day4;
 
-impl Solver for Day4Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day4 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let parsed_passports_iter = parse_passports(input);
-		filter_required_fields(parsed_passports_iter).count() as i64
+		SolverOutput::Num(filter_required_fields(parsed_passports_iter).count() as i64)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let parsed_passports_iter = parse_passports(input);
-		filter_valid_fields(filter_required_fields(parsed_passports_iter)).count() as i64
+		SolverOutput::Num(
+			filter_valid_fields(filter_required_fields(parsed_passports_iter)).count() as i64,
+		)
 	}
 }
 
@@ -127,41 +130,4 @@ where
 				false
 			}
 		})
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day4Solver {};
-		assert_eq!(solver.solve_part_one(input), 2);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let invalid_passports_input = include_str!("input.test2.txt");
-		let valid_passports_input = include_str!("input.test3.txt");
-		let solver = Day4Solver {};
-		assert_eq!(solver.solve_part_two(&invalid_passports_input), 0);
-		assert_eq!(solver.solve_part_two(&valid_passports_input), 4);
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(4);
-		let solver = Day4Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(4);
-		let solver = Day4Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

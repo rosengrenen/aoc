@@ -1,11 +1,11 @@
 [package]
-name = "aoc2019-rust"
-version = "0.1.0"
-authors = ["Rasmus Rosengren <rasmus.rosengren@pm.me>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+name = "aoc2019"
+version = "0.0.0"
+authors = ["Rasmus Rosengren <rasmus.rosengren@protonmail.com>"]
+edition = "2021"
 
 [dependencies]
-num = "0.2.0"
-permutohedron = "0.2.4"
+aoc_macro = { path = "../../shared/rust/aoc_macro" }
+aoc_util = { path = "../../shared/rust/aoc_util" }
+num = "0.4"
+permutohedron = "0.2"

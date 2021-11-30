@@ -1,15 +1,16 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day8Solver;
+#[derive(Default)]
+pub struct Day8;
 
-impl Solver for Day8Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day8 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let program = parse_program(input);
 		let (accumulator, _) = run_program(&program);
-		accumulator
+		SolverOutput::Num(accumulator)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut program = parse_program(input);
 		for i in 0..program.len() {
 			program[i] = match program[i] {
@@ -25,7 +26,7 @@ impl Solver for Day8Solver {
 			};
 
 			if exited {
-				return acc;
+				return SolverOutput::Num(acc);
 			}
 		}
 
@@ -49,7 +50,7 @@ fn parse_program(input: &str) -> Vec<Instruction> {
 				"acc" => Instruction::Acc(value.parse().unwrap()),
 				"jmp" => Instruction::Jmp(value.parse().unwrap()),
 				"nop" => Instruction::Nop(value.parse().unwrap()),
-				_ => panic!(format!("Invalid instruction {}", instruction)),
+				_ => panic!("Invalid instruction {}", instruction),
 			}
 		})
 		.collect()
@@ -90,45 +91,4 @@ fn run_program(program: &[Instruction]) -> (i64, bool) {
 	}
 
 	(accumulator, true)
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day8Solver {};
-		assert_eq!(solver.solve_part_one(input), 5);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day8Solver {};
-		assert_eq!(solver.solve_part_two(input), 8);
-	}
-
-	#[bench]
-	fn bench_parse_instructions(bencher: &mut Bencher) {
-		let input = fetch_input(8);
-		bencher.iter(|| parse_program(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(8);
-		let solver = Day8Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(8);
-		let solver = Day8Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

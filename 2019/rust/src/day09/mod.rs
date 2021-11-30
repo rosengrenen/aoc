@@ -1,24 +1,25 @@
-use crate::lib::{Solver, SolverResult};
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day9Solver;
+#[derive(Default)]
+pub struct Day9;
 
-impl Solver for Day9Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+impl Solver for Day9 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input
 			.split(',')
 			.map(|s| s.parse::<i64>().unwrap())
 			.collect();
 		let output = collect_outputs(&program_orig, &vec![1])[0];
-		SolverResult::Num(output)
+		SolverOutput::Num(output)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input
 			.split(',')
 			.map(|s| s.parse::<i64>().unwrap())
 			.collect();
 		let output = collect_outputs(&program_orig, &vec![2])[0];
-		SolverResult::Num(output)
+		SolverOutput::Num(output)
 	}
 }
 

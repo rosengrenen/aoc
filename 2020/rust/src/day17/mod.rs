@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day17Solver;
+#[derive(Default)]
+pub struct Day17;
 
-impl Solver for Day17Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day17 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		const ITERATIONS: usize = 6;
 		let (plane, x, y) = parse_plane(input);
 		let x_size = x + 2 * ITERATIONS;
@@ -84,12 +85,14 @@ impl Solver for Day17Solver {
 			space = new_space;
 		}
 
-		space
-			.iter()
-			.fold(0, |prev, &curr| if curr { prev + 1 } else { prev })
+		SolverOutput::Num(
+			space
+				.iter()
+				.fold(0, |prev, &curr| if curr { prev + 1 } else { prev }),
+		)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		const ITERATIONS: usize = 6;
 		let (plane, x, y) = parse_plane(input);
 		let x_size = x + 2 * ITERATIONS;
@@ -204,9 +207,11 @@ impl Solver for Day17Solver {
 			space = new_space;
 		}
 
-		space
-			.iter()
-			.fold(0, |prev, &curr| if curr { prev + 1 } else { prev })
+		SolverOutput::Num(
+			space
+				.iter()
+				.fold(0, |prev, &curr| if curr { prev + 1 } else { prev }),
+		)
 	}
 }
 
@@ -288,45 +293,4 @@ fn set_xyzw(
 	let az = (z + (z_size as i64 / 2)) as usize;
 	let aw = (w + (w_size as i64 / 2)) as usize;
 	vec[aw * z_size * y_size * x_size + az * y_size * x_size + ay * y_size + ax] = value;
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day17Solver {};
-		assert_eq!(solver.solve_part_one(input), 112);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day17Solver {};
-		assert_eq!(solver.solve_part_two(input), 848);
-	}
-
-	#[bench]
-	fn bench_parse_plane(bencher: &mut Bencher) {
-		let input = fetch_input(17);
-		bencher.iter(|| parse_plane(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(17);
-		let solver = Day17Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(17);
-		let solver = Day17Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

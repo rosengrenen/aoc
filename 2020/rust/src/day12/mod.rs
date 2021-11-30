@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day12Solver;
+#[derive(Default)]
+pub struct Day12;
 
-impl Solver for Day12Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day12 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let instructions = parse_instructions(input);
 		let mut facing = Point { x: 1, y: 0 };
 		let mut position = Point { x: 0, y: 0 };
@@ -22,10 +23,11 @@ impl Solver for Day12Solver {
 				_ => panic!("Invalid action"),
 			}
 		}
-		position.x.abs() + position.y.abs()
+
+		SolverOutput::Num(position.x.abs() + position.y.abs())
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let instructions = parse_instructions(input);
 		let mut waypoint = Point { x: 10, y: 1 };
 		let mut position = Point { x: 0, y: 0 };
@@ -44,7 +46,8 @@ impl Solver for Day12Solver {
 				_ => panic!("Invalid action"),
 			}
 		}
-		position.x.abs() + position.y.abs()
+
+		SolverOutput::Num(position.x.abs() + position.y.abs())
 	}
 }
 
@@ -84,46 +87,5 @@ fn rotate_anticlockwise(point: &mut Point, degrees: i64) {
 		let tmp = point.x;
 		point.x = -point.y;
 		point.y = tmp;
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day12Solver {};
-		assert_eq!(solver.solve_part_one(input), 25);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day12Solver {};
-		assert_eq!(solver.solve_part_two(input), 286);
-	}
-
-	#[bench]
-	fn bench_parse_instructions(bencher: &mut Bencher) {
-		let input = fetch_input(12);
-		bencher.iter(|| parse_instructions(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(12);
-		let solver = Day12Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(12);
-		let solver = Day12Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

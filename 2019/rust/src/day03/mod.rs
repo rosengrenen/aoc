@@ -1,27 +1,30 @@
-use crate::lib::{Solver, SolverResult};
-use std::cmp::Eq;
-use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::{
+	cmp::{Eq, Ordering},
+	collections::HashMap,
+};
 
-pub struct Day3Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day3Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day3;
+
+impl Solver for Day3 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut lines = input.lines();
 		let first_path: Vec<&str> = lines.next().unwrap().split(',').collect();
 		let second_path: Vec<&str> = lines.next().unwrap().split(',').collect();
 
 		let distance = calculate_distance(&first_path, &second_path, false);
-		SolverResult::Num(distance)
+		SolverOutput::Num(distance)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut lines = input.lines();
 		let first_path: Vec<&str> = lines.next().unwrap().split(',').collect();
 		let second_path: Vec<&str> = lines.next().unwrap().split(',').collect();
 
 		let distance = calculate_distance(&first_path, &second_path, true);
-		SolverResult::Num(distance)
+		SolverOutput::Num(distance)
 	}
 }
 
@@ -237,62 +240,5 @@ fn calculate_distance(first_path: &Vec<&str>, second_path: &Vec<&str>, part_two:
 					Ordering::Less => mh_distance,
 				},
 			)
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn part_one_test_cases() {
-		assert_eq!(
-			calculate_distance(
-				&vec!["R75", "D30", "R83", "U83", "L12", "D49", "R71", "U7", "L72"],
-				&vec!["U62", "R66", "U55", "R34", "D71", "R55", "D58", "R83"],
-				false
-			),
-			159
-		);
-		assert_eq!(
-			calculate_distance(
-				&vec!["R98", "U47", "R26", "D63", "R33", "U87", "L62", "D20", "R33", "U53", "R51"],
-				&vec!["U98", "R91", "D20", "R16", "D67", "R40", "U7", "R15", "U6", "R7"],
-				false
-			),
-			135
-		);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		assert_eq!(
-			calculate_distance(
-				&vec!["R75", "D30", "R83", "U83", "L12", "D49", "R71", "U7", "L72"],
-				&vec!["U62", "R66", "U55", "R34", "D71", "R55", "D58", "R83"],
-				true
-			),
-			610
-		);
-		assert_eq!(
-			calculate_distance(
-				&vec!["R98", "U47", "R26", "D63", "R33", "U87", "L62", "D20", "R33", "U53", "R51"],
-				&vec!["U98", "R91", "D20", "R16", "D67", "R40", "U7", "R15", "U6", "R7"],
-				true
-			),
-			410
-		);
-	}
-
-	#[test]
-	fn mh_distance_test() {
-		assert_eq!(
-			manhattan_distance(&Pos { x: 0, y: 0 }, &Pos { x: -7, y: 10 }),
-			17
-		);
-		assert_eq!(
-			manhattan_distance(&Pos { x: -75, y: 18 }, &Pos { x: -38, y: -17 }),
-			72
-		);
 	}
 }

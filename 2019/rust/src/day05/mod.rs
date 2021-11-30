@@ -1,18 +1,19 @@
-use crate::lib::{Solver, SolverResult};
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day5Solver;
+#[derive(Default)]
+pub struct Day5;
 
-impl Solver for Day5Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+impl Solver for Day5 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut program: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
 		let result = run_program(&mut program, 1);
-		SolverResult::Num(result)
+		SolverOutput::Num(result)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut program: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
 		let result = run_program(&mut program, 5);
-		SolverResult::Num(result)
+		SolverOutput::Num(result)
 	}
 }
 
@@ -103,7 +104,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn part_two_test_cases() {
+	fn part_two_test1() {
 		// Position mode
 		assert_eq!(
 			run_program(

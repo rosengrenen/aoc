@@ -1,21 +1,22 @@
-use crate::lib::{Solver, SolverResult};
-use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::{cmp::Ordering, collections::HashMap};
 
-pub struct Day6Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day6Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day6;
+
+impl Solver for Day6 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let tree = build_orbit_tree(input);
 		let orbit_counts = calculate_orbit_counts(&tree);
-		SolverResult::Num(orbit_counts)
+		SolverOutput::Num(orbit_counts)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let tree = build_orbit_tree(input);
 		let orbital_transfers =
 			calculate_orbital_transfers(&tree, String::from("YOU"), String::from("SAN"));
-		SolverResult::Num(orbital_transfers)
+		SolverOutput::Num(orbital_transfers)
 	}
 }
 

@@ -1,11 +1,12 @@
-use crate::lib::{Solver, SolverResult};
-use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::{cmp::Ordering, collections::HashMap};
 
-pub struct Day13Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day13Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day13;
+
+impl Solver for Day13 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input
 			.split(',')
 			.map(|s| s.parse::<i64>().unwrap())
@@ -35,14 +36,15 @@ impl Solver for Day13Solver {
 				},
 			);
 		}
+
 		let block_tile_count = screen.iter().fold(0, |previous, (_, tile)| match tile {
 			Tile::Block => previous + 1,
 			_ => previous,
 		});
-		SolverResult::Num(block_tile_count)
+		SolverOutput::Num(block_tile_count)
 	}
 
-	fn solve_part_two(&self, input: &str) -> crate::lib::SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input
 			.split(',')
 			.map(|s| s.parse::<i64>().unwrap())
@@ -97,7 +99,8 @@ impl Solver for Day13Solver {
 				}
 			};
 		}
-		SolverResult::Num(score)
+
+		SolverOutput::Num(score)
 	}
 }
 

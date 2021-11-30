@@ -1,11 +1,13 @@
-use crate::lib::{Solver, SolverResult};
-use permutohedron::heap_recursive;
 use std::cmp::Ordering;
 
-pub struct Day7Solver;
+use aoc_util::{Solver, SolverOutput};
+use permutohedron::heap_recursive;
 
-impl Solver for Day7Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day7;
+
+impl Solver for Day7 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
 		let mut program = program_orig.clone();
 
@@ -21,10 +23,10 @@ impl Solver for Day7Solver {
 				_ => previous,
 			}
 		});
-		SolverResult::Num(result)
+		SolverOutput::Num(result)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
 		let mut program = program_orig.clone();
 		let mut input = [5, 6, 7, 8, 9];
@@ -39,7 +41,7 @@ impl Solver for Day7Solver {
 				_ => previous,
 			}
 		});
-		SolverResult::Num(result)
+		SolverOutput::Num(result)
 	}
 }
 

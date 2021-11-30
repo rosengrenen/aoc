@@ -1,24 +1,26 @@
-use crate::lib::{Solver, SolverResult};
-use num;
 use std::collections::HashMap;
 
-pub struct Day10Solver;
+use aoc_util::{Solver, SolverOutput};
+use num;
 
-impl Solver for Day10Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day10;
+
+impl Solver for Day10 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let asteroid_map =
 			create_asteroid_map(&input.lines().map(|line| line.to_owned()).collect());
 		let (_, asteroids_in_sight) = find_best_asteroid(&asteroid_map);
-		SolverResult::Num(asteroids_in_sight)
+		SolverOutput::Num(asteroids_in_sight)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let asteroid_map =
 			create_asteroid_map(&input.lines().map(|line| line.to_owned()).collect());
 		let (best_asteroid_position, _) = find_best_asteroid(&asteroid_map);
 		let vaporized_asteroid_200 =
 			vaporize_asteroids(asteroid_map.clone(), &best_asteroid_position)[199];
-		SolverResult::Num(vaporized_asteroid_200.x * 100 + vaporized_asteroid_200.y)
+		SolverOutput::Num(vaporized_asteroid_200.x * 100 + vaporized_asteroid_200.y)
 	}
 }
 

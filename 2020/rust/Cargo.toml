@@ -1,14 +1,11 @@
 [package]
-name = "aoc2020-rust"
-version = "0.1.0"
-authors = ["Rasmus Rosengren <rasmus.rosengren@pm.me>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+name = "aoc2020"
+version = "0.0.0"
+authors = ["Rasmus Rosengren <rasmus.rosengren@protonmail.com>"]
+edition = "2021"
 
 [dependencies]
-dotenv = "0.15.0"
-hashbrown = "0.9.1"
-num-format = "0.4.0"
-regex = "1.4.2"
-reqwest = { version = "0.10.9", features = ["blocking"] }
+aoc_macro = { path = "../../shared/rust/aoc_macro" }
+aoc_util = { path = "../../shared/rust/aoc_util" }
+hashbrown = "0.11"
+regex = "1.4"

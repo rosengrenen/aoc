@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day25Solver;
+#[derive(Default)]
+pub struct Day25;
 
-impl Solver for Day25Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day25 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let (card_pub_key, door_pub_key) = parse_pub_keys(input);
 
 		let mut door_loop_size = 1;
@@ -24,11 +25,11 @@ impl Solver for Day25Solver {
 			value %= 20_201_227;
 		}
 
-		value
+		SolverOutput::Num(value)
 	}
 
-	fn solve_part_two(&self, _input: &str) -> i64 {
-		0
+	fn part_two(&self, _input: &str) -> SolverOutput {
+		SolverOutput::Num(0)
 	}
 }
 
@@ -39,38 +40,4 @@ fn parse_pub_keys(input: &str) -> (i64, i64) {
 		card_pub_key_raw.parse().unwrap(),
 		door_pub_key_raw.parse().unwrap(),
 	)
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day25Solver {};
-		assert_eq!(solver.solve_part_one(input), 14897079);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day25Solver {};
-		assert_eq!(solver.solve_part_two(input), 0);
-	}
-
-	#[bench]
-	fn bench_parse_pub_keys(bencher: &mut Bencher) {
-		let input = fetch_input(25);
-		bencher.iter(|| parse_pub_keys(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(25);
-		let solver = Day25Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
 }

@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day13Solver;
+#[derive(Default)]
+pub struct Day13;
 
-impl Solver for Day13Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day13 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let (first_poss, buses) = parse_buses(input);
 		// Here index is used as the wait time for the first bus of the specific interval to depart
 		let mut first_avail = Bus {
@@ -20,10 +21,10 @@ impl Solver for Day13Solver {
 			}
 		}
 
-		first_avail.interval * first_avail.index
+		SolverOutput::Num(first_avail.interval * first_avail.index)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let (first_poss, mut buses) = parse_buses(input);
 		buses.sort_by(|left, right| right.interval.cmp(&left.interval));
 		let first_avail = (first_poss / buses[0].interval + 1) * buses[0].interval;
@@ -38,7 +39,7 @@ impl Solver for Day13Solver {
 				step *= bus.interval;
 				bus_index += 1;
 				if bus_index == buses.len() {
-					return t;
+					return SolverOutput::Num(t);
 				}
 			}
 
@@ -67,55 +68,4 @@ fn parse_buses(input: &str) -> (i64, Vec<Bus>) {
 		}
 	}
 	(first_poss, bus_intervals)
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day13Solver {};
-		assert_eq!(solver.solve_part_one(input), 295);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let input2 = include_str!("input.test2.txt");
-		let input3 = include_str!("input.test3.txt");
-		let input4 = include_str!("input.test4.txt");
-		let input5 = include_str!("input.test5.txt");
-		let input6 = include_str!("input.test6.txt");
-		let solver = Day13Solver {};
-		assert_eq!(solver.solve_part_two(input), 1068781);
-		assert_eq!(solver.solve_part_two(input2), 3417);
-		assert_eq!(solver.solve_part_two(input3), 754018);
-		assert_eq!(solver.solve_part_two(input4), 779210);
-		assert_eq!(solver.solve_part_two(input5), 1261476);
-		assert_eq!(solver.solve_part_two(input6), 1202161486);
-	}
-
-	#[bench]
-	fn bench_parse_buses(bencher: &mut Bencher) {
-		let input = fetch_input(13);
-		bencher.iter(|| parse_buses(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(13);
-		let solver = Day13Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(13);
-		let solver = Day13Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

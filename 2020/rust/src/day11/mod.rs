@@ -1,22 +1,25 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day11Solver;
+#[derive(Default)]
+pub struct Day11;
 
-impl Solver for Day11Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day11 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut seat_layout = parse_seat_layout(input);
 		while let Some(new_seat_layout) = simulate_behaviour(&seat_layout, 4, 1) {
 			seat_layout = new_seat_layout;
 		}
-		seat_layout.occupied_seats()
+
+		SolverOutput::Num(seat_layout.occupied_seats())
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut seat_layout = parse_seat_layout(input);
 		while let Some(new_seat_layout) = simulate_behaviour(&seat_layout, 5, std::i64::MAX) {
 			seat_layout = new_seat_layout;
 		}
-		seat_layout.occupied_seats()
+
+		SolverOutput::Num(seat_layout.occupied_seats())
 	}
 }
 
@@ -158,45 +161,4 @@ fn calc_new_seat_state(
 	}
 
 	None
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day11Solver {};
-		assert_eq!(solver.solve_part_one(input), 37);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day11Solver {};
-		assert_eq!(solver.solve_part_two(input), 26);
-	}
-
-	#[bench]
-	fn bench_parse_seat_layout(bencher: &mut Bencher) {
-		let input = fetch_input(11);
-		bencher.iter(|| parse_seat_layout(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(11);
-		let solver = Day11Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(11);
-		let solver = Day11Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

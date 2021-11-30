@@ -1,10 +1,12 @@
-use crate::lib::{Solver, SolverResult};
 use std::collections::HashMap;
 
-pub struct Day11Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day11Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day11;
+
+impl Solver for Day11 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
 
 		let mut canvas: HashMap<Pos, (Colour, i64)> = HashMap::new();
@@ -56,10 +58,11 @@ impl Solver for Day11Solver {
 				Direction::Left => robot_position.x -= 1,
 			}
 		}
-		SolverResult::Num(canvas.len() as i64)
+
+		SolverOutput::Num(canvas.len() as i64)
 	}
 
-	fn solve_part_two(&self, input: &str) -> crate::lib::SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input
 			.split(',')
 			.map(|s| s.parse::<i64>().unwrap())
@@ -158,7 +161,8 @@ impl Solver for Day11Solver {
 			}
 			reg_id.push('\n');
 		}
-		SolverResult::Text(reg_id)
+
+		SolverOutput::String(reg_id)
 	}
 }
 

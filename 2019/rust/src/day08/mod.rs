@@ -1,26 +1,27 @@
-use crate::lib::{Solver, SolverResult};
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day8Solver;
+#[derive(Default)]
+pub struct Day8;
 
-impl Solver for Day8Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+impl Solver for Day8 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let input: Vec<i64> = input
 			.as_bytes()
 			.iter()
 			.map(|&c| (c - b'0') as i64)
 			.collect();
 		let result = calculate_min_zeroes(&parse_raw(&input, 25, 6));
-		SolverResult::Num(result)
+		SolverOutput::Num(result)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let input: Vec<i64> = input
 			.as_bytes()
 			.iter()
 			.map(|&c| (c - b'0') as i64)
 			.collect();
 		let result = print_layer(&combine_layers(&parse_raw(&input, 25, 6)), 25);
-		SolverResult::Text(result)
+		SolverOutput::String(result)
 	}
 }
 

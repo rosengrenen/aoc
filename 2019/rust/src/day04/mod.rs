@@ -1,9 +1,10 @@
-use crate::lib::{Solver, SolverResult};
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day4Solver;
+#[derive(Default)]
+pub struct Day4;
 
-impl Solver for Day4Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+impl Solver for Day4 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let (min, max) = input.split_once('-').unwrap();
 		let min = min.parse().unwrap();
 		let max = max.parse().unwrap();
@@ -13,10 +14,11 @@ impl Solver for Day4Solver {
 				count += 1;
 			}
 		}
-		SolverResult::Num(count)
+
+		SolverOutput::Num(count)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let (min, max) = input.split_once('-').unwrap();
 		let min = min.parse().unwrap();
 		let max = max.parse().unwrap();
@@ -26,7 +28,8 @@ impl Solver for Day4Solver {
 				count += 1;
 			}
 		}
-		SolverResult::Num(count)
+
+		SolverOutput::Num(count)
 	}
 }
 
@@ -71,14 +74,14 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn part_one_test_cases() {
+	fn part_one_test1() {
 		assert_eq!(is_valid_code(111111, false), true);
 		assert_eq!(is_valid_code(223450, false), false);
 		assert_eq!(is_valid_code(123789, false), false);
 	}
 
 	#[test]
-	fn part_two_test_cases() {
+	fn part_two_test1() {
 		assert_eq!(is_valid_code(112233, true), true);
 		assert_eq!(is_valid_code(123444, true), false);
 		assert_eq!(is_valid_code(111122, true), true);

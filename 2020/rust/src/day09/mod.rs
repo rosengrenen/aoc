@@ -1,17 +1,32 @@
-use crate::lib::Solver;
 use std::cmp::Ordering;
 
-pub struct Day9Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day9Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+pub struct Day9 {
+	preamble_length: i64,
+}
+
+impl Default for Day9 {
+	fn default() -> Self {
+		Self {
+			preamble_length: 25,
+		}
+	}
+}
+
+impl Solver for Day9 {
+	fn part_one(&self, input: &str) -> SolverOutput {
+		println!("preamble length: {}", self.preamble_length);
 		let numbers = parse_numbers(input);
-		find_first_invalid(&numbers, 25)
+		SolverOutput::Num(find_first_invalid(&numbers, self.preamble_length as usize))
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let numbers = parse_numbers(input);
-		find_first_invalid_contiguous_min_max(&numbers, 25)
+		SolverOutput::Num(find_first_invalid_contiguous_min_max(
+			&numbers,
+			self.preamble_length as usize,
+		))
 	}
 }
 
@@ -79,41 +94,17 @@ fn find_contiguous_sum(list: &[i64], target: i64) -> &[i64] {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
+	use aoc_util::test_solver;
 
 	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		assert_eq!(find_first_invalid(&parse_numbers(input), 5), 127);
+	fn part_one_test1() {
+		let solver: Box<dyn Solver> = Box::new(Day9 { preamble_length: 5 });
+		test_solver(&solver, 9, true, "custom.test1");
 	}
 
 	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		assert_eq!(
-			find_first_invalid_contiguous_min_max(&parse_numbers(input), 5),
-			62
-		);
-	}
-
-	#[bench]
-	fn bench_parse_numbers(bencher: &mut Bencher) {
-		let input = fetch_input(9);
-		bencher.iter(|| parse_numbers(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(9);
-		let solver = Day9Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(9);
-		let solver = Day9Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
+	fn part_two_test1() {
+		let solver: Box<dyn Solver> = Box::new(Day9 { preamble_length: 5 });
+		test_solver(&solver, 9, false, "custom.test1");
 	}
 }

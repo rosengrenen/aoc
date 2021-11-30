@@ -1,27 +1,28 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 use hashbrown::HashMap;
 
-pub struct Day18Solver;
+#[derive(Default)]
+pub struct Day18;
 
-impl Solver for Day18Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day18 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let op_precedences = HashMap::new();
-		input.lines().fold(0, |prev, cur_line| {
+		SolverOutput::Num(input.lines().fold(0, |prev, cur_line| {
 			let infix = parse_string_to_tokens(cur_line);
 			let postfix = infix_to_postfix(&infix, &op_precedences);
 			prev + eval_postfix(&postfix)
-		})
+		}))
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut op_precedences = HashMap::new();
 		op_precedences.insert(b'+', 1);
 		op_precedences.insert(b'*', 0);
-		input.lines().fold(0, |prev, cur_line| {
+		SolverOutput::Num(input.lines().fold(0, |prev, cur_line| {
 			let infix = parse_string_to_tokens(cur_line);
 			let postfix = infix_to_postfix(&infix, &op_precedences);
 			prev + eval_postfix(&postfix)
-		})
+		}))
 	}
 }
 
@@ -135,7 +136,7 @@ fn eval_postfix(postfix: &[Token]) -> i64 {
 						stack.push(match op {
 							b'+' => a + b,
 							b'*' => a * b,
-							_ => panic!(format!("Unknown operator: {}", op as char)),
+							_ => panic!("Unknown operator: {}", op as char),
 						});
 						continue;
 					}
@@ -147,62 +148,4 @@ fn eval_postfix(postfix: &[Token]) -> i64 {
 	}
 
 	*stack.last().unwrap()
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let solver = Day18Solver {};
-		assert_eq!(solver.solve_part_one(&"1 + 2 * 3 + 4 * 5 + 6"), 71);
-		assert_eq!(solver.solve_part_one(&"1 + (2 * 3) + (4 * (5 + 6))"), 51);
-		assert_eq!(solver.solve_part_one(&"2 * 3 + (4 * 5)"), 26);
-		assert_eq!(solver.solve_part_one(&"5 + (8 * 3 + 9 + 3 * 4 * 3)"), 437);
-		assert_eq!(
-			solver.solve_part_one(&"5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"),
-			12240
-		);
-		assert_eq!(
-			solver.solve_part_one(&"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"),
-			13632
-		);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let solver = Day18Solver {};
-		assert_eq!(solver.solve_part_two(&"1 + 2 * 3 + 4 * 5 + 6"), 231);
-		assert_eq!(
-			solver.solve_part_two(&"1 + (2 * 3) + (4 * (5 + 6)) still"),
-			51
-		);
-		assert_eq!(solver.solve_part_two(&"2 * 3 + (4 * 5)"), 46);
-		assert_eq!(solver.solve_part_two(&"5 + (8 * 3 + 9 + 3 * 4 * 3)"), 1445);
-		assert_eq!(
-			solver.solve_part_two(&"5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"),
-			669060
-		);
-		assert_eq!(
-			solver.solve_part_two(&"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"),
-			23340
-		);
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(18);
-		let solver = Day18Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(18);
-		let solver = Day18Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

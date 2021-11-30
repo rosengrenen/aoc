@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day6Solver;
+#[derive(Default)]
+pub struct Day6;
 
-impl Solver for Day6Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day6 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut questions_answered: i64 = 0;
 		for batch in input.split("\n\n") {
 			// "bitset" that represents if an answer was used, first bit represents 'a', the second 'b', ...
@@ -17,10 +18,11 @@ impl Solver for Day6Solver {
 			}
 			questions_answered += answers.count_ones() as i64;
 		}
-		questions_answered
+
+		SolverOutput::Num(questions_answered)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut questions_answered: i64 = 0;
 		// "bitset" that represents if an answer was used, first bit represents 'a', the second 'b', ...
 		let mut answers: i64 = 0;
@@ -55,45 +57,10 @@ impl Solver for Day6Solver {
 			answers &= prev_answers;
 		}
 		questions_answered += answers.count_ones() as i64;
-		questions_answered
+		SolverOutput::Num(questions_answered)
 	}
 }
 
 fn set_bit(bit_set: &mut i64, bit_index: usize) {
 	*bit_set |= 1 << (bit_index % 64);
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day6Solver {};
-		assert_eq!(solver.solve_part_one(input), 11);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day6Solver {};
-		assert_eq!(solver.solve_part_two(input), 6);
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(6);
-		let solver = Day6Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(6);
-		let solver = Day6Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day2Solver;
+#[derive(Default)]
+pub struct Day2;
 
-impl Solver for Day2Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day2 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut count = 0;
 		for policy in parse_input(input) {
 			let mut occurences = 0;
@@ -21,10 +22,11 @@ impl Solver for Day2Solver {
 				count += 1;
 			}
 		}
-		count
+
+		SolverOutput::Num(count)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut count = 0;
 		for policy in parse_input(input) {
 			let mut occurences = 0;
@@ -38,7 +40,8 @@ impl Solver for Day2Solver {
 				count += 1;
 			}
 		}
-		count
+
+		SolverOutput::Num(count)
 	}
 }
 
@@ -62,41 +65,4 @@ fn parse_input(input: &str) -> impl Iterator<Item = Policy> {
 			password,
 		}
 	})
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-
-		let solver: Day2Solver = Day2Solver {};
-		assert_eq!(solver.solve_part_one(input), 2);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-
-		let solver: Day2Solver = Day2Solver {};
-		assert_eq!(solver.solve_part_two(input), 1);
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(2);
-		let solver = Day2Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(2);
-		let solver = Day2Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

@@ -1,9 +1,10 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day23Solver;
+#[derive(Default)]
+pub struct Day23;
 
-impl Solver for Day23Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day23 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let input = parse_cups(input);
 		let mut forward_links = vec![0; input.len()];
 		for i in 0..input.len() - 1 {
@@ -50,10 +51,11 @@ impl Solver for Day23Solver {
 			num += next;
 			next = forward_links[next as usize - 1];
 		}
-		num
+
+		SolverOutput::Num(num)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		const FILL_SIZE: usize = 1_000_000;
 		let input = parse_cups(input);
 		let mut forward_links = vec![0; FILL_SIZE];
@@ -103,7 +105,7 @@ impl Solver for Day23Solver {
 		let first_number = forward_links[0];
 		let second_number = forward_links[first_number as usize - 1];
 
-		first_number * second_number
+		SolverOutput::Num(first_number * second_number)
 	}
 }
 
@@ -113,45 +115,4 @@ fn parse_cups(input: &str) -> Vec<i64> {
 		.iter()
 		.map(|c| (*c - b'0') as i64)
 		.collect()
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day23Solver {};
-		assert_eq!(solver.solve_part_one(input), 67384529);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day23Solver {};
-		assert_eq!(solver.solve_part_two(input), 149245887792);
-	}
-
-	#[bench]
-	fn bench_parse_cups(bencher: &mut Bencher) {
-		let input = fetch_input(23);
-		bencher.iter(|| parse_cups(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(23);
-		let solver = Day23Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(23);
-		let solver = Day23Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

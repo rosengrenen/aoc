@@ -1,18 +1,20 @@
-use crate::lib::Solver;
 use std::collections::{HashMap, HashSet};
 
-pub struct Day7Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day7Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+#[derive(Default)]
+pub struct Day7;
+
+impl Solver for Day7 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let child_to_parents_map = create_child_to_parents_map(input);
 		let set = find_bags_that_contains_bag(&child_to_parents_map, "shiny gold");
-		set.len() as i64
+		SolverOutput::Num(set.len() as i64)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let parent_to_children_map = create_parent_to_children_map(input);
-		count_bags_in_bag(&parent_to_children_map, "shiny gold")
+		SolverOutput::Num(count_bags_in_bag(&parent_to_children_map, "shiny gold"))
 	}
 }
 
@@ -101,54 +103,5 @@ fn count_bags_in_bag(parent_to_children_map: &HashMap<&str, Vec<(i64, String)>>,
 			.sum()
 	} else {
 		0
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day7Solver {};
-		assert_eq!(solver.solve_part_one(input), 4);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let input2 = include_str!("input.test2.txt");
-		let solver = Day7Solver {};
-		assert_eq!(solver.solve_part_two(input), 32);
-		assert_eq!(solver.solve_part_two(&input2), 126);
-	}
-
-	#[bench]
-	fn bench_create_child_to_parents_map(bencher: &mut Bencher) {
-		let input = fetch_input(7);
-		bencher.iter(|| create_child_to_parents_map(&input));
-	}
-
-	#[bench]
-	fn bench_create_parent_to_children_map(bencher: &mut Bencher) {
-		let input = fetch_input(7);
-		bencher.iter(|| create_parent_to_children_map(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(7);
-		let solver = Day7Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(7);
-		let solver = Day7Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

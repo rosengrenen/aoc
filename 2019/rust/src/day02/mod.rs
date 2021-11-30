@@ -1,15 +1,16 @@
-use crate::lib::{Solver, SolverResult};
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day2Solver;
+#[derive(Default)]
+pub struct Day2;
 
-impl Solver for Day2Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+impl Solver for Day2 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut program: Vec<i64> = input.split(',').map(|s| s.parse().unwrap()).collect();
 		let result = run_program(&mut program, 12, 2);
-		SolverResult::Num(result)
+		SolverOutput::Num(result)
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let program_orig: Vec<i64> = input
 			.split(',')
 			.map(|s| s.parse::<i64>().unwrap())
@@ -18,7 +19,7 @@ impl Solver for Day2Solver {
 			for verb in 0..=99 {
 				let mut program = program_orig.clone();
 				if run_program(&mut program, noun, verb) == 19_690_720 {
-					return SolverResult::Num(100 * noun + verb);
+					return SolverOutput::Num(100 * noun + verb);
 				}
 			}
 		}

@@ -1,11 +1,12 @@
-use crate::lib::{Solver, SolverResult};
-use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::{cmp::Ordering, collections::HashMap};
 
-pub struct Day12Solver;
+use aoc_util::{Solver, SolverOutput};
 
-impl Solver for Day12Solver {
-	fn solve_part_one(&self, input: &str) -> SolverResult {
+#[derive(Default)]
+pub struct Day12;
+
+impl Solver for Day12 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let moons: Vec<Moon> = input
 			.lines()
 			.map(|line| {
@@ -31,10 +32,11 @@ impl Solver for Day12Solver {
 		for _ in 0..1000 {
 			system.step();
 		}
-		SolverResult::Num(system.total_energy())
+
+		SolverOutput::Num(system.total_energy())
 	}
 
-	fn solve_part_two(&self, input: &str) -> SolverResult {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let moons: Vec<Moon> = input
 			.lines()
 			.map(|line| {
@@ -58,7 +60,7 @@ impl Solver for Day12Solver {
 			.collect();
 		let mut system = System::new(&moons);
 		let system_interval = find_system_interval(&mut system);
-		SolverResult::Num(system_interval)
+		SolverOutput::Num(system_interval)
 	}
 }
 

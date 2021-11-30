@@ -1,20 +1,23 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day3Solver;
+#[derive(Default)]
+pub struct Day3;
 
-impl Solver for Day3Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day3 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let lines: Vec<&str> = input.lines().collect();
-		traverse_map(&lines, 3, 1)
+		SolverOutput::Num(traverse_map(&lines, 3, 1))
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let lines: Vec<&str> = input.lines().collect();
-		traverse_map(&lines, 1, 1)
-			* traverse_map(&lines, 3, 1)
-			* traverse_map(&lines, 5, 1)
-			* traverse_map(&lines, 7, 1)
-			* traverse_map(&lines, 1, 2)
+		SolverOutput::Num(
+			traverse_map(&lines, 1, 1)
+				* traverse_map(&lines, 3, 1)
+				* traverse_map(&lines, 5, 1)
+				* traverse_map(&lines, 7, 1)
+				* traverse_map(&lines, 1, 2),
+		)
 	}
 }
 
@@ -32,48 +35,4 @@ fn traverse_map(map: &[&str], x_step: usize, y_step: usize) -> i64 {
 			hits
 		}
 	})
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-
-		let solver = Day3Solver {};
-		assert_eq!(solver.solve_part_one(input), 7);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let lines: Vec<&str> = input.lines().collect();
-
-		assert_eq!(traverse_map(&lines, 1, 1), 2);
-		assert_eq!(traverse_map(&lines, 3, 1), 7);
-		assert_eq!(traverse_map(&lines, 5, 1), 3);
-		assert_eq!(traverse_map(&lines, 7, 1), 4);
-		assert_eq!(traverse_map(&lines, 1, 2), 2);
-
-		let solver = Day3Solver {};
-		assert_eq!(solver.solve_part_two(input), 336);
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(3);
-		let solver = Day3Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(3);
-		let solver = Day3Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

@@ -1,11 +1,11 @@
+use aoc_util::{Solver, SolverOutput};
 use hashbrown::{HashMap, HashSet};
 
-use crate::lib::Solver;
+#[derive(Default)]
+pub struct Day21;
 
-pub struct Day21Solver;
-
-impl Solver for Day21Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day21 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let foods = parse_foods(input);
 		let ingredient_allergent_pairs = find_ingredient_allergent_pairs(&foods);
 
@@ -19,25 +19,23 @@ impl Solver for Day21Solver {
 			}
 		}
 
-		count
+		SolverOutput::Num(count)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let foods = parse_foods(input);
 		let ingredient_to_allergent = find_ingredient_allergent_pairs(&foods);
 
 		let mut dangerous_ingredients: Vec<_> = ingredient_to_allergent.into_iter().collect();
 		dangerous_ingredients.sort_unstable_by(|left, right| left.1.cmp(&right.1));
-		println!(
-			"{:?}",
+
+		SolverOutput::String(
 			dangerous_ingredients
 				.iter()
 				.map(|&(i, _)| i)
 				.collect::<Vec<_>>()
-				.join(",")
-		);
-
-		0
+				.join(","),
+		)
 	}
 }
 
@@ -112,45 +110,4 @@ fn find_ingredient_allergent_pairs<'a>(
 	}
 
 	ingredient_to_allergent
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day21Solver {};
-		assert_eq!(solver.solve_part_one(input), 5);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day21Solver {};
-		assert_eq!(solver.solve_part_two(input), 0);
-	}
-
-	#[bench]
-	fn bench_parse_foods(bencher: &mut Bencher) {
-		let input = fetch_input(21);
-		bencher.iter(|| parse_foods(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(21);
-		let solver = Day21Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(21);
-		let solver = Day21Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

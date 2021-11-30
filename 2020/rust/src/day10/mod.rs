@@ -1,23 +1,24 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day10Solver;
+#[derive(Default)]
+pub struct Day10;
 
-impl Solver for Day10Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day10 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let mut adapters = parse_adapters(input);
 		adapters.push(0);
 		adapters.sort_unstable();
-		solve_part_one(&adapters)
+		SolverOutput::Num(part_one(&adapters))
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let mut adapters = parse_adapters(input);
 		adapters.sort_unstable();
-		solve_part_two(&adapters)
+		SolverOutput::Num(part_two(&adapters))
 	}
 }
 
-fn solve_part_one(adapters: &[i64]) -> i64 {
+fn part_one(adapters: &[i64]) -> i64 {
 	let mut ones = 0;
 	let mut threes = 1;
 	let mut prev_adapter = adapters[0];
@@ -34,7 +35,7 @@ fn solve_part_one(adapters: &[i64]) -> i64 {
 	ones * threes
 }
 
-fn solve_part_two(adapters: &[i64]) -> i64 {
+fn part_two(adapters: &[i64]) -> i64 {
 	let mut sliding_window = [1, 0, 0, 0];
 	let mut sliding_window_index = adapters[adapters.len() - 1];
 	for &adapter in adapters.iter().rev() {
@@ -87,49 +88,4 @@ fn parse_adapters(input: &str) -> Vec<i64> {
 		.lines()
 		.map(|line| line.parse::<i64>().unwrap())
 		.collect()
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let input2 = include_str!("input.test2.txt");
-		let solver = Day10Solver {};
-		assert_eq!(solver.solve_part_one(input), 35);
-		assert_eq!(solver.solve_part_one(input2), 220);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let input1 = include_str!("input.test2.txt");
-		let solver = Day10Solver {};
-		assert_eq!(solver.solve_part_two(input), 8);
-		assert_eq!(solver.solve_part_two(input1), 19208);
-	}
-
-	#[bench]
-	fn bench_parse_adapters(bencher: &mut Bencher) {
-		let input = fetch_input(10);
-		bencher.iter(|| parse_adapters(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(10);
-		let solver = Day10Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(10);
-		let solver = Day10Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

@@ -1,24 +1,24 @@
+use aoc_util::{Solver, SolverOutput};
 use hashbrown::HashSet;
 
-use crate::lib::Solver;
+#[derive(Default)]
+pub struct Day24;
 
-pub struct Day24Solver;
-
-impl Solver for Day24Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day24 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let instructions = parse_instructions(input);
 		let tiles = tiles_from_instructions(&instructions);
-		tiles.len() as i64
+		SolverOutput::Num(tiles.len() as i64)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let instructions = parse_instructions(input);
 		let mut tiles = tiles_from_instructions(&instructions);
 		for _ in 0..100 {
 			tiles = simulate(&tiles);
 		}
 
-		tiles.len() as i64
+		SolverOutput::Num(tiles.len() as i64)
 	}
 }
 
@@ -174,45 +174,4 @@ fn simulate(tiles: &HashSet<Pos>) -> HashSet<Pos> {
 	}
 
 	new_tiles
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day24Solver {};
-		assert_eq!(solver.solve_part_one(input), 10);
-	}
-
-	#[test]
-	fn part_two_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day24Solver {};
-		assert_eq!(solver.solve_part_two(input), 2208);
-	}
-
-	#[bench]
-	fn bench_parse_instructions(bencher: &mut Bencher) {
-		let input = fetch_input(24);
-		bencher.iter(|| parse_instructions(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(24);
-		let solver = Day24Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(24);
-		let solver = Day24Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }

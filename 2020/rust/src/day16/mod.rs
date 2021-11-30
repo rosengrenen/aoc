@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day16Solver;
+#[derive(Default)]
+pub struct Day16;
 
-impl Solver for Day16Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day16 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let (ranges, values) = parse_simple(input);
 		let mut ticket_error_rate = 0;
 		for value in values.iter() {
@@ -20,10 +21,11 @@ impl Solver for Day16Solver {
 				ticket_error_rate += value;
 			}
 		}
-		ticket_error_rate
+
+		SolverOutput::Num(ticket_error_rate)
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let data = parse_advanced(input);
 		let valid_tickets: Vec<_> = data
 			.others_tickets
@@ -79,10 +81,12 @@ impl Solver for Day16Solver {
 			}
 		}
 
-		name_to_index
-			.iter()
-			.filter(|(key, _)| key.contains("departure"))
-			.fold(1, |prev, (_, index)| prev * data.my_ticket[*index])
+		SolverOutput::Num(
+			name_to_index
+				.iter()
+				.filter(|(key, _)| key.contains("departure"))
+				.fold(1, |prev, (_, index)| prev * data.my_ticket[*index]),
+		)
 	}
 }
 
@@ -164,45 +168,5 @@ fn parse_advanced(input: &str) -> Data {
 		field_rules,
 		my_ticket,
 		others_tickets,
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let input = include_str!("input.test1.txt");
-		let solver = Day16Solver {};
-		assert_eq!(solver.solve_part_one(input), 71);
-	}
-
-	#[bench]
-	fn bench_parse_simple(bencher: &mut Bencher) {
-		let input = fetch_input(16);
-		bencher.iter(|| parse_simple(&input));
-	}
-
-	#[bench]
-	fn bench_parse_advanced(bencher: &mut Bencher) {
-		let input = fetch_input(16);
-		bencher.iter(|| parse_advanced(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(16);
-		let solver = Day16Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(16);
-		let solver = Day16Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
 	}
 }

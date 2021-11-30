@@ -1,16 +1,17 @@
-use crate::lib::Solver;
+use aoc_util::{Solver, SolverOutput};
 
-pub struct Day15Solver;
+#[derive(Default)]
+pub struct Day15;
 
-impl Solver for Day15Solver {
-	fn solve_part_one(&self, input: &str) -> i64 {
+impl Solver for Day15 {
+	fn part_one(&self, input: &str) -> SolverOutput {
 		let input = parse_numbers(input);
-		find_nth_van_eck(&input, 2020)
+		SolverOutput::Num(find_nth_van_eck(&input, 2020))
 	}
 
-	fn solve_part_two(&self, input: &str) -> i64 {
+	fn part_two(&self, input: &str) -> SolverOutput {
 		let input = parse_numbers(input);
-		find_nth_van_eck(&input, 30_000_000)
+		SolverOutput::Num(find_nth_van_eck(&input, 30_000_000))
 	}
 }
 
@@ -42,55 +43,4 @@ fn find_nth_van_eck(starting_numbers: &[i64], n: i64) -> i64 {
 	}
 
 	last_num
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::lib::fetch_input;
-	use test::Bencher;
-
-	#[test]
-	fn part_one_test_cases() {
-		let solver = Day15Solver {};
-		assert_eq!(solver.solve_part_one(&"0,3,6"), 436);
-		assert_eq!(solver.solve_part_one(&"1,3,2"), 1);
-		assert_eq!(solver.solve_part_one(&"2,1,3"), 10);
-		assert_eq!(solver.solve_part_one(&"1,2,3"), 27);
-		assert_eq!(solver.solve_part_one(&"2,3,1"), 78);
-		assert_eq!(solver.solve_part_one(&"3,2,1"), 438);
-		assert_eq!(solver.solve_part_one(&"3,1,2"), 1836);
-	}
-
-	// #[test]
-	// fn part_two_test_cases() {
-	// 	let solver = Day15Solver {};
-	// 	assert_eq!(solver.solve_part_two(&"0,3,6"), 175594);
-	// 	assert_eq!(solver.solve_part_two(&"1,3,2"), 2578);
-	// 	assert_eq!(solver.solve_part_two(&"2,1,3"), 3544142);
-	// 	assert_eq!(solver.solve_part_two(&"1,2,3"), 261214);
-	// 	assert_eq!(solver.solve_part_two(&"2,3,1"), 6895259);
-	// 	assert_eq!(solver.solve_part_two(&"3,2,1"), 18);
-	// 	assert_eq!(solver.solve_part_two(&"3,1,2"), 362);
-	// }
-
-	#[bench]
-	fn bench_parse_numbers(bencher: &mut Bencher) {
-		let input = fetch_input(15);
-		bencher.iter(|| parse_numbers(&input));
-	}
-
-	#[bench]
-	fn bench_part_one(bencher: &mut Bencher) {
-		let input = fetch_input(15);
-		let solver = Day15Solver {};
-		bencher.iter(|| solver.solve_part_one(&input));
-	}
-
-	#[bench]
-	fn bench_part_two(bencher: &mut Bencher) {
-		let input = fetch_input(15);
-		let solver = Day15Solver {};
-		bencher.iter(|| solver.solve_part_two(&input));
-	}
 }
