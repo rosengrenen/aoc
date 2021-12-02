@@ -60,3 +60,16 @@ fn parse_commands(input: &str) -> Vec<(Direction, i64)> {
 		})
 		.collect()
 }
+
+#[cfg(test)]
+mod benches {
+	use super::*;
+	use aoc_util::get_input;
+	use test::{black_box, Bencher};
+
+	#[bench]
+	fn parse(bencher: &mut Bencher) {
+		let input = get_input(2021, 2).unwrap();
+		bencher.iter(|| parse_commands(black_box(&input)));
+	}
+}
