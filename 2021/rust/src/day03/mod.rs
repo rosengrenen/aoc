@@ -6,92 +6,61 @@ pub struct Day3;
 impl Solver for Day3 {
 	fn part_one(&self, input: &str) -> SolverOutput {
 		let nums = parse_nums(input);
-		let nums_len = nums.len();
+		let nums_len = nums.len() as i64;
 		let num_len = nums[0].len();
-		let gamma_rate = (0..num_len).fold(0, |prev, i| {
-			let occurences =
-				(0..nums_len).fold(0, |prev, j| prev + (nums[j].as_bytes()[i] - b'0') as i64);
-			if occurences > nums_len as i64 - occurences {
-				(prev << 1) + 1
-			} else {
-				prev << 1
-			}
-		});
-		let epsilon_rate = (!gamma_rate) & ((1 << num_len) - 1);
+		let gamma_rate = (0..num_len)
+			.map(|i| {
+				nums.iter().fold(0, |occurences, num| {
+					occurences + (num.as_bytes()[i] - b'0') as i64
+				})
+			})
+			.map(|occs| if 2 * occs > nums_len { 1 } else { 0 })
+			.fold(0, |gamma_rate, binary| (gamma_rate << 1) + binary);
+		let epsilon_rate = !gamma_rate & (1 << num_len) - 1;
 		SolverOutput::Num(gamma_rate * epsilon_rate)
 	}
 
 	fn part_two(&self, input: &str) -> SolverOutput {
 		let nums = parse_nums(input);
-		let num_len = nums[0].len();
-		let mut oxygen_nums = nums.clone();
-		for i in 0..num_len {
-			if oxygen_nums.len() == 1 {
-				break;
-			}
-
-			let ones = oxygen_nums
-				.iter()
-				.fold(0, |prev, cur| prev + (cur.as_bytes()[i] - b'0') as i64);
-
-			if ones >= oxygen_nums.len() as i64 - ones {
-				oxygen_nums = oxygen_nums
-					.into_iter()
-					.filter(|num| num.as_bytes()[i] == b'1')
-					.collect();
-			} else {
-				oxygen_nums = oxygen_nums
-					.into_iter()
-					.filter(|num| num.as_bytes()[i] == b'0')
-					.collect();
-			}
-		}
-
-		let mut co2_nums = nums.clone();
-		for i in 0..num_len {
-			if co2_nums.len() == 1 {
-				break;
-			}
-
-			let ones = co2_nums
-				.iter()
-				.fold(0, |prev, cur| prev + (cur.as_bytes()[i] - b'0') as i64);
-
-			if ones < co2_nums.len() as i64 - ones {
-				co2_nums = co2_nums
-					.into_iter()
-					.filter(|num| num.as_bytes()[i] == b'1')
-					.collect();
-			} else {
-				co2_nums = co2_nums
-					.into_iter()
-					.filter(|num| num.as_bytes()[i] == b'0')
-					.collect();
-			}
-		}
-
-		let oxygen_rate = (0..num_len).fold(0, |prev, i| {
-			if oxygen_nums[0].as_bytes()[i] == b'1' {
-				(prev << 1) + 1
-			} else {
-				prev << 1
-			}
-		});
-
-		let co2_rate = (0..num_len).fold(0, |prev, i| {
-			if co2_nums[0].as_bytes()[i] == b'1' {
-				(prev << 1) + 1
-			} else {
-				prev << 1
-			}
-		});
-
+		let oxygen_rate = find_num(nums.clone(), |ones, len| ones >= len - ones);
+		let co2_rate = find_num(nums, |ones, len| 2 * ones < len);
 		SolverOutput::Num(oxygen_rate * co2_rate)
 	}
 }
 
 fn parse_nums(input: &str) -> Vec<&str> {
 	input.lines().collect()
+}
+
+fn find_num<F>(mut nums: Vec<&str>, pred: F) -> i64
+where
+	F: Fn(i64, i64) -> bool,
+{
+	let num_len = nums[0].len();
+	for i in 0..num_len {
+		if nums.len() <= 1 {
+			break;
+		}
+
+		let ones = nums
+			.iter()
+			.fold(0, |ones, num| ones + (num.as_bytes()[i] - b'0') as i64);
+
+		let filter_on = if pred(ones, nums.len() as i64) {
+			b'1'
+		} else {
+			b'0'
+		};
+
+		nums = nums
+			.into_iter()
+			.filter(|num| num.as_bytes()[i] == filter_on)
+			.collect();
+	}
+
+	assert_eq!(nums.len(), 1);
+
+	i64::from_str_radix(nums[0], 2).unwrap()
 }
 
 #[cfg(test)]
