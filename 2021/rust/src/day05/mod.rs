@@ -66,11 +66,15 @@ struct Point {
 }
 
 fn calculate_bounds(lines: &[Line]) -> (usize, usize) {
-	lines
-		.iter()
-		.fold((i64::MIN, i64::MIN), |(max_x, max_y), Line { from, to }| {
-			(max_x.max(from.x.max(to.x)), max_y.max(from.y.max(to.y)))
-		})
+	lines.iter().fold(
+		(usize::MIN, usize::MIN),
+		|(max_x, max_y), Line { from, to }| {
+			(
+				max_x.max(from.x.max(to.x) as usize),
+				max_y.max(from.y.max(to.y) as usize),
+			)
+		},
+	)
 }
 
 struct PointIter {
