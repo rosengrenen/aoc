@@ -29,7 +29,7 @@ dependencies = [
 [[package]]
 name = "aoc_util"
 version = "0.0.0"
-source = "git+https://github.com/rosengrenen/aoc_util#99b500553142430428f99265a3f0007a61b8b1a6"
+source = "git+https://github.com/rosengrenen/aoc_util#ce51bf75ebb9a15078ae99f5f821d0466067dc53"
 dependencies = [
  "anyhow",
  "clap",
@@ -406,9 +406,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.108"
+version = "0.2.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8521a1b57e76b1ec69af7599e75e38e7b7fad6610f037db8c79b127201b5d119"
+checksum = "f98a04dce437184842841303488f70d0188c5f51437d2a834dc097eafa909a01"
 
 [[package]]
 name = "log"
@@ -676,9 +676,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.11.6"
+version = "0.11.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66d2927ca2f685faf0fc620ac4834690d29e7abb153add10f5812eef20b5e280"
+checksum = "07bea77bc708afa10e59905c3d4af7c8fd43c9214251673095ff8b14345fcbc5"
 dependencies = [
  "base64",
  "bytes",
