@@ -5,7 +5,7 @@ authors = ["Rasmus Rosengren <rasmus.rosengren@protonmail.com>"]
 edition = "2021"
 
 [dependencies]
-aoc_macro = { path = "../../shared/rust/aoc_macro" }
-aoc_util = { path = "../../shared/rust/aoc_util" }
+aoc_macro = { git = "https://github.com/rosengrenen/aoc_macro" }
+aoc_util = { git = "https://github.com/rosengrenen/aoc_util" }
 hashbrown = "0.11"
 regex = "1.4"

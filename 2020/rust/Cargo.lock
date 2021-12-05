@@ -41,6 +41,7 @@ dependencies = [
 [[package]]
 name = "aoc_macro"
 version = "0.0.0"
+source = "git+https://github.com/rosengrenen/aoc_macro#f2a2a1b15049d597e4904611fa4209c7c84c03d6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -50,6 +51,7 @@ dependencies = [
 [[package]]
 name = "aoc_util"
 version = "0.0.0"
+source = "git+https://github.com/rosengrenen/aoc_util#99b500553142430428f99265a3f0007a61b8b1a6"
 dependencies = [
  "anyhow",
  "clap",
