@@ -5,42 +5,60 @@ pub struct Day7;
 
 impl Solver for Day7 {
 	fn part_one(&self, input: &str) -> SolverOutput {
-		let a = parse(input);
-		let max = a.iter().max().unwrap();
-		let mut cheapest_pos = i64::MAX;
-		for pos in 0..*max {
-			cheapest_pos = cheapest_pos.min(a.iter().fold(0, |prev, cur| prev + (pos - cur).abs()));
-		}
-		SolverOutput::Num(cheapest_pos)
+		let crabs = parse_crabs(input);
+		let median = median(&crabs);
+		SolverOutput::Num(crabs.iter().map(|pos| (median - pos).abs()).sum())
 	}
 
 	fn part_two(&self, input: &str) -> SolverOutput {
-		let a = parse(input);
-		let max = a.iter().max().unwrap();
-		let mut cheapest_pos = i64::MAX;
-		for pos in 0..*max {
-			cheapest_pos = cheapest_pos.min(a.iter().fold(0, |prev, cur| {
-				let sum: i64 = (1..=(pos - cur).abs()).sum();
-				prev + sum
-			}));
-		}
-		SolverOutput::Num(cheapest_pos)
+		let crabs = parse_crabs(input);
+		let average = average(&crabs);
+		SolverOutput::Num(
+			crabs
+				.iter()
+				.map(|pos| (average - pos).abs())
+				.map(|d| (d * (d + 1)) / 2)
+				.sum::<i64>()
+				.min(
+					crabs
+						.iter()
+						.map(|pos| (average - pos).abs() + 1)
+						.map(|d| (d * (d + 1)) / 2)
+						.sum(),
+				),
+		)
 	}
 }
 
-fn parse(input: &str) -> Vec<i64> {
-	input.split(",").map(|line| line.parse().unwrap()).collect()
+fn average(nums: &[i64]) -> i64 {
+	nums.iter().sum::<i64>() / nums.len() as i64
 }
 
-// #[cfg(test)]
-// mod benches {
-// 	use super::*;
-// 	use aoc_util::get_input;
-// 	use test::{black_box, Bencher};
+fn median(nums: &[i64]) -> i64 {
+	let len = nums.len();
+	if len % 2 == 0 {
+		let middle = len / 2;
+		(nums[middle] + nums[middle - 1]) / 2
+	} else {
+		nums[len]
+	}
+}
 
-// 	#[bench]
-// 	fn parse(bencher: &mut Bencher) {
-// 		let input = get_input(2021, 6).unwrap();
-// 		bencher.iter(|| parse_(black_box(&input)));
-// 	}
-// }
+fn parse_crabs(input: &str) -> Vec<i64> {
+	let mut crabs: Vec<_> = input.split(",").map(|num| num.parse().unwrap()).collect();
+	crabs.sort_unstable();
+	crabs
+}
+
+#[cfg(test)]
+mod benches {
+	use super::*;
+	use aoc_util::get_input;
+	use test::{black_box, Bencher};
+
+	#[bench]
+	fn parse(bencher: &mut Bencher) {
+		let input = get_input(2021, 6).unwrap();
+		bencher.iter(|| parse_crabs(black_box(&input)));
+	}
+}
