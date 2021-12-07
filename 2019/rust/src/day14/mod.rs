@@ -8,12 +8,24 @@ pub struct Day14;
 impl Solver for Day14 {
 	fn part_one(&self, input: &str) -> SolverOutput {
 		let recipes = parse_recipes(input);
-		let ore_cost = calculate_ore_cost(&recipes);
+		let ore_cost = calculate_ore_cost(&recipes, "FUEL", 1);
 		SolverOutput::Num(ore_cost)
 	}
 
 	fn part_two(&self, input: &str) -> SolverOutput {
-		SolverOutput::Num(0)
+		let recipes = parse_recipes(input);
+		let mut max_fuel = 1;
+		let max_fuel = loop {
+			let ore_cost = calculate_ore_cost(&recipes, "FUEL", max_fuel as i64) as i128;
+			let new_max_fuel = max_fuel * 1_000_000_000_000 / ore_cost;
+			if new_max_fuel == max_fuel {
+				break max_fuel;
+			}
+
+			max_fuel = new_max_fuel;
+		};
+
+		SolverOutput::Num(max_fuel as i64)
 	}
 }
 
@@ -45,70 +57,52 @@ fn parse_recipes<'a>(input: &'a str) -> Recipes {
 		.collect()
 }
 
-fn calculate_ore_cost(recipes: &Recipes) -> i64 {
-	let (_, fuel_inputs) = recipes.get("FUEL").unwrap();
-	let mut amounts: Vec<_> = fuel_inputs
+fn calculate_ore_cost<'a>(recipes: &Recipes<'a>, name: &'a str, amount: i64) -> i64 {
+	let (_, fuel_inputs) = recipes.get(name).unwrap();
+	let mut ingredient_amounts: Vec<_> = fuel_inputs
 		.iter()
-		.map(|ingredient| (ingredient.amount, ingredient.name))
+		.map(|ingredient| (ingredient.amount * amount, ingredient.name))
 		.collect();
 
-	println!("pre:");
-	println!("check = {:?}", amounts);
-	println!("");
-
-	let mut i = 0;
 	loop {
-		if i > 100 {
-			break 0;
-		}
-		println!("iter {}:", i);
-
-		let (amount, name) = amounts.remove(0);
-		if name == "ORE" {
-			if amounts.is_empty() {
-				return amount;
+		let (current_amount, current_name) = ingredient_amounts.remove(0);
+		if current_name == "ORE" {
+			if ingredient_amounts.is_empty() {
+				return current_amount;
 			}
 
-			amounts.push((amount, name));
+			ingredient_amounts.push((current_amount, current_name));
 			continue;
 		}
 
-		println!("cur = ({}, {})", amount, name);
-
-		let only_input = amounts.iter().all(|(_, n)| !in_input(recipes, n, name));
-		println!("{} in *? {}", name, !only_input);
+		let only_input = ingredient_amounts
+			.iter()
+			.all(|(_, n)| !in_input(recipes, n, current_name));
 		if only_input {
-			println!("GOOD add to outputs");
-
-			let (a, is) = recipes.get(name).unwrap();
-			let k = if amount % a != 0 {
-				amount / a + 1
+			let (input_amount, ingredients) = recipes.get(current_name).unwrap();
+			let recipe_amount = if current_amount % input_amount != 0 {
+				current_amount / input_amount + 1
 			} else {
-				amount / a
+				current_amount / input_amount
 			};
 
-			println!("{} {} {}", amount, a, k);
-			for i in is {
-				if let Some(index) = amounts.iter().position(|(_, name)| *name == i.name) {
-					amounts[index].0 += i.amount * k;
+			for ingredient in ingredients {
+				if let Some(index) = ingredient_amounts
+					.iter()
+					.position(|(_, name)| *name == ingredient.name)
+				{
+					ingredient_amounts[index].0 += ingredient.amount * recipe_amount;
 				} else {
-					amounts.push((i.amount * k, i.name));
+					ingredient_amounts.push((ingredient.amount * recipe_amount, ingredient.name));
 				}
 			}
 		} else {
-			println!("BAD!!!");
-			amounts.push((amount, name));
+			ingredient_amounts.push((current_amount, current_name));
 		}
-
-		println!("check = {:?}", amounts);
-		println!("");
-
-		i += 1;
 	}
 }
 
 fn in_input(recipes: &Recipes, name: &str, search_name: &str) -> bool {
-	// println!("{} in {}?", search_name, name);
 	if name == search_name {
 		return true;
 	}
