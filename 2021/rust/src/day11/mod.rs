@@ -166,7 +166,7 @@ mod benches {
 
 	#[bench]
 	fn parse(bencher: &mut Bencher) {
-		let input = get_input(2021, 9).unwrap();
+		let input = get_input(2021, 11).unwrap();
 		bencher.iter(|| parse_(black_box(&input)));
 	}
 }
