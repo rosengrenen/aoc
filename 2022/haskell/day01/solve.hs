@@ -7,7 +7,7 @@ splitOn :: String -> String -> [String]
 splitOn delim input = map T.unpack $ T.splitOn (T.pack delim) (T.pack input)
 
 parseInput :: String -> [Int]
-parseInput input = map (sum . map read . splitOn "\n") (splitOn "\n\n" input)
+parseInput input = map (sum . map read . lines) (splitOn "\n\n" input)
 
 solvePart1 :: String -> Int
 solvePart1 = maximum . parseInput
@@ -21,4 +21,3 @@ main =
     input <- readFile "input.txt"
     putStrLn $ "Part one: " ++ show (solvePart1 input)
     putStrLn $ "Part two: " ++ show (solvePart2 input)
-    return ()
