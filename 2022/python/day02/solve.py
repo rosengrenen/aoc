@@ -4,11 +4,7 @@ invs = [(ord(item[0]) - ord('A'), ord(item[2]) - ord('X'))
 
 
 def score(elf, me):
-    if elf == me:
-        return 3 + me + 1
-    elif elf == (me + 1) % 3:
-        return 0 + me + 1
-    return 6 + me + 1
+    return (me - elf + 1) % 3 * 3 + me + 1
 
 
 def selectscore(elf, result):
