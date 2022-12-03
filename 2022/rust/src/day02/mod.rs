@@ -1,5 +1,3 @@
-use std::collections::BinaryHeap;
-
 use aoc_util::{Solver, SolverOutput};
 
 #[derive(Default)]

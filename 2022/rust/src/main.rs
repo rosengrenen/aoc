@@ -1,3 +1,4 @@
+#![feature(iter_array_chunks)]
 #![feature(test)]
 extern crate test;
 
