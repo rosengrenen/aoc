@@ -1,16 +1,29 @@
 input = open("input.txt").read()
-invs = [[int(item) for item in inv.splitlines()]
-        for inv in input.split("\n\n")]
-invs = [int(item) for item in input.splitlines()]
+invs = input.splitlines()
 
 
-def score(elf, me):
-    return (me - elf + 1) % 3 * 3 + me + 1
+def priority(item: chr):
+    if ord('a') <= ord(item) <= ord('z'):
+        return ord(item) - ord('a') + 1
+    return ord(item) - ord('A') + 27
 
 
-def selectscore(elf, result):
-    return score(elf, (elf + result) % 3)
+compartments = [[inv[0:int(len(inv)/2)], inv[int(len(inv)/2):]]
+                for inv in invs]
+common_items = [list(set(comp1).intersection(set(comp2)))[0]
+                for [comp1, comp2] in compartments]
+part1_sum = sum([priority(item) for item in common_items])
 
 
-print("Part 1:", sum([score(elf, me) for (elf, me) in invs]))
-print("Part 2:", sum([selectscore(elf, me - 1) for (elf, me) in invs]))
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
+elf_groups = chunks(invs, 3)
+common_items = [list(set(inv1).intersection(set(inv2)).intersection(set(inv3)))[0]
+                for [inv1, inv2, inv3] in elf_groups]
+part2_sum = sum([priority(item) for item in common_items])
+
+print("Part 1:", part1_sum)
+print("Part 2:", part2_sum)
