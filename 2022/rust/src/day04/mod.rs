@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 use aoc_util::{Solver, SolverOutput};
 
 #[derive(Default)]
@@ -9,7 +11,7 @@ impl Solver for Day4 {
       input
         .lines()
         .map(parse_sched)
-        .filter(|&(r0, r1)| r0.contains(&r1) || r1.contains(&r0))
+        .filter(|(r0, r1)| r0.contains_r(r1) || r1.contains_r(r0))
         .count() as i64,
     )
   }
@@ -19,35 +21,34 @@ impl Solver for Day4 {
       input
         .lines()
         .map(parse_sched)
-        .filter(|&(r0, r1)| r0.overlaps(&r1))
+        .filter(|(r0, r1)| r0.overlaps_r(r1))
         .count() as i64,
     )
   }
 }
 
-type Range = (i64, i64);
-
-trait RangeExt {
-  fn contains(&self, other: &Range) -> bool;
-  fn overlaps(&self, other: &Range) -> bool;
+trait RangeExt<T> {
+  fn contains_r(&self, other: &RangeInclusive<T>) -> bool;
+  fn overlaps_r(&self, other: &RangeInclusive<T>) -> bool;
 }
 
-impl RangeExt for Range {
-  fn contains(&self, other: &Range) -> bool {
-    self.0 <= other.0 && self.1 >= other.1
+impl<T: PartialOrd> RangeExt<T> for RangeInclusive<T> {
+  fn contains_r(&self, other: &RangeInclusive<T>) -> bool {
+    self.start() <= other.start() && self.end() >= other.end()
   }
 
-  fn overlaps(&self, other: &Range) -> bool {
-    !(other.0 > self.1 || self.1 < other.0) && !(self.0 > other.1 || other.1 < self.0)
+  fn overlaps_r(&self, other: &RangeInclusive<T>) -> bool {
+    !(other.start() > self.end() || self.end() < other.start())
+      && !(self.start() > other.end() || other.end() < self.start())
   }
 }
 
-fn parse_sched(input: &str) -> (Range, Range) {
+fn parse_sched(input: &str) -> (RangeInclusive<i64>, RangeInclusive<i64>) {
   let (elf1, elf2) = input.split_once(",").unwrap();
-  let (s1, e1) = elf1.split_once("-").unwrap();
-  let (s2, e2) = elf2.split_once("-").unwrap();
+  let (start0, end0) = elf1.split_once("-").unwrap();
+  let (start1, end1) = elf2.split_once("-").unwrap();
   (
-    (s1.parse().unwrap(), e1.parse().unwrap()),
-    (s2.parse().unwrap(), e2.parse().unwrap()),
+    (start0.parse::<i64>().unwrap()..=end0.parse::<i64>().unwrap()),
+    (start1.parse::<i64>().unwrap()..=end1.parse::<i64>().unwrap()),
   )
 }
