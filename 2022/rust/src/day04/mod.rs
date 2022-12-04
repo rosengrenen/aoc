@@ -9,7 +9,7 @@ impl Solver for Day4 {
       input
         .lines()
         .map(parse_sched)
-        .filter(|&(r0, r1)| range_within(r0, r1) || range_within(r1, r0))
+        .filter(|&(r0, r1)| r0.contains(&r1) || r1.contains(&r0))
         .count() as i64,
     )
   }
@@ -19,7 +19,7 @@ impl Solver for Day4 {
       input
         .lines()
         .map(parse_sched)
-        .filter(|&(r0, r1)| range_overlap(r0, r1))
+        .filter(|&(r0, r1)| r0.overlaps(&r1))
         .count() as i64,
     )
   }
@@ -27,12 +27,19 @@ impl Solver for Day4 {
 
 type Range = (i64, i64);
 
-fn range_within((is, ie): Range, (os, oe): Range) -> bool {
-  is >= os && ie <= oe
+trait RangeExt {
+  fn contains(&self, other: &Range) -> bool;
+  fn overlaps(&self, other: &Range) -> bool;
 }
 
-fn range_overlap((s0, e0): Range, (s1, e1): Range) -> bool {
-  !(s1 > e0 || e0 < s1) && !(s0 > e1 || e1 < s0)
+impl RangeExt for Range {
+  fn contains(&self, other: &Range) -> bool {
+    self.0 <= other.0 && self.1 >= other.1
+  }
+
+  fn overlaps(&self, other: &Range) -> bool {
+    !(other.0 > self.1 || self.1 < other.0) && !(self.0 > other.1 || other.1 < self.0)
+  }
 }
 
 fn parse_sched(input: &str) -> (Range, Range) {
