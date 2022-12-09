@@ -50,7 +50,7 @@ fn dir_to_delete<'a>(dir: &'a Directory<'a>, space_to_free: i64) -> Option<&'a D
   return Some(dir);
 }
 
-fn parse_commands(input: &str) -> Directory {
+fn parse_commands<'a>(input: &'a str) -> Directory<'a> {
   let mut root_dir = Directory::default();
   let mut current_path = vec![];
   for cmd in input.split("$") {
@@ -65,7 +65,7 @@ fn parse_commands(input: &str) -> Directory {
         current_path.push(to)
       }
     } else {
-      let files = cmd
+      let files_size = cmd
         .trim()
         .lines()
         .skip(1)
@@ -74,11 +74,11 @@ fn parse_commands(input: &str) -> Directory {
           if size == "dir" {
             None
           } else {
-            Some(size.parse().unwrap())
+            Some(size.parse::<i64>().unwrap())
           }
         })
-        .collect::<Vec<_>>();
-      root_dir.set_files(&current_path, files);
+        .sum();
+      root_dir.set_files_size(&current_path, files_size);
     }
   }
 
@@ -87,25 +87,24 @@ fn parse_commands(input: &str) -> Directory {
 
 #[derive(Debug, Default)]
 struct Directory<'a> {
-  files: Vec<i64>,
+  files_size: i64,
   dirs: HashMap<&'a str, Directory<'a>>,
 }
 
 impl<'a> Directory<'a> {
-  fn set_files(&mut self, path: &[&'a str], files: Vec<i64>) {
+  fn set_files_size(&mut self, path: &[&'a str], files_size: i64) {
     if path.is_empty() {
-      self.files = files;
+      self.files_size = files_size;
     } else {
       let dir = self.dirs.entry(path[0]).or_default();
-      dir.set_files(&path[1..], files);
+      dir.set_files_size(&path[1..], files_size);
     }
   }
 
   fn size(&self) -> i64 {
-    let files_size = self.files.iter().sum();
     self
       .dirs
       .values()
-      .fold(files_size, |total, dir| total + dir.size())
+      .fold(self.files_size, |total, dir| total + dir.size())
   }
 }
