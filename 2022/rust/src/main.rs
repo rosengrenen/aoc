@@ -1,4 +1,5 @@
 #![feature(iter_array_chunks)]
+#![feature(iter_intersperse)]
 #![feature(test)]
 extern crate test;
 
