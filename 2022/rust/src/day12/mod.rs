@@ -1,4 +1,4 @@
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::HashSet;
 
 use aoc_util::{Solver, SolverOutput};
 
@@ -23,7 +23,7 @@ impl Solver for Day12 {
             .iter()
             .enumerate()
             .filter(|(_, tile)| **tile == 0)
-            .filter_map(|(x, tile)| {
+            .filter_map(|(x, _tile)| {
               find_path(
                 &map,
                 Pos {
