@@ -7,3 +7,4 @@ edition = "2021"
 [dependencies]
 aoc_macro = { git = "https://github.com/rosengrenen/aoc_boilerplate" }
 aoc_util = { git = "https://github.com/rosengrenen/aoc_boilerplate" }
+num = "0.4.1"
