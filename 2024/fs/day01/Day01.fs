@@ -8,14 +8,10 @@ let parseLine (line: string) =
     let left, right = splitOnce line "   " |> Option.get
     left |> int, right |> int
 
-let parse (input: string) =
-    let lines = lines input |> Seq.map parseLine
-    let left = lines |> Seq.map fst
-    let right = lines |> Seq.map snd
-    Seq.sort left, Seq.sort right
-
 let part1 input =
-    let left, right = parse input
+    let entries = lines input |> Seq.map parseLine
+    let left = entries |> Seq.map fst |> Seq.sort
+    let right = entries |> Seq.map snd |> Seq.sort
 
     Seq.zip left right
     |> Seq.map (fun (left, right) -> left - right |> abs)
@@ -23,13 +19,17 @@ let part1 input =
     |> string
 
 let part2 input =
-    let left, right = parse input
-    let frequency = right |> Seq.countBy id |> Map
+    let entries = lines input |> Seq.map parseLine
+    let frequency = entries |> Seq.map snd |> Seq.countBy id |> Map
 
     let getFrequency value =
         frequency |> Map.tryFind value |> Option.defaultValue 0
 
-    left |> Seq.map (fun value -> value * getFrequency value) |> Seq.sum |> string
+    entries
+    |> Seq.map fst
+    |> Seq.map (fun value -> value * getFrequency value)
+    |> Seq.sum
+    |> string
 
 let part1Tests =
     testList "Day 1 part 1 tests" [ partTestCase part1 "day01/example1.txt" "11" ]

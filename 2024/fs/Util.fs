@@ -5,13 +5,17 @@ open System.IO
 
 let lines (input: string) = input.Split('\n') |> Array.toSeq
 
+let words (input: string) =
+    input.Split([| ' '; '\t'; '\n'; '\r' |], System.StringSplitOptions.RemoveEmptyEntries)
+    |> Array.toSeq
+
 let splitOnce (input: string) (separator: string) =
-    let parts = input.Split(separator)
+    let parts = input.Split(separator) |> Array.toList
 
     if parts.Length <> 2 then
         None
     else
-        Some(parts.[0], parts.[1])
+        Some(parts |> List.item 0, parts |> List.item 1)
 
 let formatDay (day: int) : string = sprintf "day%02d" day
 
