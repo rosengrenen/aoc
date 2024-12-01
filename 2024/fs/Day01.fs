@@ -1,34 +1,30 @@
 module Day01
 
+open Util
+
 let parseLine (line: string) =
-    let parts = line.Split("   ")
-    parts.[0] |> int, parts.[1] |> int
+    let left, right = splitOnce line "   " |> Option.get
+    left |> int, right |> int
 
 let parse (input: string) =
-    let lines = input.Split('\n') |> Array.toList
-    let lines = List.map (fun line -> parseLine line) lines
-    let leftList = List.map (fun parts -> fst parts) lines
-    let rightList = List.map (fun parts -> snd parts) lines
+    let lines = lines input |> Seq.map parseLine
+    let leftList = Seq.map (fun parts -> fst parts) lines |> Seq.toList
+    let rightList = Seq.map (fun parts -> snd parts) lines |> Seq.toList
     List.sort leftList, List.sort rightList
 
-let intToString (number: int) = number.ToString()
-
 let part1 input =
-    let leftList, rightList = parse input
+    let left, right = parse input
 
-    List.zip leftList rightList
-    |> List.map (fun (left, right) -> abs (left - right))
+    List.zip left right
+    |> List.map (fun (left, right) -> left - right |> abs)
     |> List.sum
-    |> intToString
+    |> string
 
 let part2 input =
-    let leftList, rightList = parse input
-    let frequency = Seq.countBy id rightList |> Map
+    let left, right = parse input
+    let frequency = List.countBy id right |> Map
 
     let getFrequency value =
-        let found, value = frequency.TryGetValue value
-        if found then value else 0
+        frequency |> Map.tryFind value |> Option.defaultValue 0
 
-    List.map (fun value -> value * getFrequency value) leftList
-    |> List.sum
-    |> intToString
+    left |> List.map (fun value -> value * getFrequency value) |> List.sum |> string
