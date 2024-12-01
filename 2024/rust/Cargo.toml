@@ -1,5 +1,5 @@
 [package]
-name = "aoc2023"
+name = "aoc2024"
 version = "0.0.0"
 authors = ["Rasmus Rosengren <rasmus.rosengren@protonmail.com>"]
 edition = "2021"
@@ -7,4 +7,4 @@ edition = "2021"
 [dependencies]
 aoc_macro = { git = "https://github.com/rosengrenen/aoc_boilerplate" }
 aoc_util = { git = "https://github.com/rosengrenen/aoc_boilerplate" }
-num = "0.4.1"
+num = "0.4.3"
