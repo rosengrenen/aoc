@@ -1,5 +1,7 @@
 module Day01
 
+open Expecto
+
 open Util
 
 let parseLine (line: string) =
@@ -28,3 +30,9 @@ let part2 input =
         frequency |> Map.tryFind value |> Option.defaultValue 0
 
     left |> List.map (fun value -> value * getFrequency value) |> List.sum |> string
+
+let part1Tests =
+    testList "Day 1 part 1 tests" [ partTestCase part1 "day01/example1.txt" "11" ]
+
+let part2Tests =
+    testList "Day 1 part 2 tests" [ partTestCase part2 "day01/example1.txt" "31" ]
