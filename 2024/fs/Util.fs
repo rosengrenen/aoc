@@ -20,8 +20,11 @@ let splitOnce (input: string) (separator: string) =
 let formatDay (day: int) : string = sprintf "day%02d" day
 
 let partTestCase runner inputPath expected =
-    testCase ""
+    testCase inputPath
     <| fun _ ->
         let input = File.ReadAllText inputPath
         let result = runner input
         Expect.equal result expected ""
+
+let extraTestCase name result expected =
+    testCase name <| fun _ -> Expect.equal result expected ""
