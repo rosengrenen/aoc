@@ -2,12 +2,19 @@ module Util
 
 open Expecto
 open System.IO
+open System.Text.RegularExpressions
 
 let lines (input: string) = input.Split('\n') |> Array.toSeq
 
 let words (input: string) =
     input.Split([| ' '; '\t'; '\n'; '\r' |], System.StringSplitOptions.RemoveEmptyEntries)
     |> Array.toSeq
+
+let ints (input: string) =
+    seq {
+        for m in Regex.Matches(input, "-?\d+") do
+            m.Value |> int
+    }
 
 let splitOnce (input: string) (separator: string) =
     let parts = input.Split(separator) |> Array.toList
