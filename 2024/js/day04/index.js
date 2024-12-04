@@ -1,155 +1,27 @@
 const fs = require("fs");
 fs.readFile("input.txt", { encoding: "utf8" }, (err, content) => {
-	const grid = content.split("\n").map((line) => line.split(""));
-	function get(row, col) {
-		if (grid[row]) {
-			return grid[row][col];
-		}
+  const grid = content.split("\n").map((line) => line.split(""));
+  const get = (x, y) => (grid[y] ? grid[y][x] : undefined);
+  const arr = (length, mapper) => Array.from({ length }, (_, i) => mapper(i));
+  const row = (x, y, l) => arr(l, (i) => [x + i, y]);
+  const col = (x, y, l) => arr(l, (i) => [x, y + i]);
+  const diag1 = (x, y, l) => arr(l, (i) => [x + i, y + i]);
+  const diag2 = (x, y, l) => arr(l, (i) => [x + i, y - i]);
+  const match = (coords, string) => coords.every(([x, y], i) => get(x, y) === string[i]);
+  const matchMany = (coords, strings) => strings.some((string) => match(coords, string));
 
-		return undefined;
-	}
+  const allCoords = arr(grid.length, (y) => arr(grid[y].length, (x) => [x, y])).flat();
 
-	function row(row, col) {
-		if (
-			get(row, col) == "X" &&
-			get(row, col + 1) == "M" &&
-			get(row, col + 2) == "A" &&
-			get(row, col + 3) == "S"
-		) {
-			return 1;
-		}
+  const seqs = (x, y, l) => [row(x, y, l), col(x, y, l), diag1(x, y, l), diag2(x, y, l)];
+  const matchSum = (seqs, string) => seqs.reduce((acc, coords) => acc + (match(coords, string) ? 1 : 0), 0);
+  const p1 = allCoords.reduce(
+    (acc, [x, y]) => acc + matchSum(seqs(x, y, 4), "XMAS") + matchSum(seqs(x, y, 4), "SAMX"),
+    0
+  );
+  console.log("Part 1", p1);
 
-		if (
-			get(row, col) == "S" &&
-			get(row, col + 1) == "A" &&
-			get(row, col + 2) == "M" &&
-			get(row, col + 3) == "X"
-		) {
-			return 1;
-		}
-
-		return 0;
-	}
-	function col(row, col) {
-		if (
-			get(row, col) == "X" &&
-			get(row + 1, col) == "M" &&
-			get(row + 2, col) == "A" &&
-			get(row + 3, col) == "S"
-		) {
-			return 1;
-		}
-
-		if (
-			get(row, col) == "S" &&
-			get(row + 1, col) == "A" &&
-			get(row + 2, col) == "M" &&
-			get(row + 3, col) == "X"
-		) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	function diag(row, col) {
-		if (
-			get(row, col) == "X" &&
-			get(row + 1, col + 1) == "M" &&
-			get(row + 2, col + 2) == "A" &&
-			get(row + 3, col + 3) == "S"
-		) {
-			return 1;
-		}
-
-		if (
-			get(row, col) == "S" &&
-			get(row + 1, col + 1) == "A" &&
-			get(row + 2, col + 2) == "M" &&
-			get(row + 3, col + 3) == "X"
-		) {
-			return 1;
-		}
-
-		return 0;
-	}
-	function diag2(row, col) {
-		if (
-			get(row, col) == "X" &&
-			get(row + 1, col - 1) == "M" &&
-			get(row + 2, col - 2) == "A" &&
-			get(row + 3, col - 3) == "S"
-		) {
-			return 1;
-		}
-
-		if (
-			get(row, col) == "S" &&
-			get(row + 1, col - 1) == "A" &&
-			get(row + 2, col - 2) == "M" &&
-			get(row + 3, col - 3) == "X"
-		) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	function diag3(row, col) {
-		if (
-			get(row, col) == "S" &&
-			get(row + 1, col + 1) == "A" &&
-			get(row + 2, col + 2) == "M"
-		) {
-			return true;
-		}
-
-		if (
-			get(row, col) == "M" &&
-			get(row + 1, col + 1) == "A" &&
-			get(row + 2, col + 2) == "S"
-		) {
-			return true;
-		}
-
-		return false;
-	}
-	function diag4(row, col) {
-		if (
-			get(row, col) == "S" &&
-			get(row + 1, col - 1) == "A" &&
-			get(row + 2, col - 2) == "M"
-		) {
-			return true;
-		}
-
-		if (
-			get(row, col) == "M" &&
-			get(row + 1, col - 1) == "A" &&
-			get(row + 2, col - 2) == "S"
-		) {
-			return true;
-		}
-
-		return false;
-	}
-
-	let sum = 0;
-	for (let r = 0; r < grid.length; r++) {
-		for (let c = 0; c < grid[r].length; c++) {
-			sum += row(r, c) + col(r, c) + diag(r, c) + diag2(r, c);
-		}
-	}
-
-	console.log(sum);
-
-	let sum2 = 0;
-	for (let r = 0; r < grid.length; r++) {
-		for (let c = 0; c < grid[r].length; c++) {
-			if (diag3(r - 1, c - 1) && diag4(r - 1, c + 1)) {
-				sum2 += 1;
-			}
-		}
-	}
-	console.log(sum2);
+  const crossSeqs = (x, y) => [diag1(x - 1, y - 1, 3), diag2(x - 1, y + 1, 3)];
+  const matchAll = (seqs, strings) => (seqs.every((coords) => matchMany(coords, strings)) ? 1 : 0);
+  const p2 = allCoords.reduce((acc, [x, y]) => acc + matchAll(crossSeqs(x, y), ["SAM", "MAS"]), 0);
+  console.log("Part 2", p2);
 });
