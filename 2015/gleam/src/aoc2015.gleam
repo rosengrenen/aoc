@@ -5,6 +5,7 @@ import day04/day04
 import day05/day05
 import day06/day06
 import day07/day07
+import day08/day08
 import gleam/int
 import gleam/io
 import simplifile
@@ -26,6 +27,7 @@ fn day_runners(day: Int) {
     5 -> #(day05.part1, day05.part2)
     6 -> #(day06.part1, day06.part2)
     7 -> #(day07.part1, day07.part2)
+    8 -> #(day08.part1, day08.part2)
     _ -> panic as "unimplemented"
   }
 }
@@ -40,5 +42,5 @@ fn run_day(day: Int) {
 }
 
 pub fn main() {
-  run_day(7)
+  run_day(8)
 }
