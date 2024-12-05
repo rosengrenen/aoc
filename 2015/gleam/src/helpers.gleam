@@ -14,6 +14,12 @@ pub fn min(nums) {
   |> result.unwrap(0)
 }
 
+pub fn max(nums) {
+  nums
+  |> list.reduce(fn(acc, x) { int.max(acc, x) })
+  |> result.unwrap(0)
+}
+
 pub fn enumerate(input) {
   input |> list.index_map(fn(v, i) { #(i, v) })
 }
