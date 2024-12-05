@@ -1,8 +1,6 @@
-import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/order
-import gleam/result
 import gleam/set
 import gleam/string
 
@@ -44,8 +42,8 @@ fn update_correctly_ordered(orders, update) {
   |> list.all(fn(e) { correctly_ordered(e.0, e.1, orders) })
 }
 
-fn correctly_ordered(left, right, orders) {
-  orders |> dict.get(left) |> result.unwrap(set.new()) |> set.contains(right)
+fn correctly_ordered(from, to, orders) {
+  orders |> set.contains(#(from, to))
 }
 
 fn parse(input: String) {
@@ -53,14 +51,11 @@ fn parse(input: String) {
   let order =
     order
     |> string.split("\n")
-    |> list.fold(dict.new(), fn(acc, line) {
-      let assert Ok(#(before, after)) = string.split_once(line, "|")
-      let assert Ok(before) = int.parse(before)
-      let assert Ok(after) = int.parse(after)
-      case acc |> dict.get(before) {
-        Ok(afters) -> acc |> dict.insert(before, afters |> set.insert(after))
-        Error(_) -> acc |> dict.insert(before, set.new() |> set.insert(after))
-      }
+    |> list.fold(set.new(), fn(acc, line) {
+      let assert Ok(#(from, to)) = string.split_once(line, "|")
+      let assert Ok(from) = int.parse(from)
+      let assert Ok(to) = int.parse(to)
+      acc |> set.insert(#(from, to))
     })
   let updates =
     updates
