@@ -15,13 +15,6 @@ pub fn part1(input: String) -> String {
 pub fn part2(input: String) -> String {
   let #(obstacles, pos, max_x, max_y) = input |> parse
   traverse2(set.new(), obstacles, North, pos, #(max_x, max_y))
-  |> set.filter(fn(new_obstacle) {
-    loops(set.new(), obstacles |> set.insert(new_obstacle), North, pos, #(
-      max_x,
-      max_y,
-    ))
-  })
-  |> set.size
   |> int.to_string
 }
 
@@ -45,19 +38,34 @@ fn traverse(visited, obstacles, dir, pos, max) {
 fn traverse2(visited, obstacles, dir, pos, max) {
   let #(max_x, max_y) = max
   let #(x, y) = pos
+  let new_pos = step(dir, pos)
+  let new_dir = rotate(dir)
+
   case x < 0 || y < 0 || x > max_x || y > max_y {
-    True -> visited
+    True -> 0
     False -> {
-      let visited = case obstacles |> set.contains(step(dir, pos)) {
-        False -> visited |> set.insert(step(dir, pos))
-        True -> visited
+      let new_visited = visited |> set.insert(#(dir, pos))
+      let good_obstacles = case obstacles |> set.contains(new_pos) {
+        False -> traverse2(new_visited, obstacles, dir, new_pos, max)
+        True -> traverse2(new_visited, obstacles, new_dir, pos, max)
       }
-      case obstacles |> set.contains(step(dir, pos)) {
-        False -> traverse(visited, obstacles, dir, step(dir, pos), max)
-        True -> traverse(visited, obstacles, rotate(dir), pos, max)
+      case
+        obstacles |> set.contains(new_pos)
+        || visited |> contains_pos(new_pos)
+        || !loops(visited, obstacles |> set.insert(new_pos), dir, pos, max)
+      {
+        True -> 0 + good_obstacles
+        False -> 1 + good_obstacles
       }
     }
   }
+}
+
+fn contains_pos(visited, pos) {
+  visited |> set.contains(#(North, pos))
+  || visited |> set.contains(#(East, pos))
+  || visited |> set.contains(#(South, pos))
+  || visited |> set.contains(#(West, pos))
 }
 
 fn loops(visited, obstacles, dir, pos, max) {
@@ -70,10 +78,14 @@ fn loops(visited, obstacles, dir, pos, max) {
         True -> True
         False -> {
           let visited = visited |> set.insert(#(dir, pos))
-          case obstacles |> set.contains(step(dir, pos)) {
-            True -> loops(visited, obstacles, rotate(dir), pos, max)
-            False -> loops(visited, obstacles, dir, step(dir, pos), max)
+          let #(new_dir, new_pos) = case
+            obstacles |> set.contains(step(dir, pos))
+          {
+            True -> #(rotate(dir), pos)
+            False -> #(dir, step(dir, pos))
           }
+
+          loops(visited, obstacles, new_dir, new_pos, max)
         }
       }
     }
