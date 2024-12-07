@@ -7,7 +7,7 @@ import helpers
 pub fn part1(input: String) -> String {
   input
   |> parse
-  |> list.filter(fn(entry) { combinations(entry.0, entry.1) })
+  |> list.filter(run(_, combinations))
   |> list.map(helpers.tuple_first)
   |> helpers.sum
   |> int.to_string
@@ -16,37 +16,40 @@ pub fn part1(input: String) -> String {
 pub fn part2(input: String) -> String {
   input
   |> parse
-  |> list.filter(fn(entry) { combinations2(entry.0, entry.1) })
+  |> list.filter(run(_, combinations2))
   |> list.map(helpers.tuple_first)
   |> helpers.sum
   |> int.to_string
 }
 
-fn combinations(answer, inputs) {
-  case inputs {
+fn run(entry: #(Int, List(Int)), f) {
+  case entry.1 {
     [] -> False
-    [result] -> result == answer
-    [acc, next, ..rest] ->
-      case acc > answer {
-        True -> False
-        False ->
-          combinations(answer, [acc * next, ..rest])
-          || combinations(answer, [acc + next, ..rest])
+    [acc, ..rest] -> f(entry.0, acc, rest)
+  }
+}
+
+fn combinations(answer, acc, inputs) {
+  case inputs {
+    [] -> acc == answer
+    [next, ..rest] ->
+      acc <= answer
+      && {
+        combinations(answer, acc * next, rest)
+        || combinations(answer, acc + next, rest)
       }
   }
 }
 
-fn combinations2(answer, inputs) {
+fn combinations2(answer, acc, inputs) {
   case inputs {
-    [] -> False
-    [result] -> result == answer
-    [acc, next, ..rest] ->
-      case acc > answer {
-        True -> False
-        False ->
-          combinations2(answer, [acc * next, ..rest])
-          || combinations2(answer, [acc + next, ..rest])
-          || combinations2(answer, [concat_ints(acc, next), ..rest])
+    [] -> acc == answer
+    [next, ..rest] ->
+      acc <= answer
+      && {
+        combinations2(answer, acc * next, rest)
+        || combinations2(answer, acc + next, rest)
+        || combinations2(answer, concat_ints(acc, next), rest)
       }
   }
 }
