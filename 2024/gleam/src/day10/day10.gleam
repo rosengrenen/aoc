@@ -3,7 +3,6 @@ import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/set
-import gleam/string
 
 import helpers
 
@@ -62,17 +61,8 @@ fn num_trails(grid, start, visited) {
 
 fn parse(input) {
   input
-  |> string.split("\n")
-  |> helpers.enumerate
-  |> list.fold(dict.new(), fn(acc, line) {
-    let #(y, line) = line
-    line
-    |> string.to_graphemes
-    |> helpers.enumerate
-    |> list.fold(acc, fn(acc, tile) {
-      let #(x, tile) = tile
-      let assert Ok(tile) = tile |> int.parse
-      acc |> dict.insert(#(x, y), tile)
-    })
+  |> helpers.parse_grid(dict.new(), fn(acc, x, y, tile) {
+    let assert Ok(tile) = tile |> int.parse
+    acc |> dict.insert(#(x, y), tile)
   })
 }

@@ -3,7 +3,6 @@ import gleam/int
 import gleam/list
 import gleam/option
 import gleam/set
-import gleam/string
 import gleam/yielder
 
 import helpers
@@ -54,27 +53,18 @@ fn in_bounds(pos: #(Int, Int), mx, my) {
 
 fn parse(input) {
   input
-  |> string.split("\n")
-  |> helpers.enumerate
-  |> list.fold(#(dict.new(), 0, 0), fn(acc, line) {
-    let #(y, line) = line
-    line
-    |> string.to_graphemes
-    |> helpers.enumerate
-    |> list.fold(acc, fn(acc, tile) {
-      let #(antennas, mx, my) = acc
-      let #(x, tile) = tile
-      case tile {
-        "." -> #(antennas, int.max(x, mx), int.max(y, my))
-        name -> {
-          let antennas =
-            antennas
-            |> dict.upsert(name, fn(positions) {
-              positions |> option.unwrap(set.new()) |> set.insert(#(x, y))
-            })
-          #(antennas, int.max(x, mx), int.max(y, my))
-        }
+  |> helpers.parse_grid(#(dict.new(), 0, 0), fn(acc, x, y, tile) {
+    let #(antennas, mx, my) = acc
+    case tile {
+      "." -> #(antennas, int.max(x, mx), int.max(y, my))
+      name -> {
+        let antennas =
+          antennas
+          |> dict.upsert(name, fn(positions) {
+            positions |> option.unwrap(set.new()) |> set.insert(#(x, y))
+          })
+        #(antennas, int.max(x, mx), int.max(y, my))
       }
-    })
+    }
   })
 }

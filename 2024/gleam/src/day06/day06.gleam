@@ -1,7 +1,5 @@
 import gleam/int
-import gleam/list
 import gleam/set
-import gleam/string
 
 import helpers
 
@@ -120,25 +118,16 @@ fn step(dir, pos) {
 
 fn parse(input) {
   input
-  |> string.split("\n")
-  |> helpers.enumerate
-  |> list.fold(#(set.new(), #(0, 0), 0, 0), fn(grid, row) {
-    let #(y, row) = row
-    row
-    |> string.to_graphemes
-    |> helpers.enumerate
-    |> list.fold(grid, fn(grid, tile) {
-      let #(x, tile) = tile
-      case tile {
-        "^" -> #(grid.0, #(x, y), int.max(grid.2, x), int.max(grid.3, y))
-        "#" -> #(
-          grid.0 |> set.insert(#(x, y)),
-          grid.1,
-          int.max(grid.2, x),
-          int.max(grid.3, y),
-        )
-        _ -> #(grid.0, grid.1, int.max(grid.2, x), int.max(grid.3, y))
-      }
-    })
+  |> helpers.parse_grid(#(set.new(), #(0, 0), 0, 0), fn(grid, x, y, tile) {
+    case tile {
+      "^" -> #(grid.0, #(x, y), int.max(grid.2, x), int.max(grid.3, y))
+      "#" -> #(
+        grid.0 |> set.insert(#(x, y)),
+        grid.1,
+        int.max(grid.2, x),
+        int.max(grid.3, y),
+      )
+      _ -> #(grid.0, grid.1, int.max(grid.2, x), int.max(grid.3, y))
+    }
   })
 }
