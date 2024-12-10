@@ -13,7 +13,7 @@ pub fn part1(input: String) -> String {
   |> list.map(fn(update) {
     update |> helpers.list_nth(list.length(update) / 2, 0)
   })
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 
@@ -32,7 +32,7 @@ pub fn part2(input: String) -> String {
   |> list.map(fn(update) {
     update |> helpers.list_nth(list.length(update) / 2, 0)
   })
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 

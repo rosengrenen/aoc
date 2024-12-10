@@ -3,12 +3,10 @@ import gleam/list
 import gleam/result
 import gleam/string
 
-import helpers
-
 pub fn part1(input: String) -> String {
   input
   |> parse_muls
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 
@@ -22,7 +20,7 @@ pub fn part2(input: String) -> String {
     |> result.unwrap(part)
   })
   |> list.flat_map(parse_muls)
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 

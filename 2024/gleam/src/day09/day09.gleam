@@ -22,7 +22,7 @@ pub fn part1(input: String) -> String {
     let #(index, id) = entry
     index * id
   })
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 
@@ -78,7 +78,7 @@ pub fn part2(input: String) -> String {
     let #(index, id) = entry
     index * id
   })
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 

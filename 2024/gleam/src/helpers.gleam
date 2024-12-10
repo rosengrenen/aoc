@@ -1,10 +1,6 @@
 import gleam/list
 import gleam/result
 
-pub fn sum(ints) {
-  ints |> list.fold(0, fn(acc, x) { acc + x })
-}
-
 pub fn combinations(first, second) {
   first
   |> list.map(fn(el_first) {

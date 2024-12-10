@@ -9,7 +9,7 @@ pub fn part1(input: String) -> String {
   |> parse
   |> list.filter(run(_, combinations))
   |> list.map(helpers.tuple_first)
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 
@@ -18,7 +18,7 @@ pub fn part2(input: String) -> String {
   |> parse
   |> list.filter(run(_, combinations2))
   |> list.map(helpers.tuple_first)
-  |> helpers.sum
+  |> int.sum
   |> int.to_string
 }
 
