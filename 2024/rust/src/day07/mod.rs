@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use aoc_util::{Solver, SolverOutput};
 
 #[derive(Default)]
