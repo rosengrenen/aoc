@@ -8,6 +8,7 @@ import day07/day07
 import day08/day08
 import day09/day09
 import day10/day10
+import day11/day11
 import gleam/int
 import gleam/io
 import gleam/string
@@ -33,6 +34,7 @@ fn day_runners(day: Int) {
     8 -> #(day08.part1, day08.part2)
     9 -> #(day09.part1, day09.part2)
     10 -> #(day10.part1, day10.part2)
+    11 -> #(day11.part1, day11.part2)
     _ -> panic as "unimplemented"
   }
 }
@@ -48,5 +50,5 @@ fn run_day(day: Int) {
 }
 
 pub fn main() {
-  run_day(10)
+  run_day(11)
 }
