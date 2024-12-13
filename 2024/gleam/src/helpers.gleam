@@ -1,3 +1,4 @@
+import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
@@ -48,3 +49,26 @@ pub const adj4 = [#(0, -1), #(1, 0), #(0, 1), #(-1, 0)]
 pub const adj8 = [
   #(0, -1), #(1, -1), #(1, 0), #(1, 1), #(0, 1), #(-1, 1), #(-1, 0), #(-1, -1),
 ]
+
+fn euclid_inner(r0, r1, s0, s1, t0, t1) {
+  let q = r0 / r1
+  let rem = r0 - q * r1
+  let s2 = s0 - q * s1
+  let t2 = t0 - q * t1
+  case rem {
+    0 -> #(q, s0 - q * s1, t0 - q * t1)
+    _ -> euclid_inner(r1, rem, s1, s2, t1, t2)
+  }
+}
+
+pub fn euclid(r0, r1) {
+  euclid_inner(int.max(r0, r1), int.min(r0, r1), 1, 0, 0, 1)
+}
+
+pub fn gcd(r0, r1) {
+  euclid(int.max(r0, r1), int.min(r0, r1)).0
+}
+
+pub fn lcm(a, b) {
+  a * b / gcd(a, b)
+}
