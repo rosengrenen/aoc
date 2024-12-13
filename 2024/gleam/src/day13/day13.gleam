@@ -24,11 +24,13 @@ pub fn part2(input: String) -> String {
   input
   |> parse
   |> list.map(fn(e) {
-    calc(e.0, e.1, #(10_000_000_000_000 + e.2.0, 10_000_000_000_000 + e.2.1))
+    calc(e.0, e.1, #(e.2.0, e.2.1))
+    // calc(e.0, e.1, #(10_000_000_000_000 + e.2.0, 10_000_000_000_000 + e.2.1))
     // |> debug
   })
   |> int.sum
   |> int.to_string
+  // ""
 }
 
 fn euclid_inner(r0, r1, s0, s1, t0, t1) {
@@ -48,65 +50,92 @@ fn gcd(r0, r1) {
 
 // crt
 
+// 12 10
+// 120 / 
+fn lcm(a, b) {
+  a * b / gcd(a, b)
+}
+
 // Steg 1: 
 // Button A: X+94, Y+34
 // Button B: X+22, Y+67
 // Prize: X=8400, Y=5400
+// (8400-94x) % 34==0
 fn calc(a: #(Int, Int), b: #(Int, Int), p: #(Int, Int)) {
+  // #(a, b, p) |> debug
+  // let c = gcd(gcd(a.0, a.1), gcd(b.0, b.1)) |> debug
+  // let a = #(a.0 / c, a.1 / c)
+  // let b = #(b.0 / c, b.1 / c)
+  // let p = #(p.0 / c, p.1 / c)
   #(a, b, p) |> debug
-  let c = gcd(gcd(a.0, a.1), gcd(b.0, b.1)) |> debug
-  let a = #(a.0 / c, a.1 / c)
-  let b = #(b.0 / c, b.1 / c)
-  let p = #(p.0 / c, p.1 / c)
-  #(a, b, p) |> debug
-  let xxa =
-    yielder.range(0, 10_000_000_000_000)
-    |> yielder.filter_map(fn(xa) {
+  "calc" |> debug
+
+  let assert Ok(xxa) =
+    yielder.range(0, { p.0 / a.0 } + 1)
+    |> yielder.find(fn(xa) {
       let rem = p.0 - xa * a.0
       case int.compare(rem, 0) {
-        order.Lt -> Error(Nil)
-        _ ->
-          case rem % b.0 == 0 {
-            True -> Ok(#(xa, rem / b.0))
-            False -> Error(Nil)
-          }
+        order.Lt -> False
+        _ -> rem % b.0 == 0
       }
     })
-    // |> yielder.map(fn(x) { #(x.0 * a.0 + x.1 * b.0) })
-    |> yielder.to_list
-    |> set.from_list
+    |> debug
+  let kk = lcm(a.0, b.0) |> debug
+  let kka = kk / a.0 |> debug
+  let kkb = kk / b.0 |> debug
+  // 799
+
+  yielder.range(0, 10)
+  // |> yielder.to_list
+  |> yielder.map(fn(i) {
+    let p = xxa + i * kka
+    #(xxa + i * kka, xxa + i * kkb)
+    // let a = p.0 - { { xxa * a.0 } + i * kk }
+  })
+  |> yielder.to_list
+  |> debug
+  |> list.map(fn(x) { x.0 * a.0 + x.1 * b.0 })
+  |> debug
+  // |> yielder.map(fn(i) { i % b.0 })
   // |> debug
-  let xxb =
-    yielder.range(0, 10_000_000_000_000)
-    |> yielder.filter_map(fn(xb) {
-      let rem = p.1 - xb * a.1
-      case int.compare(rem, 0) {
-        order.Lt -> Error(Nil)
-        _ ->
-          case rem % b.1 == 0 {
-            True -> Ok(#(xb, rem / b.1))
-            False -> Error(Nil)
-          }
-      }
-    })
-    // |> yielder.map(fn(x) { #(x.0 * a.1 + x.1 * b.1) })
-    |> yielder.to_list
-    |> set.from_list
-  // |> debug
-  xxa
-  |> set.intersection(xxb)
-  // |> debug
-  // |> set.map(fn(i) {
-  //   let x = i.0 * a.0 + i.1 * b.0
-  //   let y = i.0 * a.1 + i.1 * b.1
-  //   #(x, y)
-  // })
-  // |> debug
-  |> set.to_list
-  |> list.map(fn(a) { a.0 * 3 + a.1 })
-  |> list.sort(int.compare)
-  |> list.first
-  |> result.unwrap(0)
+  // |> yielder.filter(fn(i) { i >= 0 })
+  panic
+  0
+  // |> yielder.map(fn(x) { #(x.0 * a.0 + x.1 * b.0) })
+  //   |> yielder.to_list
+  //   |> set.from_list
+  //   |> debug
+  // let xxb =
+  //   yielder.range(0, { p.1 / a.1 } + 1)
+  //   |> yielder.filter_map(fn(xb) {
+  //     let rem = p.1 - xb * a.1
+  //     case int.compare(rem, 0) {
+  //       order.Lt -> Error(Nil)
+  //       _ ->
+  //         case rem % b.1 == 0 {
+  //           True -> Ok(#(xb, rem / b.1))
+  //           False -> Error(Nil)
+  //         }
+  //     }
+  //   })
+  //   // |> yielder.map(fn(x) { #(x.0 * a.1 + x.1 * b.1) })
+  //   |> yielder.to_list
+  //   |> set.from_list
+  //   |> debug
+  // xxa
+  // |> set.intersection(xxb)
+  // // |> debug
+  // // |> set.map(fn(i) {
+  // //   let x = i.0 * a.0 + i.1 * b.0
+  // //   let y = i.0 * a.1 + i.1 * b.1
+  // //   #(x, y)
+  // // })
+  // // |> debug
+  // |> set.to_list
+  // |> list.map(fn(a) { a.0 * 3 + a.1 })
+  // |> list.sort(int.compare)
+  // |> list.first
+  // |> result.unwrap(0)
   // panic
   // let c = #(ca * a.0 + cb * b.0, ca * a.1 + cb * b.1)
   // #(ca, cb) |> debug
