@@ -32,14 +32,16 @@ pub fn parse_grid(input, acc, f) {
   input
   |> string.split("\n")
   |> enumerate
-  |> list.fold(acc, fn(acc, line) {
+  |> list.fold(#(acc, #(0, 0)), fn(acc, line) {
     let #(y, line) = line
     line
     |> string.to_graphemes
     |> enumerate
     |> list.fold(acc, fn(acc, tile) {
+      let #(acc, max) = acc
       let #(x, tile) = tile
-      f(acc, x, y, tile)
+      let acc = f(acc, x, y, tile)
+      #(acc, #(int.max(x, max.0), int.max(y, max.1)))
     })
   })
 }

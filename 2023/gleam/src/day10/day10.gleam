@@ -183,4 +183,5 @@ fn parse(input) {
       _ -> acc
     }
   })
+  |> helpers.tuple_first
 }
