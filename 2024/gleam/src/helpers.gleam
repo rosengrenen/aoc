@@ -72,3 +72,25 @@ pub fn gcd(r0, r1) {
 pub fn lcm(a, b) {
   a * b / gcd(a, b)
 }
+
+pub fn mod(x, n) {
+  let r = x % n
+  case r < 0 {
+    True -> r + n
+    False -> r
+  }
+}
+
+pub fn variance(values) {
+  let len = values |> list.length
+  let assert Ok(avg) = values |> int.sum |> int.divide(len)
+  let assert Ok(variance) =
+    values
+    |> list.map(fn(value) {
+      let diff = value - avg
+      diff * diff
+    })
+    |> int.sum
+    |> int.divide(len)
+  variance
+}
